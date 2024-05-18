@@ -1,0 +1,57 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33829.357
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlgotechUnityREST-ckb", "AlgotechUnityREST-ckb\AlgotechUnityREST-ckb.csproj", "{D67C8F3E-8159-482D-99B2-B4C58F9265DC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlgotechUnityUDF", "AlgotechUnityUDF\AlgotechUnityUDF.csproj", "{0A9709DB-FB38-4255-91B3-A115A5932857}"
+EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Database", "Database\Database.sqlproj", "{1C36B871-B916-4F29-93B0-D47E12EDD448}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DAL", "DAL", "{8EDCD062-4777-44BC-B8DD-6206580584BF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OracleHelper", "OracleHelper\OracleHelper.csproj", "{C3179A41-C7CE-4D79-9E0C-CDB3025386A2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlHelper", "SqlHelper\SqlHelper.csproj", "{76187855-E094-4393-9D0A-596FEAFD9250}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D67C8F3E-8159-482D-99B2-B4C58F9265DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D67C8F3E-8159-482D-99B2-B4C58F9265DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D67C8F3E-8159-482D-99B2-B4C58F9265DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D67C8F3E-8159-482D-99B2-B4C58F9265DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A9709DB-FB38-4255-91B3-A115A5932857}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A9709DB-FB38-4255-91B3-A115A5932857}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A9709DB-FB38-4255-91B3-A115A5932857}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A9709DB-FB38-4255-91B3-A115A5932857}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C36B871-B916-4F29-93B0-D47E12EDD448}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1C36B871-B916-4F29-93B0-D47E12EDD448}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1C36B871-B916-4F29-93B0-D47E12EDD448}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{1C36B871-B916-4F29-93B0-D47E12EDD448}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1C36B871-B916-4F29-93B0-D47E12EDD448}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1C36B871-B916-4F29-93B0-D47E12EDD448}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{C3179A41-C7CE-4D79-9E0C-CDB3025386A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3179A41-C7CE-4D79-9E0C-CDB3025386A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3179A41-C7CE-4D79-9E0C-CDB3025386A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3179A41-C7CE-4D79-9E0C-CDB3025386A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76187855-E094-4393-9D0A-596FEAFD9250}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76187855-E094-4393-9D0A-596FEAFD9250}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76187855-E094-4393-9D0A-596FEAFD9250}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76187855-E094-4393-9D0A-596FEAFD9250}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C3179A41-C7CE-4D79-9E0C-CDB3025386A2} = {8EDCD062-4777-44BC-B8DD-6206580584BF}
+		{76187855-E094-4393-9D0A-596FEAFD9250} = {8EDCD062-4777-44BC-B8DD-6206580584BF}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {47079DE1-36B4-490A-97DB-F4769F22D3D6}
+	EndGlobalSection
+EndGlobal
