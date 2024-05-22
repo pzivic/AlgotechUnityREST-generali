@@ -2,6 +2,8 @@
 // 10.04.2023
 
 using System;
+using System.ComponentModel;
+using System.Linq;
 using Hyland.Unity;
 
 namespace Algotech.UTL.AlgotechUnityUDF
@@ -22,6 +24,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
 
         private readonly string _appServerURL = System.Configuration.ConfigurationManager.AppSettings["AppServerURL"];
         private readonly string _dataSource = System.Configuration.ConfigurationManager.AppSettings["DataSource"];
+        private readonly string _licenceType = System.Configuration.ConfigurationManager.AppSettings["LicenceType"];
         #endregion
 
         //#region OnBaseConnect
@@ -98,10 +101,13 @@ namespace Algotech.UTL.AlgotechUnityUDF
                 var userPassword = System.Configuration.ConfigurationManager.AppSettings["UserPassword"];
                 OnBaseAuthenticationProperties authProps = Application.CreateOnBaseAuthenticationProperties(_appServerURL, userName, userPassword, _dataSource);
 
-                _logger.Info(string.Format("Pokušaj uspostavljanja veze na klasičan način sa identitetom: {0}.", userName));
-
                 authProps.IdentitySettings = authProps.CreateIdentitySettings("AlgotechUnityREST");
                 authProps.LicenseType = LicenseType.Default;
+                //authProps.LicenseType = LicenseType.QueryMetering;
+                //authProps.LicenseType = LicenseType.EnterpriseCoreAPI;
+
+
+                _logger.Debug(string.Format("Pokušaj uspostavljanja veze na klasičan način sa identitetom: {0} i licencom: {1}.", userName, authProps.LicenseType));
 
                 try
                 {
@@ -120,7 +126,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
 
                 if (app != null)
                 {
-                    _logger.Info(string.Format("Konekcija je uspešno uspostavljena identitetom {0}. SessionID: {1}.", userName, app.SessionID));
+                    _logger.Info(string.Format("Konekcija je uspešno uspostavljena identitetom [{0}]. SessionID: [{1}].", userName, app.SessionID));
                 }
             }
             #endregion
@@ -130,7 +136,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
             {
                 // Vrti kroz dostupne app.pool identitete
                 var obj = new Algotech.UTL.AlgotechUnityUDF.AppPool();
-                var listAppPool = obj.GetAppPools((short)AppPool.Status.Active);
+                var listAppPool = obj.GetAppPools((short)AppPool.Status.Active).OrderBy(l => l.AppPoolIdentity);
                 foreach (var appPool in listAppPool)
                 {
                     var userName = appPool.AppPoolIdentity;
@@ -138,17 +144,16 @@ namespace Algotech.UTL.AlgotechUnityUDF
 
                     OnBaseAuthenticationProperties authProps = Application.CreateOnBaseAuthenticationProperties(_appServerURL, userName, userPassword, _dataSource);
 
-                    _logger.Info(string.Format("Pokušaj uspostavljanja veze preko AppPoolConnection identitetom: {0}.", appPool.AppPoolIdentity));
-                    //Debug.Write(string.Format("Pokušaj uspostavljanja veze sa identitetom: {0}.", appPool.AppPoolIdentity));
-
                     authProps.IdentitySettings = authProps.CreateIdentitySettings("AlgotechUnityREST");
-                    authProps.LicenseType = LicenseType.Default;
+                    //authProps.LicenseType = LicenseType.Default;
+                    //authProps.LicenseType = LicenseType.EnterpriseCoreAPI;
+                    //authProps.LicenseType = LicenseType.QueryMetering;
+                    authProps.LicenseType = (LicenseType)Enum.Parse(typeof(LicenseType), _licenceType);
 
-                    //authProps.IsDisconnectEnabled = isDisconnectEnabled;
-                    
-                    // Default 20 probaćemo 100
+                    // Vidi web.config
                     var timeOut = Convert.ToInt32(System.Configuration.ConfigurationManager.AppSettings["APPLICATION_TIMEOUT"]);
 
+                    _logger.Debug(string.Format("Pokušaj uspostavljanja veze sa identitetom: {0} i licencom: {1}.", userName, authProps.LicenseType));
                     try
                     {
                         app = Application.Connect(authProps);
@@ -157,29 +162,31 @@ namespace Algotech.UTL.AlgotechUnityUDF
                             app.Timeout = timeOut;
                         } 
                     }
-
                     catch (SystemLockedOutException)
                     {
-                        Console.Out.WriteLine("Error: The system is currently in lockout mode.");
+                        Console.Out.WriteLine("Warn: The system is currently in lockout mode.");
                         Console.Out.WriteLine();
+                        _logger.Warn("Warn: The system is currently in lockout mode.");
                     }
                     catch (InvalidLoginException)
                     {
-                        Console.Out.WriteLine("Error: Invalid Login Credentials.");
+                        Console.Out.WriteLine("Warn: Invalid Login Credentials.");
                         Console.Out.WriteLine();
+                        _logger.Warn("Warn: Invalid Login Credentials.");
                     }
 
                     catch (MaxConcurrentLicensesException)
                     {
-                        Console.Out.WriteLine("Error: All concurrent licenses for this user group have been consumed.");
+                        Console.Out.WriteLine("Warn: All concurrent licenses for this user group have been consumed.");
                         Console.Out.WriteLine();
+                        _logger.Warn("Warn: All concurrent licenses for this user group have been consumed.");
                     }
 
                     catch (InvalidLicensingException)
                     {
-                        // Ne loguj kao grešku više warning jer nedostaju licence
-                        //_logger.Warn(string.Format("Error: Invalid Licensing. Neuspešna uspostavljanja veze sa identitetom: {0}.", appPool.AppPoolIdentity));
-                        _logger.Warn(string.Format("Warning: Invalid Licensing. Neuspešna uspostavljanja veze sa identitetom: {0}.", appPool.AppPoolIdentity));
+                        Console.Out.WriteLine(string.Format("Warning: Invalid Licensing. Neuspešna uspostavljanja veze sa identitetom: {0} proverite licencu.", appPool.AppPoolIdentity));
+                        Console.Out.WriteLine();
+                        _logger.Warn(string.Format("Warning: Invalid Licensing. Neuspešna uspostavljanja veze sa identitetom: {0} proverite licencu.", appPool.AppPoolIdentity));
                     }
 
                     catch (Exception ex)
@@ -189,8 +196,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
 
                     if (app != null)
                     {
-                        _logger.Info(string.Format("Konekcija je uspešno uspostavljena identitetom {0}. SessionID: {1} TimeOut: {2}.", appPool.AppPoolIdentity, app.SessionID, app.Timeout));
-                        //Debug.Write(string.Format("Konekcija je uspešno uspostavljena identitetom {0}. SessionID: {1}.", appPool.AppPoolIdentity, app.SessionID));
+                        _logger.Info(string.Format("Konekcija je uspešno uspostavljena identitetom [{0}]. SessionID: [{1}] TimeOut: [{2}].", appPool.AppPoolIdentity, app.SessionID, app.Timeout));
                         break;
                     }
                 }

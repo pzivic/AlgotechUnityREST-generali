@@ -15,7 +15,6 @@ using System.Data;
 using System.Configuration;
 
 using Oracle.ManagedDataAccess.Client;
-using System.Data.SqlClient;
 
 namespace Algotech.DAL.OracleHelper
 {

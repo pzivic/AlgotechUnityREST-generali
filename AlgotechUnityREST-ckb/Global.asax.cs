@@ -31,7 +31,7 @@ namespace AlgotechUnityREST_ckb
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
-            _logger.Info("//GlobalConfiguration");
+            _logger.Info("GlobalConfiguration");
 
             // Konfiguracija globalnih postavki JSON serializacije za REST servis https://chat.openai.com/c/63ba055c-c24c-429a-b8ca-173e8b7dc362
             GlobalConfiguration.Configuration.Formatters.JsonFormatter.SerializerSettings.DateFormatHandling = DateFormatHandling.IsoDateFormat;

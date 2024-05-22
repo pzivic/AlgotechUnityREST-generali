@@ -1,6 +1,6 @@
 ﻿namespace WindowsFormsApp
 {
-    partial class Form1
+    partial class frmDocumentImport
     {
         /// <summary>
         /// Required designer variable.
@@ -41,16 +41,16 @@
             // 
             this.txtUrl.Location = new System.Drawing.Point(43, 47);
             this.txtUrl.Name = "txtUrl";
-            this.txtUrl.Size = new System.Drawing.Size(726, 28);
+            this.txtUrl.Size = new System.Drawing.Size(726, 24);
             this.txtUrl.TabIndex = 0;
             // 
             // butSubmit
             // 
-            this.butSubmit.Location = new System.Drawing.Point(661, 92);
+            this.butSubmit.Location = new System.Drawing.Point(43, 77);
             this.butSubmit.Name = "butSubmit";
-            this.butSubmit.Size = new System.Drawing.Size(98, 42);
+            this.butSubmit.Size = new System.Drawing.Size(168, 42);
             this.butSubmit.TabIndex = 1;
-            this.butSubmit.Text = "Submit";
+            this.butSubmit.Text = "Submit PostAsync";
             this.butSubmit.UseVisualStyleBackColor = true;
             this.butSubmit.Click += new System.EventHandler(this.butSubmit_Click);
             // 
@@ -59,16 +59,16 @@
             this.statusStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel1});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 279);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 283);
             this.statusStrip1.Name = "statusStrip1";
-            this.statusStrip1.Size = new System.Drawing.Size(795, 26);
+            this.statusStrip1.Size = new System.Drawing.Size(795, 22);
             this.statusStrip1.TabIndex = 2;
             this.statusStrip1.Text = "statusStrip1";
             // 
             // toolStripStatusLabel1
             // 
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(151, 20);
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(118, 17);
             this.toolStripStatusLabel1.Text = "toolStripStatusLabel1";
             // 
             // txtResults
@@ -81,17 +81,18 @@
             // 
             // butSetDocumentKeyword
             // 
-            this.butSetDocumentKeyword.Location = new System.Drawing.Point(43, 81);
+            this.butSetDocumentKeyword.Location = new System.Drawing.Point(589, -1);
             this.butSetDocumentKeyword.Name = "butSetDocumentKeyword";
             this.butSetDocumentKeyword.Size = new System.Drawing.Size(206, 42);
             this.butSetDocumentKeyword.TabIndex = 4;
             this.butSetDocumentKeyword.Text = "Set Document Keyword";
             this.butSetDocumentKeyword.UseVisualStyleBackColor = true;
+            this.butSetDocumentKeyword.Visible = false;
             this.butSetDocumentKeyword.Click += new System.EventHandler(this.butSetDocumentKeyword_Click);
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 21F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(795, 305);
             this.Controls.Add(this.butSetDocumentKeyword);

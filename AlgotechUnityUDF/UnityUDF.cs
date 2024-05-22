@@ -487,7 +487,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
 
                 sqlString = string.Format("SELECT COUNT(*) FROM GroupType_Doctype WHERE DocumentTypeName='{0}' AND GroupType='{1}'", documentTypeName, groupType);
 
-                _logger.Info(string.Format("SQL string: {0}", sqlString));
+                _logger.Debug(string.Format("SQL string: {0}", sqlString));
 
                 // Ako postoji u data setu onda je kombinacija dobra
                 ret = Convert.ToBoolean(sqlHelper.ExecuteScalar(sqlString));
