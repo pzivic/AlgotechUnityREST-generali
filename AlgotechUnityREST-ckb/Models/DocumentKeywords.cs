@@ -26,11 +26,11 @@ namespace AlgotechUnityREST.Models
         /// </summary>
         public string DocumentTypeName { get; set; }
         /// <summary>
-        /// Naziv klučne reči
+        /// Naziv ključne reči
         /// </summary>
         public string KeywordName { get; set; }
         /// <summary>
-        /// Vrednost klučne reči
+        /// Vrednost ključne reči
         /// </summary>
         public string KeywordValue { get; set; }
 

@@ -731,59 +731,82 @@ namespace Algotech.UTL.AlgotechUnityUDF
         #region RemoveKeywordRecord
         public bool RemoveKeywordRecord(Application app, Document document, string keywordTypeName)
         {
-            _logger.Info("Pokušaj ažuriranja zapisa ključnih reči...");
+            var dateTimeStart = DateTime.Now;
 
-            // Keyword tip
-            KeywordType keywordType = app.Core.KeywordTypes.Find(keywordTypeName);
-            if (keywordType == null)
+            try
             {
-                return false;
-                throw new Exception("Tip ključne reči nije pronađen");
-            }
-            // Idemo da uklonimo ključnu reč
-            var forceLockDocument = System.Configuration.ConfigurationManager.AppSettings["ForceLockDocumentOnDelete"] == "True";
-            if (forceLockDocument == true)
-            {
-                _logger.Info(string.Format("Zaključavanje dokumenta : {0}.", document.ID));
-                using (DocumentLock documentLock = document.LockDocument())
+                _logger.Info("Funkcija:: RemoveKeywordRecord");
+                //_logger.Info("Pokušaj ažuriranja zapisa ključnih reči...");
+
+                // Keyword tip
+                KeywordType keywordType = app.Core.KeywordTypes.Find(keywordTypeName);
+                if (keywordType == null)
                 {
-                    if (documentLock.Status != DocumentLockStatus.LockObtained)
+                    return false;
+                    throw new Exception("Tip ključne reči nije pronađen");
+                }
+                // Idemo da uklonimo ključnu reč
+                var forceLockDocument = System.Configuration.ConfigurationManager.AppSettings["ForceLockDocumentOnDelete"] == "True";
+                if (forceLockDocument == true)
+                {
+                    _logger.Debug(string.Format("Zaključavanje dokumenta : {0}.", document.ID));
+                    using (DocumentLock documentLock = document.LockDocument())
                     {
+                        if (documentLock.Status != DocumentLockStatus.LockObtained)
+                        {
 
-                        _logger.Warn(string.Format("Zaključavanje dokumenta DocumentID: {0} nije uspelo!", document.ID));
-                        throw new Exception("Failed to lock document");
+                            _logger.Warn(string.Format("Zaključavanje dokumenta DocumentID: {0} nije uspelo!", document.ID));
+                            throw new Exception("Failed to lock document");
+                        }
                     }
                 }
-            }
-            //.
-            
-            _logger.Info("Pokušaj CreateKeywordModifier...");
-            KeywordModifier keywordModifier = document.CreateKeywordModifier();
+                //.
 
-            // Pronalazimo zapis u dokumentu
-            _logger.Info("Pokušaj da se pronađe zapis...");
-            KeywordRecord keywordRecord = document.KeywordRecords.Find(keywordType);
-            if (keywordRecord == null)
+                _logger.Debug("Pokušaj CreateKeywordModifier...");
+                KeywordModifier keywordModifier = document.CreateKeywordModifier();
+
+                // Pronalazimo zapis u dokumentu
+                _logger.Debug("Pokušaj da se pronađe zapis...");
+                KeywordRecord keywordRecord = document.KeywordRecords.Find(keywordType);
+                if (keywordRecord == null)
+                {
+                    //return false;
+                    //throw new Exception("Zapis ključne reči nije pronađen");
+                    _logger.Debug("Zapis ključne reči nije pronađen");
+                }
+                else
+                {
+                    // Find the old keyword from the record of the keyword type.
+                    _logger.Debug("Pronađite staru ključnu reč iz zapisa tipa ključne reči i uradi RemoveKeyword...");
+                    var keyword = keywordRecord.Keywords.Find(keywordTypeName);
+                    keywordModifier.RemoveKeyword(keyword);
+                }
+
+                keywordModifier.ApplyChanges();
+                //.
+
+                _logger.Info("Ključna reč je uklonjena.");
+                return true;
+            }
+
+            catch (Exception ex)
             {
-                return false;
-                throw new Exception("Zapis ključne reči nije pronađen");
-            }
-            //.
+                // Logger
+                _logger.Error(string.Format ("Greška kod uklanjanja ključne reči documentID {0} keywordTypeName {1}.", document.ID, keywordTypeName));
+                _logger.Error(ex.Message);
+                _logger.Error(ex.StackTrace);
+                //.
 
-            if (keywordRecord != null)
+                throw new Exception(ex.Message);
+            }
+            finally
             {
-                // Find the old keyword from the record of the keyword type.
-                _logger.Info("Pronađite staru ključnu reč iz zapisa tipa ključne reči i radi izmenu....");
-                var keyword = keywordRecord.Keywords.Find(keywordTypeName);
-                keywordModifier.RemoveKeyword(keyword);
+                // Metrika end
+                var dateTimeEnd = DateTime.Now;
+                var diffInSeconds = (dateTimeEnd - dateTimeStart).TotalSeconds;
+
+                _logger.Info("Funkcija:: RemoveKeywordRecord finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
             }
-
-            keywordModifier.ApplyChanges();
-
-            //.
-
-            _logger.Info("Ključna reč je uklonjena.");
-            return true;
         }
         #endregion
     }

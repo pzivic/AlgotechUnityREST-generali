@@ -1,6 +1,6 @@
 ﻿//Autor... Predrag Živić
 //Datum... 23.04.2008
-//Opis.... Komponenta omogućava lakši rad sa ADO.NET metodama za pristup podacima.
+//Opis... Komponenta omogućava lakši rad sa ADO.NET metodama za pristup podacima.
 
 // 15.07.2011, C# 3.0 optimizacija
 // 13.04.2012, .NET 4.0

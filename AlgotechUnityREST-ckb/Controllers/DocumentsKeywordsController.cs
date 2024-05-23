@@ -179,7 +179,7 @@ namespace AlgotechUnityREST.Controllers
         /// Vraća ključne reči određenog dokumenta
         /// </summary>
         /// <param name="documentID">Identifikator dokumenta</param>
-        /// <param name="keywordTypeName">Naziv klučne reči koju uklanjamo</param>
+        /// <param name="keywordTypeName">Naziv ključne reči koju uklanjamo</param>
         /// <returns></returns>
         [HttpDelete, ActionName("DocumentKeywordsRemove")]
         public HttpResponseMessage DocumentKeywordsRemove(long documentID, string keywordTypeName)
@@ -223,9 +223,11 @@ namespace AlgotechUnityREST.Controllers
                     objResult = new Result
                     {
                         Status = "False",
-                        Message = "Ključna reč nije uspešno obrisana!"
+                        Message = "Ključna reč nije uspešno obrisana. Vrednost ključne reči nije postojala."
                     };
-                    response = Request.CreateResponse(HttpStatusCode.BadRequest, objResult);
+                    // Ako pokuša da obriše vrednost ključne reči koje nema dolai do greške
+                    //response = Request.CreateResponse(HttpStatusCode.BadRequest, objResult);
+                    response = Request.CreateResponse(HttpStatusCode.Continue, objResult);
                 }
             }
             catch (Exception ex)

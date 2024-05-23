@@ -1,6 +1,6 @@
 ﻿//Autor... Predrag Živić
 //Datum... 14.10.2022
-//Opis.... Komponenta omogućava lakši rad sa ADO.NET metodama za pristup podacima.
+//Opis... Komponenta omogućava lakši rad sa ADO.NET metodama za pristup podacima.
 
 /*
 Oracle.ManagedDataAccess by Oracle
