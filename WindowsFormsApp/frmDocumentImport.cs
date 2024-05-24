@@ -13,9 +13,7 @@ using Newtonsoft.Json;
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
-using System.Net.Http.Headers;
-using System.Net;
+
 
 namespace WindowsFormsApp
 {
@@ -65,15 +63,25 @@ namespace WindowsFormsApp
         }
         #endregion
 
+        #region DocumentsImportResult
+        private class DocumentsImportResult
+        {
+            public long RequestID { get; set; }
+            public string DocBarcode { get; set; }
+            public string GroupBarcode { get; set; }
+            public string Message { get; set; }
+        }
+        #endregion
+
         #region butSubmit_Click
         private void butSubmit_Click(object sender, EventArgs e)
         {
             toolStripStatusLabel1.Text = string.Empty;
             txtResults.Text = string.Empty;
 
-            var task = DocumentImportToOnBaseAsync(2002);
+            var task = DocumentImportToOnBaseAsync(Convert.ToInt32(txtResponse1.Text));
 
-            toolStripStatusLabel1.Text = toolStripStatusLabel1.Text + " " + task.Status.ToString();
+            toolStripStatusLabel1.Text = toolStripStatusLabel1.Text + " TaskID: " + task.Id.ToString() + " Status: " +  task.Status.ToString();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -112,6 +120,30 @@ namespace WindowsFormsApp
         }
         #endregion
 
+        #region 1
+        private void butSubmitByCounter_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                toolStripStatusLabel1.Text = string.Empty;
+                txtResults.Text = string.Empty;
+
+                Task task;
+                for (int i = 0; i < Convert.ToInt16(txtCounter.Text); i++)
+                {
+                    task = DocumentImportToOnBaseAsync(Convert.ToInt32(txtResponse1.Text) + i);
+                    toolStripStatusLabel1.Text = string.Format("Broj poziva: {0}.", i);
+                }
+
+                toolStripStatusLabel1.Text = toolStripStatusLabel1.Text + " *** završeno!";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Greška");
+            }
+        }
+        #endregion
+
         #region DocumentImport
         private async Task DocumentImportToOnBaseAsync(long requestID)
         {
@@ -123,7 +155,7 @@ namespace WindowsFormsApp
             {
                 RequestID = requestID,
                 DocumentDate = DateTime.Now,
-                DocumentTypeName = "SMS",
+                DocumentTypeName = "NETBANK",
                 GroupType = "EBANKING",
                 GroupID = "BIIS;KLS;6;598",
                 DocID = "BIIS;KLS;6;598",
@@ -172,8 +204,16 @@ namespace WindowsFormsApp
                     {
                         response.EnsureSuccessStatusCode();
                         var responseBody = await response.Content.ReadAsStringAsync();
+
                         txtResults.Text = txtResults.Text + responseBody + "\r\n";
                         Console.WriteLine(responseBody);
+
+                        // Deserijalizacija json objekata
+                        var documentsImportResult = JsonConvert.DeserializeObject<DocumentsImportResult>(responseBody);
+                        txtRequestID.Text = documentsImportResult.RequestID.ToString();
+                        txtDocBarcode.Text = documentsImportResult.DocBarcode;
+                        txtMessage.Text = documentsImportResult.Message;
+                        //.
                     }
                     //.
 
@@ -186,18 +226,28 @@ namespace WindowsFormsApp
                     //    Console.WriteLine(responseBody);
                     //}
 
+                    //// Ovaj primer neće hvatati u UI txtResults.Text ali radi brzo
                     //using (HttpResponseMessage response = await client.PostAsync(url, content).ConfigureAwait(false))
                     //{
                     //    response.EnsureSuccessStatusCode();
                     //    var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    //    txtResults.Text = txtResults.Text + responseBody + "\r\n";
-                    //    Console.WriteLine(responseBody);
+                    //    Console.WriteLine("responseBody: " + responseBody);
+
+                    //    // Deserijalizacija json objekata
+                    //    var documentsImportResult = JsonConvert.DeserializeObject<DocumentsImportResult>(responseBody);
+                    //    txtRequestID.Text = documentsImportResult.RequestID.ToString();
+                    //    txtDocBarcode.Text = documentsImportResult.DocBarcode;
+                    //    txtMessage.Text = documentsImportResult.Message;
+                    //    //.
                     //}
+
+
+
                 }
                 catch (HttpRequestException ex)
                 {
                     Console.WriteLine($"Request error: {ex.Message}");
-                    txtResults.Text =  $"Request error: {ex.Message}"; ;
+                    txtResults.Text = $"Request error: {ex.Message}"; ;
                 }
 
                 catch (Exception ex)
@@ -209,27 +259,5 @@ namespace WindowsFormsApp
         }
 
         #endregion
-
-        private void butSubmitByCounter_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                toolStripStatusLabel1.Text = string.Empty;
-                txtResults.Text = string.Empty;
-
-                Task task;
-                for (int i = 0; i < Convert.ToInt16(txtCounter.Text); i++)
-                {
-                    task = DocumentImportToOnBaseAsync(Convert.ToInt32(txtResponse1.Text) + i);
-                    toolStripStatusLabel1.Text = string.Format("Broj poziva: {0}.", i);
-                }
-
-                toolStripStatusLabel1.Text = toolStripStatusLabel1.Text + " *** završeno!";
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Greška");
-            }
-        }
     }
 }
