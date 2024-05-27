@@ -1,4 +1,4 @@
-﻿namespace AlgotechUnityREST.Models
+﻿namespace AlgotechUnityREST_ckb.Models
 {
     /// <summary>
     /// KLučne reči za prava pristupa

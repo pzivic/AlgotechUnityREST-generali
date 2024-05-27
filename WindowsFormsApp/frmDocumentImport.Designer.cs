@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.txtUrl = new System.Windows.Forms.TextBox();
             this.butSubmit = new System.Windows.Forms.Button();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
@@ -44,15 +43,11 @@
             this.txtDocBarcode = new System.Windows.Forms.TextBox();
             this.txtMessage = new System.Windows.Forms.TextBox();
             this.txtRequestID = new System.Windows.Forms.TextBox();
+            this.txtResponse3 = new System.Windows.Forms.TextBox();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.butSimple = new System.Windows.Forms.Button();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // txtUrl
-            // 
-            this.txtUrl.Location = new System.Drawing.Point(12, 47);
-            this.txtUrl.Name = "txtUrl";
-            this.txtUrl.Size = new System.Drawing.Size(726, 24);
-            this.txtUrl.TabIndex = 0;
             // 
             // butSubmit
             // 
@@ -92,13 +87,13 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(236, 94);
+            this.button1.Location = new System.Drawing.Point(394, 87);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(206, 42);
             this.button1.TabIndex = 4;
             this.button1.Text = "Submit PostAsync multiply";
             this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.button1.Click += new System.EventHandler(this.button1_Click_1);
             // 
             // txtResponse1
             // 
@@ -170,23 +165,53 @@
             // 
             // txtMessage
             // 
-            this.txtMessage.Location = new System.Drawing.Point(15, 497);
+            this.txtMessage.Location = new System.Drawing.Point(12, 527);
             this.txtMessage.Name = "txtMessage";
             this.txtMessage.Size = new System.Drawing.Size(720, 24);
             this.txtMessage.TabIndex = 13;
             // 
             // txtRequestID
             // 
-            this.txtRequestID.Location = new System.Drawing.Point(12, 527);
+            this.txtRequestID.Location = new System.Drawing.Point(12, 497);
             this.txtRequestID.Name = "txtRequestID";
             this.txtRequestID.Size = new System.Drawing.Size(231, 24);
             this.txtRequestID.TabIndex = 14;
+            // 
+            // txtResponse3
+            // 
+            this.txtResponse3.Location = new System.Drawing.Point(236, 105);
+            this.txtResponse3.Name = "txtResponse3";
+            this.txtResponse3.Size = new System.Drawing.Size(96, 24);
+            this.txtResponse3.TabIndex = 15;
+            this.txtResponse3.Text = "2013";
+            // 
+            // comboBox1
+            // 
+            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Location = new System.Drawing.Point(12, 56);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(723, 25);
+            this.comboBox1.TabIndex = 16;
+            // 
+            // butSimple
+            // 
+            this.butSimple.Location = new System.Drawing.Point(567, 161);
+            this.butSimple.Name = "butSimple";
+            this.butSimple.Size = new System.Drawing.Size(165, 39);
+            this.butSimple.TabIndex = 17;
+            this.butSimple.Text = "Jednostavan poziv";
+            this.butSimple.UseVisualStyleBackColor = true;
+            this.butSimple.Click += new System.EventHandler(this.butSimple_Click);
             // 
             // frmDocumentImport
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(763, 606);
+            this.Controls.Add(this.butSimple);
+            this.Controls.Add(this.comboBox1);
+            this.Controls.Add(this.txtResponse3);
             this.Controls.Add(this.txtRequestID);
             this.Controls.Add(this.txtMessage);
             this.Controls.Add(this.txtDocBarcode);
@@ -201,7 +226,6 @@
             this.Controls.Add(this.txtResults);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.butSubmit);
-            this.Controls.Add(this.txtUrl);
             this.Font = new System.Drawing.Font("Tahoma", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "frmDocumentImport";
@@ -216,8 +240,6 @@
         }
 
         #endregion
-
-        private System.Windows.Forms.TextBox txtUrl;
         private System.Windows.Forms.Button butSubmit;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
@@ -233,6 +255,9 @@
         private System.Windows.Forms.TextBox txtDocBarcode;
         private System.Windows.Forms.TextBox txtMessage;
         private System.Windows.Forms.TextBox txtRequestID;
+        private System.Windows.Forms.TextBox txtResponse3;
+        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.Button butSimple;
     }
 }
 

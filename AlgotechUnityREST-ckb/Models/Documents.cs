@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace AlgotechUnityREST.Models
+namespace AlgotechUnityREST_ckb.Models
 {
     /// <summary>
     /// Model dokumenta

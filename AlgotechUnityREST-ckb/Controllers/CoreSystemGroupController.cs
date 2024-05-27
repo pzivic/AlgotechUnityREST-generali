@@ -6,14 +6,15 @@ using System.Web.Http;
 using System.Net.Http;
 using System.Net;
 
-using Oracle.ManagedDataAccess.Client;
-using System.Web.Http.Description;
-
-using AlgotechUnityREST.Models;
 using System.Data;
 using System.Collections.Generic;
+using System.Web.Http.Description;
 
-namespace AlgotechUnityREST.Controllers
+using Oracle.ManagedDataAccess.Client;
+
+using AlgotechUnityREST_ckb.Models;
+
+namespace AlgotechUnityREST_ckb.Controllers
 {
     /// <summary>
     /// Preuzimaje podataka iz Core sistema o grupama

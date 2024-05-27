@@ -8,7 +8,7 @@ using System.Net;
 using System.Web.Http;
 
 using Hyland.Unity;
-using AlgotechUnityREST.Models;
+using AlgotechUnityREST_ckb.Models;
 using Newtonsoft.Json;
 using System.Linq;
 using System.Web.Http.Description;
@@ -42,12 +42,12 @@ namespace AlgotechUnityREST_ckb.Controllers
             try
             {
                 // Konektuj OnBase
-                _logger.Info("OnBase Connect()");
+                _logger.Debug("OnBase Connect()");
                 var obj = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
                 application = obj.OnBaseConnect();
                 if (application == null)
                 {
-                    _logger.Warn("Greška kod uspostavljanja konekcije sa OnBase");
+                    _logger.Error("Greška kod uspostavljanja konekcije sa OnBase");
                     throw new ArgumentException("Greška kod uspostavljanja konekcije sa OnBase. Kontaktirajte OnBase administratora.");
                 }
                 //.

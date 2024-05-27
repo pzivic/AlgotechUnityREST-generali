@@ -1,4 +1,4 @@
-﻿using AlgotechUnityREST.Models;
+﻿using AlgotechUnityREST_ckb.Models;
 using Hyland.Unity;
 using Newtonsoft.Json;
 using System;
@@ -8,7 +8,7 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Results;
 
-namespace AlgotechUnityREST.Controllers
+namespace AlgotechUnityREST_ckb.Controllers
 {
     /// <summary>
     /// Ključne reči

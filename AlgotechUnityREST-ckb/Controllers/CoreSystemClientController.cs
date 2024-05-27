@@ -9,10 +9,10 @@ using System.Net;
 using Oracle.ManagedDataAccess.Client;
 using System.Web.Http.Description;
 
-using AlgotechUnityREST.Models;
+using AlgotechUnityREST_ckb.Models;
 using System.Data;
 
-namespace AlgotechUnityREST.Controllers
+namespace AlgotechUnityREST_ckb.Controllers
 {
     /// <summary>
     /// Preuzimaje podataka iz Core sistema o klijentima

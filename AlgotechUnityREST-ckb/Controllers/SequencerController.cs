@@ -7,9 +7,9 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
-using AlgotechUnityREST.Models;
+using AlgotechUnityREST_ckb.Models;
 
-namespace AlgotechUnityREST.Controllers
+namespace AlgotechUnityREST_ckb.Controllers
 {
     /// <summary>
     /// Generator sekvenci

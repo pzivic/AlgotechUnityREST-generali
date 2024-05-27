@@ -37,14 +37,14 @@ namespace Algotech.UTL.AlgotechUnityUDF
 
         //    // Logijemo od momenta uspostavljanja konekcije
         //    var dateTimeStart = DateTime.Now;
-        //    //_logger.Info("Pomoćna funkcija:: OnBaseConnect start " + dateTimeStart);
-        //    _logger.Info(string.Format("Pomoćna funkcija:: OnBaseConnect url: {0}, datasource {1}; start: {2}.", _appServerURL, _dataSource, dateTimeStart));
+        //    //_logger.Debug("Pomoćna funkcija:: OnBaseConnect start " + dateTimeStart);
+        //    _logger.Debug(string.Format("Pomoćna funkcija:: OnBaseConnect url: {0}, datasource {1}; start: {2}.", _appServerURL, _dataSource, dateTimeStart));
 
         //    var userName = System.Configuration.ConfigurationManager.AppSettings["UserName"];
         //    var userPassword = System.Configuration.ConfigurationManager.AppSettings["UserPassword"];
         //    OnBaseAuthenticationProperties authProps = Application.CreateOnBaseAuthenticationProperties(_appServerURL, userName, userPassword, _dataSource);
 
-        //    _logger.Info(string.Format("Pokušaj uspostavljanja veze na klasičan način sa identitetom: {0}.", userName));
+        //    _logger.Debug(string.Format("Pokušaj uspostavljanja veze na klasičan način sa identitetom: {0}.", userName));
 
         //    authProps.IdentitySettings = authProps.CreateIdentitySettings("AlgotechUnityREST");
         //    authProps.LicenseType = LicenseType.Default;
@@ -66,10 +66,10 @@ namespace Algotech.UTL.AlgotechUnityUDF
 
         //    if (app != null)
         //    {
-        //        _logger.Info(string.Format("Konekcija je uspešno uspostavljena identitetom {0}. SessionID: {1}.", userName, app.SessionID));
+        //        _logger.Debug(string.Format("Konekcija je uspešno uspostavljena identitetom {0}. SessionID: {1}.", userName, app.SessionID));
         //    }
 
-        //    _logger.Info("Pomoćna funkcija:: OnBaseConnect end " + DateTime.Now + " sec " + (DateTime.Now - dateTimeStart).TotalSeconds.ToString());
+        //    _logger.Debug("Pomoćna funkcija:: OnBaseConnect end " + DateTime.Now + " sec " + (DateTime.Now - dateTimeStart).TotalSeconds.ToString());
 
         //    return app;
         //}
@@ -86,11 +86,9 @@ namespace Algotech.UTL.AlgotechUnityUDF
 
             // Logijemo od momenta uspostavljanja konekcije
             var dateTimeStart = DateTime.Now;
-            //_logger.Info("Pomoćna funkcija:: OnBaseConnect start " + dateTimeStart);
-            _logger.Info(string.Format("Pomoćna funkcija:: OnBaseConnect url: {0}, datasource {1}; start: {2}.", _appServerURL, _dataSource, dateTimeStart));
+            _logger.Debug(string.Format("Pomoćna funkcija:: OnBaseConnect url: {0}, datasource {1}; start: {2}.", _appServerURL, _dataSource, dateTimeStart));
 
             var isAppPoolConnection = Convert.ToBoolean(System.Configuration.ConfigurationManager.AppSettings["IsAppPoolConnection"]);
-            //var isDisconnectEnabled = Convert.ToBoolean(System.Configuration.ConfigurationManager.AppSettings["IsDisconnectEnabled"]);
 
             #region Native Connection
             if (isAppPoolConnection == false)
@@ -103,7 +101,6 @@ namespace Algotech.UTL.AlgotechUnityUDF
                 authProps.LicenseType = LicenseType.Default;
                 //authProps.LicenseType = LicenseType.QueryMetering;
                 //authProps.LicenseType = LicenseType.EnterpriseCoreAPI;
-
 
                 _logger.Debug(string.Format("Pokušaj uspostavljanja veze na klasičan način sa identitetom: {0} i licencom: {1}.", userName, authProps.LicenseType));
 
@@ -124,7 +121,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
 
                 if (app != null)
                 {
-                    _logger.Info(string.Format("Konekcija je uspešno uspostavljena identitetom [{0}]. SessionID: [{1}].", userName, app.SessionID));
+                    _logger.Debug(string.Format("Konekcija je uspešno uspostavljena identitetom [{0}]. SessionID: [{1}].", userName, app.SessionID));
                 }
             }
             #endregion
@@ -151,7 +148,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
                     // Vidi web.config
                     var timeOut = Convert.ToInt32(System.Configuration.ConfigurationManager.AppSettings["APPLICATION_TIMEOUT"]);
 
-                    _logger.Info(string.Format("Pokušaj uspostavljanja veze sa identitetom: [{0}] i licencom: [{1}].", userName, authProps.LicenseType));
+                    _logger.Debug(string.Format("Pokušaj uspostavljanja veze sa identitetom: [{0}] i licencom: [{1}].", userName, authProps.LicenseType));
                     try
                     {
                         app = Application.Connect(authProps);
@@ -161,7 +158,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
                         } 
                     }
 
-                    // Samo lgojemo greške ne bacamo exception (vidi OnBase  API Sample)
+                    // Samo logojemo greške ne bacamo exception (vidi OnBase  API Sample)
                     catch (SystemLockedOutException)
                     {
                         Console.Out.WriteLine("Warn: The system is currently in lockout mode.");
@@ -196,7 +193,6 @@ namespace Algotech.UTL.AlgotechUnityUDF
 
                     if (app != null)
                     {
-                        //_logger.Debug(string.Format("Konekcija je uspešno uspostavljena identitetom [{0}]. SessionID: [{1}] TimeOut: [{2}].", appPool.AppPoolIdentity, app.SessionID, app.Timeout));
                         _logger.Debug(string.Format("Konekcija je uspešno uspostavljena identitetom [{0}]. Licenca [{1}]. SessionID: [{2}] TimeOut: [{3}].", 
                              authProps.Username, authProps.LicenseType, app.SessionID, app.Timeout));
                         break;
@@ -205,7 +201,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
             }
             #endregion
 
-            _logger.Info("Pomoćna funkcija:: OnBaseConnectByAppPool end " + DateTime.Now + " sec " + (DateTime.Now - dateTimeStart).TotalSeconds.ToString());
+            _logger.Debug("Pomoćna funkcija:: OnBaseConnectByAppPool end " + DateTime.Now + " sec " + (DateTime.Now - dateTimeStart).TotalSeconds.ToString());
 
             return app;
         }
@@ -231,7 +227,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
                 app.Dispose();
             }
 
-            _logger.Info("Konekcija je zatvorena.");
+            _logger.Debug("Konekcija je zatvorena.");
         }
         #endregion
       

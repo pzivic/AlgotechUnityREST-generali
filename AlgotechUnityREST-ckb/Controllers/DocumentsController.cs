@@ -10,7 +10,7 @@ using System.Text;
 using Hyland.Unity;
 using Hyland.Unity.Extensions;
 
-using AlgotechUnityREST.Models;
+using AlgotechUnityREST_ckb.Models;
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -24,7 +24,7 @@ using System.Collections.Specialized;
 
 using System.Threading.Tasks;
 
-namespace AlgotechUnityREST.Controllers
+namespace AlgotechUnityREST_ckb.Controllers
 {
     /// <summary>
     /// U osnovi OnBase sistema je dokument. Kotroler sadrži metode sa rad sa dokumentima.
@@ -92,7 +92,7 @@ namespace AlgotechUnityREST.Controllers
                     // Provera da li su vrednosti prosleđene
                     if (checkingValues == true && documentImport.DocumentTypeName != "File Cover Page")
                     {
-                        _logger.Info("Validacija dokumenata.");
+                        _logger.Debug("Validacija dokumenata.");
                         //httpStatusCode = HttpStatusCode.BadRequest;
                         httpStatusCode = HttpStatusCode.Forbidden;
 
@@ -118,7 +118,7 @@ namespace AlgotechUnityREST.Controllers
                     // Ako je File Cover Page nećemo raditi validaciju u kontekstu dokumenata
                     if (checkingValues == true && documentImport.DocumentTypeName == "File Cover Page")
                     {
-                        _logger.Info("Validacija File Cover Page.");
+                        _logger.Debug("Validacija File Cover Page.");
                         httpStatusCode = HttpStatusCode.NotFound;
                         if (documentImport.GroupID == string.Empty) { throw new ArgumentException("Niste definisali GroupID!"); }
                         if (documentImport.GroupType == string.Empty) { throw new ArgumentException("Niste definisali GroupType!"); }
@@ -145,7 +145,7 @@ namespace AlgotechUnityREST.Controllers
                     _logger.Debug(string.Format("UserName: {0}", documentImport.UserName));
 
                     // Konekcija na OnBase
-                    _logger.Info("OnBase Connect()");
+                    _logger.Info("DocumentImport OnBase Connect()");
                     var obj = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
                     application = obj.OnBaseConnect();
                     if (application == null)
@@ -160,7 +160,8 @@ namespace AlgotechUnityREST.Controllers
 
                     // Logijemo od momenta uspostavljanja konekcije
                     dateTimeStart = DateTime.Now;
-                    _logger.Info(string.Format("DocumentImport: session: [{0}]; request: [{1}]; start: {2}.", sessionID, requestID, dateTimeStart));
+                    _logger.Info(string.Format("DocumentImport session: [{0}]; onbase sesion [{1}] request: [{2}]; start: {3}.", 
+                        sessionID, application.SessionID, requestID, dateTimeStart));
 
                     // Validacija Tipa dokumenta
                     DocumentType documentType =
@@ -236,17 +237,18 @@ namespace AlgotechUnityREST.Controllers
                     //if (documentImport.DocumentTypeName == "File Cover Page")
                     //    keywordNameAK = "GroupBarcode";
 
-                    //_logger.Info(string.Format("Kreiramo vrednost za alternativni kljuc [{0}].", keywordNameAK));
+                    //_logger.Debug(string.Format("Kreiramo vrednost za alternativni kljuc [{0}].", keywordNameAK));
 
                     //unityUDF = new Algotech.UTL.AlgotechUnityUDF.UnityUDF();
                     //var documentTypeID = unityUDF.GetDocumentTypeID(application, documentImport.DocumentTypeName);
-                    //var newSeqValue = unityUDF.GetSequenceValue("DocBarcodeGroupBarcode");
+                    ////var newSeqValue = unityUDF.GetSequenceValue("DocBarcodeGroupBarcode");
+                    //var newSeqValue = requestID;
                     //akValue = string.Format("{1}{0}{2}{0}{3}", documentAK_Separator,
                     //    documentImport.DataSource, documentTypeID, newSeqValue.ToString().PadLeft(documentAK_LenghtSufix, Convert.ToChar("0")));
                     //// Upiši ak
                     //storeDocumentProperties.AddKeyword(keywordNameAK, akValue);
 
-                    //_logger.Info(string.Format("Upisaćemo: KeywordName {0}, KeywordValue={1}.", keywordNameAK, akValue));
+                    //_logger.Debug(string.Format("Upisaćemo: KeywordName {0}, KeywordValue={1}.", keywordNameAK, akValue));
                     ////.
                     #endregion
 
@@ -269,7 +271,7 @@ namespace AlgotechUnityREST.Controllers
                         keywordNameAK = "GroupBarcode";
                     }
 
-                    _logger.Info(string.Format("Kreiramo vrednost za alternativni kljuc [{0}].", keywordNameAK));
+                    _logger.Debug(string.Format("Kreiramo vrednost za alternativni kljuc [{0}].", keywordNameAK));
 
                     unityUDF = new Algotech.UTL.AlgotechUnityUDF.UnityUDF();
                     var documentTypeID = unityUDF.GetDocumentTypeID(application, documentImport.DocumentTypeName);
@@ -302,12 +304,6 @@ namespace AlgotechUnityREST.Controllers
 
                     if (status != string.Empty)
                     {
-                        //_logger.Info(string.Format("Status: {0}.", status));
-                        //var oldValue = Convert.ToInt64(status.Substring(5, 9)).ToString();
-                        //var newValue = (Convert.ToInt64(status.Substring(5, 9)) - 1).ToString();
-                        //status = status.Replace(oldValue, newValue);
-                        //_logger.Info(string.Format("Zamenjen Status: {0}.", status));
-
                         // Simulacija lošeg responsa umesto prave vrednosti vratiće-1
                         if (Convert.ToBoolean(System.Configuration.ConfigurationManager.AppSettings["IsEnvPROD"]) == false)
                         {
@@ -413,12 +409,11 @@ namespace AlgotechUnityREST.Controllers
             {
                 var dateTimeEnd = DateTime.Now;
                 var diffInSeconds = (dateTimeEnd - dateTimeStart).TotalSeconds;
-                _logger.Info(string.Format("DocumentImport: session [{0}] finally {1} in sec {2}.", sessionID, dateTimeEnd, diffInSeconds));
+                _logger.Debug(string.Format("DocumentImport: session [{0}] finally {1} in sec {2}.", sessionID, dateTimeEnd, diffInSeconds));
 
                 if (application != null)
                 {
-                    //_logger.Info("OnBase Disconnect()"); 07.05.2024
-                    _logger.Info(string.Format("OnBase Disconnect() Time: {0}; OnBase SessionID: {1}.", dateTimeEnd, application.SessionID));
+                    _logger.Info(string.Format("DocumentImport OnBase Disconnect() Time: {0}; OnBase SessionID: {1}.", dateTimeEnd, application.SessionID));
                     var obj = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
                     obj.OnBaseDisconnect(application);
                 }
@@ -444,7 +439,7 @@ namespace AlgotechUnityREST.Controllers
             try
             {
                 // Konekcija
-                _logger.Info("OnBase Connect()");
+                _logger.Debug("OnBase Connect()");
                 var obj = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
                 application = obj.OnBaseConnect();
                 if (application == null)
@@ -498,7 +493,7 @@ namespace AlgotechUnityREST.Controllers
             {
                 if (application != null)
                 {
-                    _logger.Info("OnBase Disconnect()");
+                    _logger.Debug("OnBase Disconnect()");
                     var obj = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
                     obj.OnBaseDisconnect(application);
                 }
@@ -560,7 +555,7 @@ namespace AlgotechUnityREST.Controllers
                 //if (docBarcode == string.Empty) { throw new ArgumentException("Parametar docBarcode mora da bude prosleđen"); }
 
                 // Konektuj OnBase
-                _logger.Info("OnBase Connect()");
+                _logger.Debug("OnBase Connect()");
                 var obj = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
                 application = obj.OnBaseConnect();
                 if (application == null)
@@ -571,7 +566,7 @@ namespace AlgotechUnityREST.Controllers
                 }
                 //.
 
-                _logger.Info("Metoda:: DocumentProperties");
+                _logger.Debug("Metoda:: DocumentProperties");
 
                 var unityUDF = new Algotech.UTL.AlgotechUnityUDF.UnityUDF();
 
@@ -582,7 +577,7 @@ namespace AlgotechUnityREST.Controllers
                     documentID = unityUDF.DocBarcode2DocumentID(application, docBarcode);
                 }
 
-                _logger.Info(string.Format("Pokušaj preuzimanja svojstava dokumenta DocumentID: {0}", documentID));
+                _logger.Debug(string.Format("Pokušaj preuzimanja svojstava dokumenta DocumentID: {0}", documentID));
 
                 Document document = application.Core.GetDocumentByID(documentID);
                 if (document == null)
@@ -596,7 +591,7 @@ namespace AlgotechUnityREST.Controllers
                 //var forceLockDocument = System.Configuration.ConfigurationManager.AppSettings["ForceLockDocument"] == "True";
                 //if (forceLockDocument == true)
                 //{
-                //    _logger.Info(string.Format("Zaključavanje dokumenta : {0}.", documentID));
+                //    _logger.Debug(string.Format("Zaključavanje dokumenta : {0}.", documentID));
                 //    using (DocumentLock documentLock = document.LockDocument())
                 //    {
                 //        if (documentLock.Status != DocumentLockStatus.LockObtained)
@@ -610,7 +605,7 @@ namespace AlgotechUnityREST.Controllers
                 ////.
 
                 // 1. Sistemska svojstva dokumenta
-                _logger.Info("Sistemska svojstva dokumenta");
+                _logger.Debug("Sistemska svojstva dokumenta");
                 var objDocuments = new DocumentProperites()
                 {
                     DocumentID = document.ID,
@@ -623,7 +618,7 @@ namespace AlgotechUnityREST.Controllers
                     Status = document.Status.ToString(),
                 };
 
-                _logger.Info("Dodatna svojstva");
+                _logger.Debug("Dodatna svojstva");
                 var webServerURL = System.Configuration.ConfigurationManager.AppSettings["OnBaseDocPop"];
                 objDocuments.DocumentUrlByID = webServerURL + string.Format(@"&docid={0}", objDocuments.DocumentID);
 
@@ -647,7 +642,7 @@ namespace AlgotechUnityREST.Controllers
                 //.
 
                 //2. Poslednja revizija dokumenta
-                _logger.Info("Poslednja revizija dokumenta");
+                _logger.Debug("Poslednja revizija dokumenta");
                 Revision latestRevision = document.LatestRevision;
                 if (latestRevision != null)
                 {
@@ -656,16 +651,16 @@ namespace AlgotechUnityREST.Controllers
                     objDocuments.RevisionComment = latestRevision.Comment;
                     objDocuments.RevisionCreatedByName = latestRevision.CreatedBy.Name;
 
-                    _logger.Info(string.Format("Dokument revizije id: {0} datum: {1}.", objDocuments.RevisionID, objDocuments.RevisionDate));
+                    _logger.Debug(string.Format("Dokument revizije id: {0} datum: {1}.", objDocuments.RevisionID, objDocuments.RevisionDate));
                 }
                 else
                 {
-                    _logger.Info("Dokument nema revizije");
+                    _logger.Debug("Dokument nema revizije");
                 }
                 //.
 
                 // 3. Ključne reči izabranog dokumenta
-                _logger.Info("Ključne reči dokumenta");
+                _logger.Debug("Ključne reči dokumenta");
                 Dictionary<string, string> keywordList = new Dictionary<string, string>();
                 // Daj nam keyword izabranog dokumenta
                 foreach (KeywordRecord keywordRecords in document.KeywordRecords)
@@ -702,7 +697,7 @@ namespace AlgotechUnityREST.Controllers
                                     //keywordList.Add(keyword.KeywordType.Name, keyword.DateTimeValue.ToString("G", CultureInfo.CurrentCulture));
                                     keywordList.Add(keyword.KeywordType.Name, keyword.DateTimeValue.ToString("s", CultureInfo.CurrentCulture));
 
-                                    _logger.Info(string.Format(
+                                    _logger.Debug(string.Format(
                                         "Datum: {0}, " +
                                         "ToString('o'): {1}, " +
                                         "ToString('s'): {2}, " +
@@ -805,7 +800,7 @@ namespace AlgotechUnityREST.Controllers
                         response = Request.CreateResponse(HttpStatusCode.OK, result);
                         response.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                        _logger.Info(result.Message);
+                        _logger.Debug(result.Message);
                     }
                 }
             }
@@ -828,7 +823,7 @@ namespace AlgotechUnityREST.Controllers
             {
                 if (application != null)
                 {
-                    _logger.Info("OnBase Disconnect()");
+                    _logger.Debug("OnBase Disconnect()");
                     var obj = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
                     obj.OnBaseDisconnect(application);
                 }
@@ -859,11 +854,11 @@ namespace AlgotechUnityREST.Controllers
 
             try
             {
-                _logger.Info("Metoda:: DocumentExport");
-                //_logger.Info(string.Format("documentID: {0} {1}.", documentID, forceLockDocument));
+                _logger.Debug("Metoda:: DocumentExport");
+                //_logger.Debug(string.Format("documentID: {0} {1}.", documentID, forceLockDocument));
 
                 if (documentID == 0) { throw new ArgumentException("Morate da prosledite documentiD."); }
-                _logger.Info("OnBase Connect()");
+                _logger.Debug("OnBase Connect()");
                 var obj = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
                 application = obj.OnBaseConnect();
                 if (application == null)
@@ -875,7 +870,7 @@ namespace AlgotechUnityREST.Controllers
                 // Logijemo od momenta uspostavljanja konekcije
                 dateTimeStart = DateTime.Now;
 
-                _logger.Info("DocumentImport start " + dateTimeStart);
+                _logger.Debug("DocumentImport start " + dateTimeStart);
 
                 var appFileUploadPath = System.Configuration.ConfigurationManager.AppSettings["ExportFolder"];
                 Document document = application.Core.GetDocumentByID(documentID) ?? throw new Exception("Document was not found");
@@ -915,7 +910,7 @@ namespace AlgotechUnityREST.Controllers
 
                 status = fileName;
                 message = string.Format("Dokument je uspešno exportovan na privremenu lokaciju.");
-                _logger.Info(String.Format("Dokument documentID={0} je uspešno exportovan na privremenu lokaciju.", documentID));
+                _logger.Debug(String.Format("Dokument documentID={0} je uspešno exportovan na privremenu lokaciju.", documentID));
 
                 if (status != string.Empty)
                 {
@@ -927,7 +922,7 @@ namespace AlgotechUnityREST.Controllers
                     response = Request.CreateResponse(HttpStatusCode.OK, result);
 
                     // Logger
-                    _logger.Info(result.Message);
+                    _logger.Debug(result.Message);
                     //.
                 }
             }
@@ -952,10 +947,10 @@ namespace AlgotechUnityREST.Controllers
             {
                 var dateTimeEnd = DateTime.Now;
                 var diffInSeconds = (dateTimeEnd - dateTimeStart).TotalSeconds;
-                _logger.Info("DocumentImport finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
+                _logger.Debug("DocumentImport finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
                 if (application != null)
                 {
-                    _logger.Info("OnBase Disconnect()");
+                    _logger.Debug("OnBase Disconnect()");
                     var obj = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
                     obj.OnBaseDisconnect(application);
                 }
@@ -983,10 +978,10 @@ namespace AlgotechUnityREST.Controllers
         //            var httpStatusCode = HttpStatusCode.Forbidden;
         //            try
         //            {
-        //                //_logger.Info("Metoda:: SetDocumentKeyword");
-        //                _logger.Info("Metoda:: DocumentKeywordSetValue");
-        //                _logger.Info(string.Format("DataSource: {0}", documentKeyword.DataSource));
-        //                _logger.Info(string.Format("UserName: {0}", documentKeyword.UserName));
+        //                //_logger.Debug("Metoda:: SetDocumentKeyword");
+        //                _logger.Debug("Metoda:: DocumentKeywordSetValue");
+        //                _logger.Debug(string.Format("DataSource: {0}", documentKeyword.DataSource));
+        //                _logger.Debug(string.Format("UserName: {0}", documentKeyword.UserName));
 
         //                if (documentKeyword.DocumentTypeName == string.Empty) { throw new ArgumentException("Svojstvo DocumentTypeName mora da bude definisano."); }
         //                if (documentKeyword.KeywordName == string.Empty) { throw new ArgumentException("Svojstvo KeywordName mora da bude definisano."); }
@@ -997,7 +992,7 @@ namespace AlgotechUnityREST.Controllers
         //                var keywordValue = documentKeyword.KeywordValue;
 
         //                dateTimeStart = DateTime.Now;
-        //                _logger.Info("SetDocumentKeyword start " + dateTimeStart);
+        //                _logger.Debug("SetDocumentKeyword start " + dateTimeStart);
 
         //                // Validacija Tipa dokumenta
         //                var documentTypeValidate = application.Core.DocumentTypes.Find(documentTypeName) ?? throw new Exception(string.Format("Tip dokumenta '{0}' nije pronađen.", documentTypeName));
@@ -1049,7 +1044,7 @@ namespace AlgotechUnityREST.Controllers
         //                if (forceLockDocument == true)
         //                {
         //                    // Zaključavanje dokumenta
-        //                    _logger.Info(string.Format("Zaključavanje dokumenta : {0}", documentID));
+        //                    _logger.Debug(string.Format("Zaključavanje dokumenta : {0}", documentID));
         //                    using (DocumentLock documentLock = document.LockDocument())
         //                    {
         //                        // Check if the lock status is Already Locked
@@ -1064,7 +1059,7 @@ namespace AlgotechUnityREST.Controllers
         //                        {
         //                            // If not locked, apply the changes to the database.
         //                            keywordModifier.ApplyChanges();
-        //                            _logger.Info(string.Format("Okinuli smo ApplyChanges sa zaključavanjem dokumenta DocumentID: {0}; OnBase SessionID: [{1}].", documentID, application.SessionID));
+        //                            _logger.Debug(string.Format("Okinuli smo ApplyChanges sa zaključavanjem dokumenta DocumentID: {0}; OnBase SessionID: [{1}].", documentID, application.SessionID));
         //                        }
         //                    }
         //                    //.
@@ -1072,7 +1067,7 @@ namespace AlgotechUnityREST.Controllers
         //                else
         //                {
         //                    keywordModifier.ApplyChanges();
-        //                    _logger.Info(string.Format("Okinuli smo ApplyChanges bez zaključavanja dokumentaza DocumentID: {0}; OnBase SessionID: [{1}].", documentID, application.SessionID));
+        //                    _logger.Debug(string.Format("Okinuli smo ApplyChanges bez zaključavanja dokumentaza DocumentID: {0}; OnBase SessionID: [{1}].", documentID, application.SessionID));
         //                }
 
         //                result = new Result
@@ -1086,7 +1081,7 @@ namespace AlgotechUnityREST.Controllers
         //#endif
 
         //                // Logger
-        //                _logger.Info(result.Message);
+        //                _logger.Debug(result.Message);
         //                //.
         //            }
         //            catch (Exception ex)
@@ -1110,7 +1105,7 @@ namespace AlgotechUnityREST.Controllers
         //            {
         //                var dateTimeEnd = DateTime.Now;
         //                var diffInSeconds = (dateTimeEnd - dateTimeStart).TotalSeconds;
-        //                _logger.Info("DocumentKeywordSetValue finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
+        //                _logger.Debug("DocumentKeywordSetValue finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
 
         //           }
         //            return response;
@@ -1133,7 +1128,7 @@ namespace AlgotechUnityREST.Controllers
 
             try
             {
-                _logger.Info("Metoda:: DocumentKeywordSetValue (preko Document document)");
+                _logger.Debug("Metoda:: DocumentKeywordSetValue"); // (preko Document document)");
                 _logger.Debug(string.Format("DataSource: {0}", documentKeyword.DataSource));
                 _logger.Debug(string.Format("UserName: {0}", documentKeyword.UserName));
 
@@ -1146,7 +1141,7 @@ namespace AlgotechUnityREST.Controllers
                 var keywordValue = documentKeyword.KeywordValue;
 
                 dateTimeStart = DateTime.Now;
-                _logger.Info("SetDocumentKeyword start " + dateTimeStart);
+                _logger.Debug("SetDocumentKeyword start " + dateTimeStart);
 
                 //// Validacija Tipa dokumenta
                 //var documentTypeValidate = application.Core.DocumentTypes.Find(documentTypeName) ?? throw new Exception(string.Format("Tip dokumenta '{0}' nije pronađen.", documentTypeName));
@@ -1196,7 +1191,7 @@ namespace AlgotechUnityREST.Controllers
                 if (forceLockDocument == true)
                 {
                     // Zaključavanje dokumenta
-                    _logger.Info(string.Format("Zaključavanje dokumenta: {0}", document.ID));
+                    _logger.Debug(string.Format("Zaključavanje dokumenta: {0}", document.ID));
                     using (DocumentLock documentLock = document.LockDocument())
                     {
                         // Check if the lock status is Already Locked
@@ -1211,7 +1206,7 @@ namespace AlgotechUnityREST.Controllers
                         {
                             // If not locked, apply the changes to the database.
                             keywordModifier.ApplyChanges();
-                            _logger.Info(string.Format("Okinuli smo ApplyChanges sa zaključavanjem dokumenta DocumentID: {0}; OnBase SessionID: [{1}].", document.ID, application.SessionID));
+                            _logger.Debug(string.Format("Okinuli smo ApplyChanges sa zaključavanjem dokumenta DocumentID: {0}; OnBase SessionID: [{1}].", document.ID, application.SessionID));
                         }
                     }
                     //.
@@ -1219,7 +1214,7 @@ namespace AlgotechUnityREST.Controllers
                 else
                 {
                     keywordModifier.ApplyChanges();
-                    _logger.Info(string.Format("Okinuli smo ApplyChanges bez zaključavanja dokumenta za DocumentID: {0}; OnBase SessionID: [{1}].", document.ID, application.SessionID));
+                    _logger.Debug(string.Format("Okinuli smo ApplyChanges bez zaključavanja dokumenta za DocumentID: {0}; OnBase SessionID: [{1}].", document.ID, application.SessionID));
                 }
 
                 retValue = true;
@@ -1239,7 +1234,8 @@ namespace AlgotechUnityREST.Controllers
             {
                 var dateTimeEnd = DateTime.Now;
                 var diffInSeconds = (dateTimeEnd - dateTimeStart).TotalSeconds;
-                _logger.Info("DocumentKeywordSetValue (preko Document document) finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
+                //_logger.Debug("DocumentKeywordSetValue (preko Document document) finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
+                _logger.Debug("DocumentKeywordSetValue finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
 
             }
             return retValue;

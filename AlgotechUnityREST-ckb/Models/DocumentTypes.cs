@@ -2,7 +2,7 @@
 // 23.05.2023
 // Tipovi dokumenata
 
-namespace AlgotechUnityREST.Models
+namespace AlgotechUnityREST_ckb.Models
 {
     /// <summary>
     /// OnBase tipovi dokumenata

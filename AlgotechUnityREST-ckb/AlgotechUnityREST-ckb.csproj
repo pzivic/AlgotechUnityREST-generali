@@ -215,6 +215,7 @@
     <Compile Include="Controllers\DocumentsKeywordsController.cs" />
     <Compile Include="Controllers\SequencerController.cs" />
     <Compile Include="Controllers\TestController.cs" />
+    <Compile Include="Controllers\TestDocumentsController.cs" />
     <Compile Include="Controllers\UploadController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -226,6 +227,7 @@
     <Compile Include="Models\Keywords.cs" />
     <Compile Include="Models\Result.cs" />
     <Compile Include="Models\SecurityInfo.cs" />
+    <Compile Include="Models\TestDocuments.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

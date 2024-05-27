@@ -37,12 +37,12 @@ namespace Algotech.UTL.AlgotechUnityUDF
             if (documentTypeName == string.Empty) { throw new ArgumentException("Parametar documentTypeName mora da bude prosleđen"); }
             if (docBarcode == string.Empty) { throw new ArgumentException("Parametar docBarcode mora da bude prosleđen"); }
 
-            _logger.Info("Početak DocBarcode2DocumentID: " + dateTimeStart);
+            _logger.Debug("Početak DocBarcode2DocumentID: " + dateTimeStart);
 
             DocumentQuery docQuery = application.Core.CreateDocumentQuery();
 
             // 
-            _logger.Info("Provera RequsetID mora da bude jedinstven u okviru DocumentType");
+            _logger.Debug("Provera RequsetID mora da bude jedinstven u okviru DocumentType");
             DocumentType documentType = application.Core.DocumentTypes.Find(documentTypeName);
             if (documentType == null)
             {
@@ -70,11 +70,11 @@ namespace Algotech.UTL.AlgotechUnityUDF
                 documentID = Convert.ToInt64(item.ID);
             }
 
-            _logger.Info(string.Format("Za DocBarcode #{0} DocumentID je #{1}!", docBarcode, documentID));
+            _logger.Debug(string.Format("Za DocBarcode #{0} DocumentID je #{1}!", docBarcode, documentID));
             // Metrika end
             var dateTimeEnd = DateTime.Now;
             var diffInSeconds = (dateTimeEnd - dateTimeStart).TotalSeconds;
-            _logger.Info("Funkcija:: DocBarcode2DocumentID finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
+            _logger.Debug("Funkcija:: DocBarcode2DocumentID finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
 
             return documentID;
         }
@@ -95,7 +95,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
 
             if (docBarcode == string.Empty) { throw new ArgumentException("Parametar docBarcode mora da bude prosleđen"); }
 
-            _logger.Info("Početak DocBarcode2DocumentID: " + dateTimeStart);
+            _logger.Debug("Početak DocBarcode2DocumentID: " + dateTimeStart);
 
             DocumentQuery docQuery = application.Core.CreateDocumentQuery();
 
@@ -119,12 +119,12 @@ namespace Algotech.UTL.AlgotechUnityUDF
                 documentID = Convert.ToInt64(item.ID);
             }
 
-            _logger.Info(string.Format("Za DocBarcode #{0} DocumentID je #{1}!", docBarcode, documentID));
+            _logger.Debug(string.Format("Za DocBarcode #{0} DocumentID je #{1}!", docBarcode, documentID));
 
             // Metrika end
             var dateTimeEnd = DateTime.Now;
             var diffInSeconds = (dateTimeEnd - dateTimeStart).TotalSeconds;
-            _logger.Info("Funkcija:: DocBarcode2DocumentID finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
+            _logger.Debug("Funkcija:: DocBarcode2DocumentID finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
 
             return documentID;
         }
@@ -172,7 +172,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
 
             if (docBarcode == string.Empty) { throw new ArgumentException("Parametar docBarcode mora da bude prosleđen"); }
 
-            _logger.Info("Početak DocumentIsExist: " + dateTimeStart);
+            _logger.Debug("Početak DocumentIsExist: " + dateTimeStart);
 
             DocumentQuery docQuery = application.Core.CreateDocumentQuery();
 
@@ -197,13 +197,13 @@ namespace Algotech.UTL.AlgotechUnityUDF
             //foreach (Document item in documents)
             //{
             //    documentID = Convert.ToInt64(item.ID);
-            //    _logger.Info("docBarcode postoji -> documentID: " + documentID);
+            //    _logger.Debug("docBarcode postoji -> documentID: " + documentID);
             //}
 
             // Metrika end
             var dateTimeEnd = DateTime.Now;
             var diffInSeconds = (dateTimeEnd - dateTimeStart).TotalSeconds;
-            _logger.Info("Funkcija:: DocumentIsExist finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
+            _logger.Debug("Funkcija:: DocumentIsExist finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
 
             return retValue;
         }
@@ -229,7 +229,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
                 if (queueName == string.Empty) { throw new ArgumentException("Parametar queueName mora da bude prosleđen!"); }
 
                 // Metrika
-                _logger.Info("Funkcija:: GetQueueID start " + dateTimeStart);
+                _logger.Debug("Funkcija:: GetQueueID start " + dateTimeStart);
 
                 // LifeCycles i pridajajući Queue
                 var lifeCycle = application.Workflow.LifeCycles.Find(lifeCycleName);
@@ -249,12 +249,12 @@ namespace Algotech.UTL.AlgotechUnityUDF
                 foreach (Hyland.Unity.Workflow.Queue queue in queues.Where(queue => queue.LifeCycle.ID == lifeCycle.ID && queue.Name == queueName))
                 {
                     Debug.Write(queue.ID + " - " + queue.Name + " [" + queue.LifeCycle.Name + "]");
-                    _logger.Info(queue.ID + " - " + queue.Name + " [" + queue.LifeCycle.Name + "]");
+                    _logger.Debug(queue.ID + " - " + queue.Name + " [" + queue.LifeCycle.Name + "]");
 
                     if (queue.Name == queueName)
                     {
                         queueID = queue.ID;
-                        _logger.Info("Našli smo queueID= " + queueID);
+                        _logger.Debug("Našli smo queueID= " + queueID);
                         break;
                     }
                 }
@@ -273,7 +273,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
                 // Metrika end
                 var dateTimeEnd = DateTime.Now;
                 var diffInSeconds = (dateTimeEnd - dateTimeStart).TotalSeconds;
-                _logger.Info("Funkcija:: GetQueueID finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
+                _logger.Debug("Funkcija:: GetQueueID finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
             }
 
             return queueID;
@@ -375,7 +375,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
             var ret = string.Empty;
             try
             {
-                _logger.Info("Metoda GetFullPath");
+                _logger.Debug("Metoda GetFullPath");
 
                 var sqlHelper = new SqlHelper("connection_string_onbase");
                 var sqlString = string.Empty;
@@ -393,7 +393,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
                     "WHERE (hsi.itemdata.itemnum={0}) AND (hsi.physicalplatter.diskgroupnum={1}) AND (hsi.physicalplatter.physicalplatternum=1) AND (hsi.itemdatapage.itempagenum=0) " +
                     "ORDER BY hsi.itemdatapage.docrevnum DESC", documentID, diskGroupID);
 
-                _logger.Info(string.Format("SQL string: {0}", sqlString));
+                _logger.Debug(string.Format("SQL string: {0}", sqlString));
 
                 ret = sqlHelper.ExecuteScalar(sqlString).ToString();
             }
@@ -412,7 +412,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
                 // Metrika end
                 var dateTimeEnd = DateTime.Now;
                 var diffInSeconds = (dateTimeEnd - dateTimeStart).TotalSeconds;
-                _logger.Info("Funkcija:: GetFullPath finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
+                _logger.Debug("Funkcija:: GetFullPath finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
             }
             return ret;
 
@@ -431,7 +431,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
         //    long ret = 0;
         //    try
         //    {
-        //        _logger.Info("Metoda GetDiskGroupID");
+        //        _logger.Debug("Metoda GetDiskGroupID");
 
         //        var sqlHelper = new SqlHelper("connection_string_onbase");
         //        var sqlString = string.Empty;
@@ -442,7 +442,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
         //            "INNER JOIN hsi.physicalplatter ON hsi.diskgroup.diskgroupnum = hsi.physicalplatter.diskgroupnum " +
         //            "WHERE hsi.physicalplatter.physicalplatternum = 1 AND hsi.diskgroup.diskgroupname='{0}'", diskGroupName);
 
-        //        _logger.Info(string.Format("SQL string: {0}", sqlString));
+        //        _logger.Debug(string.Format("SQL string: {0}", sqlString));
 
         //        ret = Convert.ToInt64(sqlHelper.ExecuteScalar(sqlString));
         //    }
@@ -461,7 +461,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
         //        // Metrika end
         //        var dateTimeEnd = DateTime.Now;
         //        var diffInSeconds = (dateTimeEnd - dateTimeStart).TotalSeconds;
-        //        _logger.Info("Funkcija:: GetDiskGroupID finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
+        //        _logger.Debug("Funkcija:: GetDiskGroupID finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
         //    }
         //    return ret;
         //}
@@ -480,7 +480,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
             var ret = false;
             try
             {
-                _logger.Info("Metoda IsValidGroupType");
+                _logger.Debug("Funkcija:: IsValidGroupType");
 
                 var sqlHelper = new SqlHelper("connection_string_mssql");
                 var sqlString = string.Empty;
@@ -507,7 +507,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
                 // Metrika end
                 var dateTimeEnd = DateTime.Now;
                 var diffInSeconds = (dateTimeEnd - dateTimeStart).TotalSeconds;
-                _logger.Info("Funkcija:: IsValidGroupType finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
+                _logger.Debug("Funkcija:: IsValidGroupType finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
             }
             return ret;
 
@@ -524,8 +524,8 @@ namespace Algotech.UTL.AlgotechUnityUDF
         {
             try
             {
-                _logger.Info("Funckija GetKeywordDataType");
-                _logger.Info(string.Format("keywordTypeName: {0}.", keywordTypeName));
+                _logger.Debug("Funckija GetKeywordDataType");
+                _logger.Debug(string.Format("keywordTypeName: {0}.", keywordTypeName));
 
                 KeywordDataType keywordTypeDataType = KeywordDataType.Undefined;
                 foreach (KeywordType keywordType in application.Core.KeywordTypes)
@@ -565,7 +565,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
 
             try
             {
-                _logger.Info("Metoda GetFullPath");
+                _logger.Debug("Metoda GetFullPath");
 
                 var sqlHelper = new SqlHelper("connection_string_onbase");
                 var sqlString = string.Empty;
@@ -582,7 +582,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
                     "(hsi.itemdatapage.docrevnum={2})" +
                     "ORDER BY hsi.itemdatapage.itempagenum", documentID, diskGroupID, lastRevisionNum);
 
-                _logger.Info(string.Format("SQL string: {0}", sqlString));
+                _logger.Debug(string.Format("SQL string: {0}", sqlString));
 
                 var reader = sqlHelper.ExecuteReader(sqlString);
 
@@ -615,7 +615,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
                 var dateTimeEnd = DateTime.Now;
                 var diffInSeconds = (dateTimeEnd - dateTimeStart).TotalSeconds;
 
-                _logger.Info("Funkcija:: GetFullPath finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
+                _logger.Debug("Funkcija:: GetFullPath finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
             }
 
         }
@@ -634,7 +634,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
             short ret = 0;
             try
             {
-                _logger.Info("Metoda GetLastRevisionNum");
+                _logger.Debug("Metoda GetLastRevisionNum");
 
                 var sqlHelper = new SqlHelper("connection_string_onbase");
                 var sqlString = string.Empty;
@@ -644,7 +644,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
                     "INNER JOIN hsi.physicalplatter ON hsi.itemdatapage.logicalplatternum = hsi.physicalplatter.logicalplatternum " +
                     "WHERE (hsi.itemdata.itemnum = {0}) AND (hsi.physicalplatter.diskgroupnum = {1}) AND (hsi.physicalplatter.physicalplatternum = 1)", documentID, diskGroupID);
 
-                _logger.Info(string.Format("SQL string: {0}", sqlString));
+                _logger.Debug(string.Format("SQL string: {0}", sqlString));
 
                 ret = Convert.ToInt16(sqlHelper.ExecuteScalar(sqlString));
             }
@@ -663,7 +663,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
                 // Metrika end
                 var dateTimeEnd = DateTime.Now;
                 var diffInSeconds = (dateTimeEnd - dateTimeStart).TotalSeconds;
-                _logger.Info("Funkcija:: GetFullPath finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
+                _logger.Debug("Funkcija:: GetFullPath finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
             }
             return ret;
 
@@ -682,15 +682,15 @@ namespace Algotech.UTL.AlgotechUnityUDF
 
             try
             {
-                _logger.Info("Metoda GetSequenceValue");
-                _logger.Info("Konektujem Sql");
+                _logger.Debug("Metoda GetSequenceValue");
+                _logger.Debug("Konektujem Sql");
 
                 var sqlHelper = new SqlHelper("connection_string_mssql");
 
                 // Napravi sql string
                 var sqlString = string.Format(@"SELECT NEXT VALUE FOR RefNo_{0} AS seq", prefix);
 
-                _logger.Info(string.Format("SQL string: {0}", sqlString));
+                _logger.Debug(string.Format("SQL string: {0}", sqlString));
 
                 // Pukni upit
                 var reader = sqlHelper.ExecuteReader(sqlString);
@@ -722,7 +722,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
                 var dateTimeEnd = DateTime.Now;
                 var diffInSeconds = (dateTimeEnd - dateTimeStart).TotalSeconds;
 
-                _logger.Info("Funkcija:: GetFullPath finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
+                _logger.Debug("Funkcija:: GetFullPath finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
             }
 
         }
@@ -735,8 +735,8 @@ namespace Algotech.UTL.AlgotechUnityUDF
 
             try
             {
-                _logger.Info("Funkcija:: RemoveKeywordRecord");
-                //_logger.Info("Pokušaj ažuriranja zapisa ključnih reči...");
+                _logger.Debug("Funkcija:: RemoveKeywordRecord");
+                //_logger.Debug("Pokušaj ažuriranja zapisa ključnih reči...");
 
                 // Keyword tip
                 KeywordType keywordType = app.Core.KeywordTypes.Find(keywordTypeName);
@@ -785,7 +785,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
                 keywordModifier.ApplyChanges();
                 //.
 
-                _logger.Info("Ključna reč je uklonjena.");
+                _logger.Debug("Ključna reč je uklonjena.");
                 return true;
             }
 
@@ -805,7 +805,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
                 var dateTimeEnd = DateTime.Now;
                 var diffInSeconds = (dateTimeEnd - dateTimeStart).TotalSeconds;
 
-                _logger.Info("Funkcija:: RemoveKeywordRecord finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
+                _logger.Debug("Funkcija:: RemoveKeywordRecord finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
             }
         }
         #endregion

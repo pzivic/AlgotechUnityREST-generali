@@ -1,7 +1,7 @@
 ﻿// Predrag Živić
 // 08.11.2022
 
-namespace AlgotechUnityREST.Models
+namespace AlgotechUnityREST_ckb.Models
 {
     /// <summary>
     /// Dokumenta i ključne reči u opštem SMISLU
