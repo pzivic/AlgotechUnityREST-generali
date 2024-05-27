@@ -38,8 +38,13 @@ namespace AlgotechUnityREST_ckb.Models
         /// Datum i vreme dokumenta.
         /// </summary>
         [Required]
-        public DateTime DocumentDate { get; set; } 
+        public DateTime DocumentDate { get; set; }
 
+        ///// <summary>
+        ///// ETag 
+        ///// </summary>
+        //[ConcurrencyCheck]
+        //public Guid ETag { get; set; }
         #endregion
     }
 }

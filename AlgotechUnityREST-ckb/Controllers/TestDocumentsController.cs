@@ -12,6 +12,7 @@ using System.Net.Http.Headers;
 using System.Collections.Specialized;
 
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace AlgotechUnityREST_ckb.Controllers
 {
@@ -61,7 +62,12 @@ namespace AlgotechUnityREST_ckb.Controllers
                     if (documentTest.DocumentName == string.Empty) { throw new ArgumentException("Niste definisali naziv dokumenta!"); }
 
                     // Ide neka logika
-                    status = "1001";
+                    Console.WriteLine($"Chef {Thread.CurrentThread.ManagedThreadId} is document order {documentTest.DocumentName}");
+                    object lockObject = new object();
+                    lock (lockObject)
+                    {
+                        status = Guid.NewGuid().ToString();
+                    }
                     //.
 
                     // OK
