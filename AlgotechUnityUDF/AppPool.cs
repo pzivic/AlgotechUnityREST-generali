@@ -115,5 +115,20 @@ namespace Algotech.UTL.AlgotechUnityUDF
             return list;
         }
         #endregion
+
+        //#region SetAppPools
+        ///// <summary>
+        ///// /// Lista vrednosi za app.pools preko baze podataka
+        ///// </summary>
+        ///// <param name="appPoolID"> Identifikator app.poola</param>
+        ///// <returns></returns>
+        //public bool SetAppPools(int appPoolID)
+        //{
+        //    var sqlHelper = new SqlHelper("connection_string_mssql");
+        //    var sqlSQL = string.Format("UPDATE AppPool SET ConnectionDate={0} WHERE AppPoolID={1};", DateTime.Now, appPoolID);
+        //    sqlHelper.ExecuteScalar(sqlSQL);
+        //    return true;
+        //}
+        //#endregion
     }
 }

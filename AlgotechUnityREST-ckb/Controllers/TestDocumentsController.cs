@@ -24,7 +24,7 @@ namespace AlgotechUnityREST_ckb.Controllers
         #region Variable  
         // Logger
         private static readonly log4net.ILog _logger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-        private static HttpResponseMessage response;
+        //private static HttpResponseMessage response;
         #endregion
 
         #region Result
@@ -32,6 +32,12 @@ namespace AlgotechUnityREST_ckb.Controllers
         {
             public string Status { get; set; }
             public string Message { get; set; }
+
+            public Result()
+            {
+                Status = string.Empty;
+                Message = string.Empty;
+            }
         }
         #endregion
 
@@ -44,12 +50,22 @@ namespace AlgotechUnityREST_ckb.Controllers
         [HttpPost, ActionName("Post")]
         public async Task<HttpResponseMessage> Post(TestDocuments documentTest)
         {
+            HttpResponseMessage response;
             Result result;
 
             var sessionID = Guid.NewGuid().ToString();
             var dateTimeStart = DateTime.Now;
             var message = string.Empty;
             var status = string.Empty;
+
+            ////
+            //result = new Result
+            //{
+            //    Status = string.Empty,
+            //    Message = string.Empty
+            //};
+            //response = Request.CreateResponse(HttpStatusCode.Forbidden);
+            ////.
 
             try
             {
@@ -93,7 +109,6 @@ namespace AlgotechUnityREST_ckb.Controllers
                     };
                     response.Headers.AddCookies(new CookieHeaderValue[] { cookie });
                     //.
-
                 });
             }
             catch (Exception ex)
@@ -109,15 +124,15 @@ namespace AlgotechUnityREST_ckb.Controllers
                     Status = string.Empty,
                     Message = ex.Message
                 };
-
                 response = Request.CreateResponse(HttpStatusCode.Forbidden);
             }
             finally
             {
+                response = null;
+
                 var dateTimeEnd = DateTime.Now;
                 var diffInSeconds = (dateTimeEnd - dateTimeStart).TotalSeconds;
                 _logger.Debug(string.Format("Metoda:: Test Asinhrona metoda: session [{0}] finally {1} in sec {2}.", sessionID, dateTimeEnd, diffInSeconds));
-
             }
             return response;
         }

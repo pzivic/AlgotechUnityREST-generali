@@ -11,18 +11,20 @@ namespace AlgotechUnityREST_ckb.Models
         /// <summary>
         /// Povratna vrednost
         /// </summary>
-        public string Status
-        {
-            get;
-            set;
-        }
+        public string Status { get; set; }
+
         /// <summary>
         /// Poruka
         /// </summary>
-        public string Message
+        public string Message { get; set;}
+
+        /// <summary>
+        /// Konstruktor
+        /// </summary>
+        public Result()
         {
-            get;
-            set;
+            Status = string.Empty;
+            Message = string.Empty;
         }
     }
 }

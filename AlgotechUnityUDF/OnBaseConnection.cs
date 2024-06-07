@@ -148,7 +148,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
                     // Vidi web.config
                     var timeOut = Convert.ToInt32(System.Configuration.ConfigurationManager.AppSettings["APPLICATION_TIMEOUT"]);
 
-                    _logger.Debug(string.Format("Pokušaj uspostavljanja veze sa identitetom: [{0}] i licencom: [{1}].", userName, authProps.LicenseType));
+                    _logger.Info(string.Format("Pokušaj uspostavljanja veze sa identitetom: [{0}] i licencom: [{1}].", userName, authProps.LicenseType));
                     try
                     {
                         app = Application.Connect(authProps);
@@ -193,7 +193,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
 
                     if (app != null)
                     {
-                        _logger.Debug(string.Format("Konekcija je uspešno uspostavljena identitetom [{0}]. Licenca [{1}]. SessionID: [{2}] TimeOut: [{3}].", 
+                        _logger.Info(string.Format("Konekcija je uspešno uspostavljena identitetom [{0}]. Licenca [{1}]. SessionID: [{2}] TimeOut: [{3}].", 
                              authProps.Username, authProps.LicenseType, app.SessionID, app.Timeout));
                         break;
                     }
@@ -201,7 +201,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
             }
             #endregion
 
-            _logger.Debug("Pomoćna funkcija:: OnBaseConnectByAppPool end " + DateTime.Now + " sec " + (DateTime.Now - dateTimeStart).TotalSeconds.ToString());
+            _logger.Info("Pomoćna funkcija:: OnBaseConnectByAppPool end " + DateTime.Now + " sec " + (DateTime.Now - dateTimeStart).TotalSeconds.ToString());
 
             return app;
         }

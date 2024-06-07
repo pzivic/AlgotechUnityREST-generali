@@ -35,7 +35,7 @@ namespace AlgotechUnityREST_ckb.Controllers
         #region Variable  
         // Logger
         private static readonly log4net.ILog _logger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-        private static HttpResponseMessage response;
+        //private static HttpResponseMessage response; (new 07.06.2024)
 
         private static readonly object _documentLock = new object();
         #endregion
@@ -50,6 +50,15 @@ namespace AlgotechUnityREST_ckb.Controllers
             public string DocBarcode { get; set; }
             public string GroupBarcode { get; set; }
             public string Message { get; set; }
+
+            // Konstruktor (new 07.06.2024)
+            public DocumentsImportResult()
+            {
+                RequestID = 0;
+                DocBarcode = string.Empty;
+                GroupBarcode = string.Empty;
+                Message = string.Empty;
+            }
         }
 
         /// <summary>
@@ -61,6 +70,7 @@ namespace AlgotechUnityREST_ckb.Controllers
         [HttpPost, ActionName("DocumentImport")]
         public async Task<HttpResponseMessage> DocumentImport(Documents documentImport, bool checkingValues = true)
         {
+            HttpResponseMessage responseMessage;
             Application application = null;
             DocumentsImportResult result;
 
@@ -71,13 +81,18 @@ namespace AlgotechUnityREST_ckb.Controllers
             var sessionID = Guid.NewGuid().ToString();
             long requestID = 0;
 
+            // Inicijalizacija promenljive za rezultat (new 07.06.2024))
+            result = new DocumentsImportResult(); // konstruktor radi svoje
+            responseMessage = Request.CreateResponse(httpStatusCode, result);
+            //.
+
             try
             {
                 // Asinhrono
                 await Task.Run(() =>
                 {
-                    lock (_documentLock)
-                    {
+                    //lock (_documentLock)
+                    //{
                         _logger.Info("Metoda:: DocumentImport Asinhrono");
                         _logger.Info(string.Format("DocumentImport Sesija: [{0}].", sessionID));
 
@@ -365,8 +380,7 @@ namespace AlgotechUnityREST_ckb.Controllers
                                 }
                             }
 
-
-                            response = Request.CreateResponse(HttpStatusCode.OK, result);
+                            responseMessage = Request.CreateResponse(HttpStatusCode.OK, result);
 
                             //Kolačić
                             //https://www.c-sharpcorner.com/UploadFile/2b481f/how-to-set-cookies-in-Asp-Net-web-api/
@@ -382,7 +396,7 @@ namespace AlgotechUnityREST_ckb.Controllers
                                 Domain = Request.RequestUri.Host,
                                 Path = "/"
                             };
-                            response.Headers.AddCookies(new CookieHeaderValue[] { cookie });
+                            responseMessage.Headers.AddCookies(new CookieHeaderValue[] { cookie });
                             //.
 
                             // Logger
@@ -390,7 +404,7 @@ namespace AlgotechUnityREST_ckb.Controllers
                                 result.Message, documentImport.UserName, documentImport.OrganizationalUnit, sessionID, application.SessionID, requestID));
                             //.
                         }
-                    }
+                  //  }
                 });
 
             }
@@ -408,8 +422,7 @@ namespace AlgotechUnityREST_ckb.Controllers
                     DocBarcode = string.Empty,
                     Message = ex.Message
                 };
-
-                response = Request.CreateResponse(httpStatusCode, result);
+                responseMessage = Request.CreateResponse(httpStatusCode, result);
             }
             finally
             {
@@ -424,7 +437,7 @@ namespace AlgotechUnityREST_ckb.Controllers
                     obj.OnBaseDisconnect(application);
                 }
             }
-            return response;
+            return responseMessage;
         }
         #endregion
 
@@ -436,11 +449,10 @@ namespace AlgotechUnityREST_ckb.Controllers
         [HttpDelete, ActionName("DocumentDelete")]
         public HttpResponseMessage DocumentDelete(long documentID)
         {
+            HttpResponseMessage responseMessage;
             Application application = null;
             Result objResult;
             string result;
-
-            HttpResponseMessage response;
 
             try
             {
@@ -483,7 +495,7 @@ namespace AlgotechUnityREST_ckb.Controllers
                     Status = result,
                     Message = "Dokument je uspešno obrisan."
                 };
-                response = Request.CreateResponse(HttpStatusCode.OK, objResult);
+                responseMessage = Request.CreateResponse(HttpStatusCode.OK, objResult);
 
             }
             catch (Exception ex)
@@ -493,7 +505,7 @@ namespace AlgotechUnityREST_ckb.Controllers
                     Status = string.Empty,
                     Message = ex.Message
                 };
-                response = Request.CreateResponse(HttpStatusCode.BadRequest, objResult);
+                responseMessage = Request.CreateResponse(HttpStatusCode.BadRequest, objResult);
             }
             finally
             {
@@ -504,7 +516,7 @@ namespace AlgotechUnityREST_ckb.Controllers
                     obj.OnBaseDisconnect(application);
                 }
             }
-            return response;
+            return responseMessage;
         }
         #endregion
 
@@ -551,10 +563,16 @@ namespace AlgotechUnityREST_ckb.Controllers
         [HttpGet, ActionName("DocumentProperties")]
         public HttpResponseMessage DocumentProperties(long documentID = 0, string docBarcode = "")
         {
+            HttpResponseMessage responseMessage;
             Application application = null;
 
             // Defalt error code
             var httpStatusCode = HttpStatusCode.Forbidden;
+
+            // Inicijalizacija promenljive za rezultat (new 07.06.2024))
+            var result = new Result();
+            responseMessage = Request.CreateResponse(httpStatusCode, result);
+            //.
 
             try
             {
@@ -797,14 +815,14 @@ namespace AlgotechUnityREST_ckb.Controllers
 
                     if (json != string.Empty)
                     {
-                        var result = new Result
+                        result = new Result
                         {
                             Status = json,
                             Message = "Podacu su uspešno preuzeti."
                         };
 
-                        response = Request.CreateResponse(HttpStatusCode.OK, result);
-                        response.Content = new StringContent(json, Encoding.UTF8, "application/json");
+                        responseMessage = Request.CreateResponse(HttpStatusCode.OK, result);
+                        responseMessage.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
                         _logger.Debug(result.Message);
                     }
@@ -818,12 +836,12 @@ namespace AlgotechUnityREST_ckb.Controllers
                 _logger.Error(ex.StackTrace);
                 //.
 
-                var result = new Result
+                result = new Result
                 {
                     Status = string.Empty,
                     Message = ex.Message
                 };
-                response = Request.CreateResponse(httpStatusCode, result);
+                responseMessage = Request.CreateResponse(httpStatusCode, result);
             }
             finally
             {
@@ -835,7 +853,7 @@ namespace AlgotechUnityREST_ckb.Controllers
                 }
             }
 
-            return response;
+            return responseMessage;
         }
         #endregion
 
@@ -851,13 +869,18 @@ namespace AlgotechUnityREST_ckb.Controllers
         //[Route("Api/Documents/DocumentExport/{documentID:long}")]
         public HttpResponseMessage DocumentExport(long documentID)
         {
+            HttpResponseMessage responseMessage;
             Application application = null;
-            Result result;
+
             var dateTimeStart = DateTime.Now;
 
             // Defalt error code
             var httpStatusCode = HttpStatusCode.Forbidden;
 
+            // Inicijalizacija promenljive za rezultat (new 07.06.2024))
+            var result = new Result();
+            responseMessage = Request.CreateResponse(httpStatusCode, result);
+            //.
             try
             {
                 _logger.Debug("Metoda:: DocumentExport");
@@ -925,7 +948,7 @@ namespace AlgotechUnityREST_ckb.Controllers
                         Status = status,
                         Message = message
                     };
-                    response = Request.CreateResponse(HttpStatusCode.OK, result);
+                    responseMessage = Request.CreateResponse(HttpStatusCode.OK, result);
 
                     // Logger
                     _logger.Debug(result.Message);
@@ -946,8 +969,7 @@ namespace AlgotechUnityREST_ckb.Controllers
                     Status = string.Empty,
                     Message = ex.Message
                 };
-
-                response = Request.CreateResponse(httpStatusCode, result);
+                responseMessage = Request.CreateResponse(httpStatusCode, result);
             }
             finally
             {
@@ -961,7 +983,7 @@ namespace AlgotechUnityREST_ckb.Controllers
                     obj.OnBaseDisconnect(application);
                 }
             }
-            return response;
+            return responseMessage;
         }
         #endregion
 
@@ -1247,6 +1269,7 @@ namespace AlgotechUnityREST_ckb.Controllers
             return retValue;
         }
         #endregion
+
     }
 }
 

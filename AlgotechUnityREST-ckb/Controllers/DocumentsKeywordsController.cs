@@ -1,12 +1,13 @@
-﻿using AlgotechUnityREST_ckb.Models;
-using Hyland.Unity;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
-using System.Web.Http.Results;
+
+using Hyland.Unity;
+using Newtonsoft.Json;
+
+using AlgotechUnityREST_ckb.Models;
 
 namespace AlgotechUnityREST_ckb.Controllers
 {
@@ -15,6 +16,13 @@ namespace AlgotechUnityREST_ckb.Controllers
     /// </summary>
     public class DocumentsKeywordsController : ApiController
     {
+
+        #region Variable  
+        // Logger
+        private static readonly log4net.ILog _logger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly object _documentLock = new object();
+        HttpResponseMessage response;
+        #endregion
 
         #region DocumentResult
         /// <summary>
@@ -53,13 +61,6 @@ namespace AlgotechUnityREST_ckb.Controllers
         }
         #endregion
 
-        #region Variable  
-        // Logger
-        private static readonly log4net.ILog _logger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-
-        HttpResponseMessage response;
-        #endregion
-
         #region DocumentKeywords
         /// <summary>
         /// Vraća ključne reči određenog dokumenta
@@ -96,7 +97,6 @@ namespace AlgotechUnityREST_ckb.Controllers
 
                 using (DocumentLock documentLock = document.LockDocument())
                 {
-                    
                     var forceLockDocument = System.Configuration.ConfigurationManager.AppSettings["ForceLockDocument"] == "True";
                     if (forceLockDocument == true)
                     {
@@ -189,45 +189,55 @@ namespace AlgotechUnityREST_ckb.Controllers
 
             try
             {
-                // Konektuj OnBase
-                _logger.Info("OnBase Connect()");
-                var obj = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
-                application = obj.OnBaseConnect();
-                if (application == null)
+                //_logger.Info("Ide zaključavaje");
+                lock (_documentLock)
                 {
-                    _logger.Warn("Greška kod uspostavljanja konekcije sa OnBase");
-                    throw new ArgumentException("Greška kod uspostavljanja konekcije sa OnBase. Kontaktirajte OnBase administratora.");
-                }
-                //.
-
-                _logger.Info("Pokušaj preuzimanja svojstava dokumenta...");
-                Document document = application.Core.GetDocumentByID(documentID);
-                if (document == null)
-                {
-                    _logger.Error(string.Format("Dokument za DocumentID={0} nije pronađen!", documentID));
-                    throw new Exception("Dokument nije pronađen!");
-                }
-
-                var objUDF = new Algotech.UTL.AlgotechUnityUDF.UnityUDF();
-                if (objUDF.RemoveKeywordRecord(application, document, keywordTypeName) == true)
-                {
-                    objResult = new Result
                     {
-                        Status = "True",
-                        Message = "Ključna reč je uspešno obrisana."
-                    };
-                    response = Request.CreateResponse(HttpStatusCode.OK, objResult);
-                }
-                else
-                {
-                    objResult = new Result
-                    {
-                        Status = "False",
-                        Message = "Ključna reč nije uspešno obrisana. Vrednost ključne reči nije postojala."
-                    };
-                    // Ako pokuša da obriše vrednost ključne reči koje nema dolai do greške
-                    //response = Request.CreateResponse(HttpStatusCode.BadRequest, objResult);
-                    response = Request.CreateResponse(HttpStatusCode.Continue, objResult);
+                        // Konektuj OnBase
+                        _logger.Info("OnBase Connect()");
+                        var obj = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
+                        application = obj.OnBaseConnect();
+                        if (application == null)
+                        {
+                            _logger.Warn("Greška kod uspostavljanja konekcije sa OnBase");
+                            throw new ArgumentException("Greška kod uspostavljanja konekcije sa OnBase. Kontaktirajte OnBase administratora.");
+                        }
+                        //.
+
+                        _logger.Info("Pokušaj preuzimanja svojstava dokumenta...");
+                        Document document = application.Core.GetDocumentByID(documentID);
+                        if (document == null)
+                        {
+                            _logger.Error(string.Format("Dokument za DocumentID={0} nije pronađen!", documentID));
+                            throw new Exception("Dokument nije pronađen!");
+                        }
+
+                        var objUDF = new Algotech.UTL.AlgotechUnityUDF.UnityUDF();
+                        if (objUDF.RemoveKeywordRecord(application, document, keywordTypeName) == true)
+                        {
+                            objResult = new Result
+                            {
+                                Status = "True",
+                                Message = "Ključna reč je uspešno obrisana."
+                            };
+                            response = Request.CreateResponse(HttpStatusCode.OK, objResult);
+                        }
+                        else
+                        {
+                            objResult = new Result
+                            {
+                                Status = "False",
+                                Message = "Ključna reč nije uspešno obrisana. Vrednost ključne reči nije postojala."
+                            };
+                            // Ako pokuša da obriše vrednost ključne reči koje nema nema ni greške
+                            // response = Request.CreateResponse(HttpStatusCode.BadRequest, objResult);
+                            // Equivalent to HTTP status 100.
+                            // Continue indicates that the client can continue with its request.Equivalent to HTTP status 201.
+                            // Created indicates that the request resulted in a new resource created before the response was sent.
+                            response = Request.CreateResponse(HttpStatusCode.Continue, objResult);
+                        }
+                    }
+                    _logger.Info("Završeno zaključavaje");
                 }
             }
             catch (Exception ex)
