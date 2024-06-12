@@ -35,6 +35,7 @@ namespace AlgotechUnityREST_ckb.Controllers
         {
             public string ClientID { get; set; }
             public string ClientName { get; set; }
+            public string CorporateSegment { get; set; }
         }
 
         /// <summary>
@@ -61,7 +62,7 @@ namespace AlgotechUnityREST_ckb.Controllers
                 // Izvrši proceduru
                 var oracleParameter = new OracleParameter[3];
 
-                oracleParameter[0] = new OracleParameter("naziv", OracleDbType.RefCursor, ParameterDirection.ReturnValue);
+                oracleParameter[0] = new OracleParameter("Result", OracleDbType.RefCursor, ParameterDirection.ReturnValue);
                 oracleParameter[1] = new OracleParameter("cClient_Identifier", clientIdentifier);
                 oracleParameter[2] = new OracleParameter("nClient_Type", clientType);
 
@@ -74,7 +75,8 @@ namespace AlgotechUnityREST_ckb.Controllers
                 {
                     _logger.Info("Pokušaj čitanja readera");
                     obj.ClientID = string.Format("{0}-{1}", clientIdentifier, clientType);
-                    obj.ClientName = Convert.ToString(reader["naziv"]).Trim();
+                    obj.ClientName = Convert.ToString(reader["NAZIV"]).Trim();
+                    obj.CorporateSegment = Convert.ToString(reader["SEGMENTATION_INTERNAL"]).Trim();
                 }
                 reader.Close();
                 reader.Dispose();
@@ -94,7 +96,6 @@ namespace AlgotechUnityREST_ckb.Controllers
                     _logger.Info("Resposne OK " + result);
                     response = Request.CreateResponse(HttpStatusCode.OK, result);
                     response.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
-
                 }
 
             }
@@ -118,6 +119,5 @@ namespace AlgotechUnityREST_ckb.Controllers
 
         }
         #endregion
-
     }
 }
