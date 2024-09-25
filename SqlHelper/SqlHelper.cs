@@ -49,6 +49,7 @@ namespace DataSystem.DAL.SqlHelper
             else
             {
                 _connectionString = confingString == "" ? ConfigurationManager.ConnectionStrings["connection_string"].ConnectionString : ConfigurationManager.ConnectionStrings[confingString].ConnectionString;
+                _logger.Debug(string.Format("ConnectionString: {0}.", _connectionString));
             }
             _owner = ConfigurationManager.AppSettings["dbOwner"];
         }

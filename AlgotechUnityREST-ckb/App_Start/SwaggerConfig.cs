@@ -29,7 +29,7 @@ namespace AlgotechUnityREST_ckb
                 .EnableSwagger(c =>
                 {
                     c.SingleApiVersion("v1", "AlgotechUnityREST_ckb");
-                    c.IncludeXmlComments(string.Format(@"{0}\bin\AlgotechUnityREST_ckb.xml", AppDomain.CurrentDomain.BaseDirectory));
+                    c.IncludeXmlComments(string.Format(@"{0}\bin\AlgotechUnityREST-ckb.xml", AppDomain.CurrentDomain.BaseDirectory));
                     c.ResolveConflictingActions(apiDescriptions => apiDescriptions.First());
                 })
                 .EnableSwaggerUi(c =>
