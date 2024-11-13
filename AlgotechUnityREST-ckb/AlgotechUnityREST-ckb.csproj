@@ -219,6 +219,7 @@
     <Compile Include="Controllers\TestController.cs" />
     <Compile Include="Controllers\TestDocumentsController.cs" />
     <Compile Include="Controllers\UploadController.cs" />
+    <Compile Include="UTL\DataReaderExtensions.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

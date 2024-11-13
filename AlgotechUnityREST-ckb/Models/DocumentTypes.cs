@@ -21,14 +21,6 @@ namespace AlgotechUnityREST_ckb.Models
 
         #region Svojstva
         /// <summary>
-        /// Identifikator tipa dokumenta
-        /// </summary>
-        //public long DocumentTypeID { get; set; }
-        ///// <summary>
-        ///// Grupa
-        ///// </summary>
-        //public string DocumentTypeGroupName { get; set; }
-        /// <summary>
         /// Naziv dokument tipa
         /// </summary>
         public string DocumentTypeName { get; set; }

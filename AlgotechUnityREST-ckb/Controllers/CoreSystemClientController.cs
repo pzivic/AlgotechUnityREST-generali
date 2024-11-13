@@ -36,6 +36,7 @@ namespace AlgotechUnityREST_ckb.Controllers
             public string ClientID { get; set; }
             public string ClientName { get; set; }
             public string CorporateSegment { get; set; }
+            public string CorporateRating { get; set; }
         }
 
         /// <summary>
@@ -77,6 +78,7 @@ namespace AlgotechUnityREST_ckb.Controllers
                     obj.ClientID = string.Format("{0}-{1}", clientIdentifier, clientType);
                     obj.ClientName = Convert.ToString(reader["NAZIV"]).Trim();
                     obj.CorporateSegment = Convert.ToString(reader["SEGMENTATION_INTERNAL"]).Trim();
+                    obj.CorporateRating = reader.HasColumn("REJTING") ? Convert.ToString(reader["REJTING"]).Trim() : null;
                 }
                 reader.Close();
                 reader.Dispose();

@@ -35,9 +35,6 @@ namespace AlgotechUnityREST_ckb.Controllers
         #region Variable  
         // Logger
         private static readonly log4net.ILog _logger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-        //private static HttpResponseMessage response; (new 07.06.2024)
-
-        private static readonly object _documentLock = new object();
         #endregion
 
         #region DocumentImport
@@ -93,318 +90,317 @@ namespace AlgotechUnityREST_ckb.Controllers
                 {
                     //lock (_documentLock)
                     //{
-                        _logger.Info("Metoda:: DocumentImport Asinhrono");
-                        _logger.Info(string.Format("DocumentImport Sesija: [{0}].", sessionID));
+                    _logger.Info("Metoda:: DocumentImport Asinhrono");
+                    _logger.Info(string.Format("DocumentImport Sesija: [{0}].", sessionID));
 
-                        var unityUDF = new Algotech.UTL.AlgotechUnityUDF.UnityUDF();
+                    var unityUDF = new Algotech.UTL.AlgotechUnityUDF.UnityUDF();
 
-                        // Sledeće parametre moramo da imamo
-                        //if (documentImport.RequestID == null) { throw new ArgumentException("Niste definisali RequestID!"); }
+                    // Sledeće parametre moramo da imamo
+                    //if (documentImport.RequestID == null) { throw new ArgumentException("Niste definisali RequestID!"); }
 
-                        if (documentImport.DocumentTypeName == string.Empty) { throw new ArgumentException("Niste definisali DocumentTypeName!"); }
+                    if (documentImport.DocumentTypeName == string.Empty) { throw new ArgumentException("Niste definisali DocumentTypeName!"); }
+                    if (documentImport.DataSource == string.Empty) { throw new ArgumentException("Niste definisali vrednost DataSource!"); }
+
+                    var match = documentImport.FileList.FirstOrDefault(stringToCheck => stringToCheck.Contains(string.Empty)) ?? throw new ArgumentException("Niste definisali vrednost FileList!");
+                    //.
+
+                    // Provera da li su vrednosti prosleđene
+                    if (checkingValues == true && documentImport.DocumentTypeName != "File Cover Page")
+                    {
+                        _logger.Debug("Validacija dokumenata.");
+                        //httpStatusCode = HttpStatusCode.BadRequest;
+                        httpStatusCode = HttpStatusCode.Forbidden;
+
+                        if (documentImport.GroupType == string.Empty) { throw new ArgumentException("Niste definisali GroupType!"); }
                         if (documentImport.DataSource == string.Empty) { throw new ArgumentException("Niste definisali vrednost DataSource!"); }
+                        if (documentImport.OrganizationalUnit == string.Empty) { throw new ArgumentException("Niste definisali OrganizationalUnit!"); }
+                        if (documentImport.UserName == string.Empty) { throw new ArgumentException("Niste definisali UserName!"); }
 
-                        var match = documentImport.FileList.FirstOrDefault(stringToCheck => stringToCheck.Contains(string.Empty));
-                        if (match == null) { throw new ArgumentException("Niste definisali vrednost FileList!"); }
-                        //.
-
-                        // Provera da li su vrednosti prosleđene
-                        if (checkingValues == true && documentImport.DocumentTypeName != "File Cover Page")
+                        if (!unityUDF.IsValidGroupType(documentImport.DocumentTypeName, documentImport.GroupType))
                         {
-                            _logger.Debug("Validacija dokumenata.");
-                            //httpStatusCode = HttpStatusCode.BadRequest;
-                            httpStatusCode = HttpStatusCode.Forbidden;
+                            throw new ArgumentException(
+                                string.Format("Kombinacija DocumentTypeName '{0}' i GroupType '{1}' nije dozovoljena!", documentImport.DocumentTypeName, documentImport.GroupType));
+                        }
 
-                            if (documentImport.GroupType == string.Empty) { throw new ArgumentException("Niste definisali GroupType!"); }
-                            if (documentImport.DataSource == string.Empty) { throw new ArgumentException("Niste definisali vrednost DataSource!"); }
-                            if (documentImport.OrganizationalUnit == string.Empty) { throw new ArgumentException("Niste definisali OrganizationalUnit!"); }
-                            if (documentImport.UserName == string.Empty) { throw new ArgumentException("Niste definisali UserName!"); }
+                        // Dadatna validacija
+                        if (documentImport.GroupID == string.Empty) { throw new ArgumentException("Niste definisali GroupID!"); }
+                        if (documentImport.DocID == string.Empty) { throw new ArgumentException("Niste definisali DocID!"); }
+                        if (documentImport.ClientID == string.Empty) { throw new ArgumentException("Niste definisali ClientID!"); }
+                        if (documentImport.ClientName == string.Empty) { throw new ArgumentException("Niste definisali ClientName!"); }
+                    }
+                    //.
 
-                            if (!unityUDF.IsValidGroupType(documentImport.DocumentTypeName, documentImport.GroupType))
+                    // Ako je File Cover Page nećemo raditi validaciju u kontekstu dokumenata
+                    if (checkingValues == true && documentImport.DocumentTypeName == "File Cover Page")
+                    {
+                        _logger.Debug("Validacija File Cover Page.");
+                        httpStatusCode = HttpStatusCode.NotFound;
+                        if (documentImport.GroupID == string.Empty) { throw new ArgumentException("Niste definisali GroupID!"); }
+                        if (documentImport.GroupType == string.Empty) { throw new ArgumentException("Niste definisali GroupType!"); }
+                    }
+                    //.
+
+                    // Format alternativnog ključa
+                    var documentAK_LenghtPrefiks = Convert.ToInt16(System.Configuration.ConfigurationManager.AppSettings["DocumentAK_LenghtPrefiks"]);
+                    var documentAK_LenghtBase = Convert.ToInt16(System.Configuration.ConfigurationManager.AppSettings["DocumentAK_LenghtBase"]);
+                    var documentAK_LenghtSufix = Convert.ToInt16(System.Configuration.ConfigurationManager.AppSettings["DocumentAK_LenghtSufix"]);
+                    var documentAK_Separator = System.Configuration.ConfigurationManager.AppSettings["DocumentAK_Separator"];
+
+                    var userName = documentImport.UserName;
+
+                    _logger.Debug(string.Format("DocumentTypeName: {0}", documentImport.DocumentTypeName));
+                    _logger.Debug(string.Format("DataSource: {0}", documentImport.DataSource));
+                    _logger.Debug(string.Format("DocStatus: {0}", documentImport.DocStatus));
+
+                    _logger.Debug(string.Format("DocID: {0}", documentImport.DocID));
+                    _logger.Debug(string.Format("ClientID: {0}", documentImport.ClientID));
+                    _logger.Debug(string.Format("ClientName: {0}", documentImport.ClientName));
+
+                    _logger.Debug(string.Format("OrganizationalUnit: {0}", documentImport.OrganizationalUnit));
+                    _logger.Debug(string.Format("UserName: {0}", documentImport.UserName));
+
+                    // Konekcija na OnBase
+                    _logger.Info("DocumentImport OnBase Connect()");
+                    var obj = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
+                    application = obj.OnBaseConnect();
+                    if (application == null)
+                    {
+                        _logger.Warn("Greška kod uspostavljanja konekcije sa OnBase");
+                        throw new ArgumentException("Greška kod uspostavljanja konekcije sa OnBase. Kontaktirajte OnBase administratora.");
+                    }
+                    //.
+
+                    //requestID = (long)documentImport.RequestID;
+                    requestID = documentImport.RequestID == null ? 0 : (long)documentImport.RequestID;
+
+                    // Logijemo od momenta uspostavljanja konekcije
+                    dateTimeStart = DateTime.Now;
+                    _logger.Info(string.Format("DocumentImport session: [{0}]; onbase sesion [{1}] request: [{2}]; start: {3}.",
+                        sessionID, application.SessionID, requestID, dateTimeStart));
+
+                    // Validacija Tipa dokumenta
+                    DocumentType documentType =
+                        application.Core.DocumentTypes.Find(documentImport.DocumentTypeName) ?? throw new Exception(string.Format("Tip dokumenta '{0}' nije pronađen ili nisu podešena prava pristupa servisnom nalogu.", documentImport.DocumentTypeName));
+                    FileType fileType =
+                        application.Core.FileTypes.Find(documentImport.DefaultFileTypeName) ?? throw new Exception(string.Format("Tip datoteke '{0}' nije pronađen ili nisu podešena prava pristupa servisnom nalogu.", documentImport.DefaultFileTypeName));
+                    //.
+
+                    // Svojstva dokumenta
+                    StoreNewDocumentProperties storeDocumentProperties =
+                        application.Core.Storage.CreateStoreNewDocumentProperties(documentType, fileType);
+
+                    // Svojstva 
+                    storeDocumentProperties.TextEncoding = Encoding.Unicode;
+                    storeDocumentProperties.DocumentDate = documentImport.DocumentDate;
+                    storeDocumentProperties.Comment = documentImport.Comment;
+                    //storeDocumentProperties.Options = StoreDocumentOptions.SkipWorkflow;
+                    //..
+
+                    // Standard keyword type, koncept je da proverimo da li je prosleđena vrednost ključne reči i ako jeste upisujemo.
+                    // Ne proveravamo da li postoji definicija ključne reč u tipu dokumenta, želimo da baci exeption i da se proveri konfiguracija.
+
+                    // Podaci o dokumentu, jedinstveni identifikator dokumenta nećemo unositi već ćemo je generisati i upisati
+                    //if (documentImport.DocBarcode != string.Empty)
+                    //    storeDocumentProperties.AddKeyword("DocBarcode", documentImport.DocBarcode);
+
+                    // Securiry keyword
+                    if (!string.IsNullOrEmpty(documentImport.OrganizationalUnit))
+                        storeDocumentProperties.AddKeyword("OrganizationalUnit", documentImport.OrganizationalUnit);
+
+                    if (!string.IsNullOrEmpty(documentImport.UserName))
+                        storeDocumentProperties.AddKeyword("UserName", documentImport.UserName);
+                    //storeDocumentProperties.AddKeyword("CKB_UserName", documentImport.UserName);
+
+                    // Ostali keyword
+                    if (!string.IsNullOrEmpty(documentImport.GroupType))
+                        storeDocumentProperties.AddKeyword("GroupType", documentImport.GroupType);
+
+                    if (!string.IsNullOrEmpty(documentImport.GroupID))
+                        storeDocumentProperties.AddKeyword("GroupID", documentImport.GroupID);
+
+                    if (!string.IsNullOrEmpty(documentImport.GroupBarcode))
+                        storeDocumentProperties.AddKeyword("GroupBarcode", documentImport.GroupBarcode);
+
+                    if (!string.IsNullOrEmpty(documentImport.DocID))
+                        storeDocumentProperties.AddKeyword("DocID", documentImport.DocID);
+
+                    if (!string.IsNullOrEmpty(documentImport.ClientID))
+                        storeDocumentProperties.AddKeyword("ClientID", documentImport.ClientID);
+
+                    if (!string.IsNullOrEmpty(documentImport.ClientName))
+                        storeDocumentProperties.AddKeyword("ClientName", documentImport.ClientName);
+                    //.
+                    if (!string.IsNullOrEmpty(documentImport.DataSource))
+                        storeDocumentProperties.AddKeyword("DataSource", documentImport.DataSource);
+
+                    if (documentImport.DocRegDate != DateTime.MinValue)
+                        storeDocumentProperties.AddKeyword("DocRegDate", documentImport.DocRegDate);
+
+                    if (!string.IsNullOrEmpty(documentImport.DocStatus))
+                        storeDocumentProperties.AddKeyword("DocStatus", documentImport.DocStatus);
+
+                    //if (documentImport.RequestID != null)
+                    //storeDocumentProperties.AddKeyword("RequestID", (long)documentImport.RequestID);
+                    if (requestID != 0)
+                        storeDocumentProperties.AddKeyword("RequestID", requestID);
+                    //.
+
+                    var akValue = string.Empty;
+
+                    #region Izmeni ključnu reč za Alternativni ključ koncept 2. (unapred da imamo seqkvencu)
+                    //var keywordNameAK = "DocBarcode";
+                    //if (documentImport.DocumentTypeName == "File Cover Page")
+                    //    keywordNameAK = "GroupBarcode";
+
+                    //_logger.Debug(string.Format("Kreiramo vrednost za alternativni kljuc [{0}].", keywordNameAK));
+
+                    //unityUDF = new Algotech.UTL.AlgotechUnityUDF.UnityUDF();
+                    //var documentTypeID = unityUDF.GetDocumentTypeID(application, documentImport.DocumentTypeName);
+                    ////var newSeqValue = unityUDF.GetSequenceValue("DocBarcodeGroupBarcode");
+                    //var newSeqValue = requestID;
+                    //akValue = string.Format("{1}{0}{2}{0}{3}", documentAK_Separator,
+                    //    documentImport.DataSource, documentTypeID, newSeqValue.ToString().PadLeft(documentAK_LenghtSufix, Convert.ToChar("0")));
+                    //// Upiši ak
+                    //storeDocumentProperties.AddKeyword(keywordNameAK, akValue);
+
+                    //_logger.Debug(string.Format("Upisaćemo: KeywordName {0}, KeywordValue={1}.", keywordNameAK, akValue));
+                    ////.
+                    #endregion
+
+                    var status = string.Empty;
+                    var message = string.Empty;
+
+                    // Skladišti novi dokument / Save the new document
+                    _logger.Debug(string.Format("Skladišti novi dokument: Sesija [{0}]; OnBase konekcija [{1}].", sessionID, application.SessionID));
+                    Document newDocument =
+                        application.Core.Storage.StoreNewDocument(documentImport.FileList, storeDocumentProperties);
+                    long newDocumentID = newDocument.ID; // Uzmi ga odmah
+                    _logger.Debug(string.Format("Usladištili smo novi dokument: Sesija [{0}]; OnBase konekcija [{1}]; DocumentID [{2}].", sessionID, application.SessionID, newDocumentID));
+                    //.
+
+                    #region Izmeni ključnu reč za Alternativni ključ koncept 1 (osnovni sa newDocument.ID)
+                    // Izmeni ključnu reč za Alternativni ključ koncept 1. 
+                    var keywordNameAK = "DocBarcode";
+                    if (documentImport.DocumentTypeName == "File Cover Page")
+                    {
+                        keywordNameAK = "GroupBarcode";
+                    }
+
+                    _logger.Debug(string.Format("Kreiramo vrednost za alternativni kljuc [{0}].", keywordNameAK));
+
+                    unityUDF = new Algotech.UTL.AlgotechUnityUDF.UnityUDF();
+                    var documentTypeID = unityUDF.GetDocumentTypeID(application, documentImport.DocumentTypeName);
+                    var documentKeyword = new DocumentKeywords
+                    {
+                        DocumentTypeName = documentImport.DocumentTypeName,
+                        KeywordName = keywordNameAK,
+                        // Definiši vrednost newDocument popuni nulama dužine zadane u DocumentAK_LenghtSufix
+                        KeywordValue = string.Format("{1}{0}{2}{0}{3}", documentAK_Separator,
+                            documentImport.DataSource, documentTypeID, newDocumentID.ToString().PadLeft(documentAK_LenghtSufix, Convert.ToChar("0"))),
+                        DataSource = documentImport.DataSource,
+                        UserName = documentImport.UserName,
+                        //.
+                    };
+                    _logger.Debug(string.Format("DocumentKeywordSetValue Sesija [{0}]; OnBase konekcija [{1}].", sessionID, application.SessionID));
+
+                    // Kritični momenat
+                    DocumentKeywordSetValue(application, newDocument, documentKeyword);
+                    //.
+
+                    _logger.Debug(string.Format("Izmenjeno je: KeywordName {0}, KeywordValue={1}.", documentKeyword.KeywordName, documentKeyword.KeywordValue));
+                    //.
+
+                    akValue = documentKeyword.KeywordValue;
+                    //message = string.Format("Dokument je uspešno sačuvan, DocBarcode: {0}.", status);
+                    //.
+                    #endregion
+
+                    status = akValue.ToString();
+
+                    if (status != string.Empty)
+                    {
+                        // Simulacija lošeg responsa umesto prave vrednosti vratiće-1
+                        if (Convert.ToBoolean(System.Configuration.ConfigurationManager.AppSettings["IsEnvPROD"]) == false)
+                        {
+                            if (requestID % 2 != 0)
                             {
-                                throw new ArgumentException(
-                                    string.Format("Kombinacija DocumentTypeName '{0}' i GroupType '{1}' nije dozovoljena!", documentImport.DocumentTypeName, documentImport.GroupType));
+                                //Neparne vrednosi kvarimo
+                                requestID--;
                             }
-
-                            // Dadatna validacija
-                            if (documentImport.GroupID == string.Empty) { throw new ArgumentException("Niste definisali GroupID!"); }
-                            if (documentImport.DocID == string.Empty) { throw new ArgumentException("Niste definisali DocID!"); }
-                            if (documentImport.ClientID == string.Empty) { throw new ArgumentException("Niste definisali ClientID!"); }
-                            if (documentImport.ClientName == string.Empty) { throw new ArgumentException("Niste definisali ClientName!"); }
                         }
                         //.
 
-                        // Ako je File Cover Page nećemo raditi validaciju u kontekstu dokumenata
-                        if (checkingValues == true && documentImport.DocumentTypeName == "File Cover Page")
-                        {
-                            _logger.Debug("Validacija File Cover Page.");
-                            httpStatusCode = HttpStatusCode.NotFound;
-                            if (documentImport.GroupID == string.Empty) { throw new ArgumentException("Niste definisali GroupID!"); }
-                            if (documentImport.GroupType == string.Empty) { throw new ArgumentException("Niste definisali GroupType!"); }
-                        }
-                        //.
-
-                        // Format alternativnog ključa
-                        var documentAK_LenghtPrefiks = Convert.ToInt16(System.Configuration.ConfigurationManager.AppSettings["DocumentAK_LenghtPrefiks"]);
-                        var documentAK_LenghtBase = Convert.ToInt16(System.Configuration.ConfigurationManager.AppSettings["DocumentAK_LenghtBase"]);
-                        var documentAK_LenghtSufix = Convert.ToInt16(System.Configuration.ConfigurationManager.AppSettings["DocumentAK_LenghtSufix"]);
-                        var documentAK_Separator = System.Configuration.ConfigurationManager.AppSettings["DocumentAK_Separator"];
-
-                        var userName = documentImport.UserName;
-
-                        _logger.Debug(string.Format("DocumentTypeName: {0}", documentImport.DocumentTypeName));
-                        _logger.Debug(string.Format("DataSource: {0}", documentImport.DataSource));
-                        _logger.Debug(string.Format("DocStatus: {0}", documentImport.DocStatus));
-
-                        _logger.Debug(string.Format("DocID: {0}", documentImport.DocID));
-                        _logger.Debug(string.Format("ClientID: {0}", documentImport.ClientID));
-                        _logger.Debug(string.Format("ClientName: {0}", documentImport.ClientName));
-
-                        _logger.Debug(string.Format("OrganizationalUnit: {0}", documentImport.OrganizationalUnit));
-                        _logger.Debug(string.Format("UserName: {0}", documentImport.UserName));
-
-                        // Konekcija na OnBase
-                        _logger.Info("DocumentImport OnBase Connect()");
-                        var obj = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
-                        application = obj.OnBaseConnect();
-                        if (application == null)
-                        {
-                            _logger.Warn("Greška kod uspostavljanja konekcije sa OnBase");
-                            throw new ArgumentException("Greška kod uspostavljanja konekcije sa OnBase. Kontaktirajte OnBase administratora.");
-                        }
-                        //.
-
-                        //requestID = (long)documentImport.RequestID;
-                        requestID = documentImport.RequestID == null ? 0 : (long)documentImport.RequestID;
-
-                        // Logijemo od momenta uspostavljanja konekcije
-                        dateTimeStart = DateTime.Now;
-                        _logger.Info(string.Format("DocumentImport session: [{0}]; onbase sesion [{1}] request: [{2}]; start: {3}.",
-                            sessionID, application.SessionID, requestID, dateTimeStart));
-
-                        // Validacija Tipa dokumenta
-                        DocumentType documentType =
-                            application.Core.DocumentTypes.Find(documentImport.DocumentTypeName) ?? throw new Exception(string.Format("Tip dokumenta '{0}' nije pronađen ili nisu podešena prava pristupa servisnom nalogu.", documentImport.DocumentTypeName));
-                        FileType fileType =
-                            application.Core.FileTypes.Find(documentImport.DefaultFileTypeName) ?? throw new Exception(string.Format("Tip datoteke '{0}' nije pronađen ili nisu podešena prava pristupa servisnom nalogu.", documentImport.DefaultFileTypeName));
-                        //.
-
-                        // Svojstva dokumenta
-                        StoreNewDocumentProperties storeDocumentProperties =
-                            application.Core.Storage.CreateStoreNewDocumentProperties(documentType, fileType);
-
-                        // Svojstva 
-                        storeDocumentProperties.TextEncoding = Encoding.Unicode;
-                        storeDocumentProperties.DocumentDate = documentImport.DocumentDate;
-                        storeDocumentProperties.Comment = documentImport.Comment;
-                        //storeDocumentProperties.Options = StoreDocumentOptions.SkipWorkflow;
-                        //..
-
-                        // Standard keyword type, koncept je da proverimo da li je prosleđena vrednost ključne reči i ako jeste upisujemo.
-                        // Ne proveravamo da li postoji definicija ključne reč u tipu dokumenta, želimo da baci exeption i da se proveri konfiguracija.
-
-                        // Podaci o dokumentu, jedinstveni identifikator dokumenta nećemo unositi već ćemo je generisati i upisati
-                        //if (documentImport.DocBarcode != string.Empty)
-                        //    storeDocumentProperties.AddKeyword("DocBarcode", documentImport.DocBarcode);
-
-                        // Securiry keyword
-                        if (!string.IsNullOrEmpty(documentImport.OrganizationalUnit))
-                            storeDocumentProperties.AddKeyword("OrganizationalUnit", documentImport.OrganizationalUnit);
-
-                        if (!string.IsNullOrEmpty(documentImport.UserName))
-                            storeDocumentProperties.AddKeyword("UserName", documentImport.UserName);
-                        //storeDocumentProperties.AddKeyword("CKB_UserName", documentImport.UserName);
-
-                        // Ostali keyword
-                        if (!string.IsNullOrEmpty(documentImport.GroupType))
-                            storeDocumentProperties.AddKeyword("GroupType", documentImport.GroupType);
-
-                        if (!string.IsNullOrEmpty(documentImport.GroupID))
-                            storeDocumentProperties.AddKeyword("GroupID", documentImport.GroupID);
-
-                        if (!string.IsNullOrEmpty(documentImport.GroupBarcode))
-                            storeDocumentProperties.AddKeyword("GroupBarcode", documentImport.GroupBarcode);
-
-                        if (!string.IsNullOrEmpty(documentImport.DocID))
-                            storeDocumentProperties.AddKeyword("DocID", documentImport.DocID);
-
-                        if (!string.IsNullOrEmpty(documentImport.ClientID))
-                            storeDocumentProperties.AddKeyword("ClientID", documentImport.ClientID);
-
-                        if (!string.IsNullOrEmpty(documentImport.ClientName))
-                            storeDocumentProperties.AddKeyword("ClientName", documentImport.ClientName);
-                        //.
-                        if (!string.IsNullOrEmpty(documentImport.DataSource))
-                            storeDocumentProperties.AddKeyword("DataSource", documentImport.DataSource);
-
-                        if (documentImport.DocRegDate != DateTime.MinValue)
-                            storeDocumentProperties.AddKeyword("DocRegDate", documentImport.DocRegDate);
-
-                        if (!string.IsNullOrEmpty(documentImport.DocStatus))
-                            storeDocumentProperties.AddKeyword("DocStatus", documentImport.DocStatus);
-
-                        //if (documentImport.RequestID != null)
-                        //storeDocumentProperties.AddKeyword("RequestID", (long)documentImport.RequestID);
-                        if (requestID != 0)
-                            storeDocumentProperties.AddKeyword("RequestID", requestID);
-                        //.
-
-                        var akValue = string.Empty;
-
-                        #region Izmeni ključnu reč za Alternativni ključ koncept 2. (unapred da imamo seqkvencu)
-                        //var keywordNameAK = "DocBarcode";
-                        //if (documentImport.DocumentTypeName == "File Cover Page")
-                        //    keywordNameAK = "GroupBarcode";
-
-                        //_logger.Debug(string.Format("Kreiramo vrednost za alternativni kljuc [{0}].", keywordNameAK));
-
-                        //unityUDF = new Algotech.UTL.AlgotechUnityUDF.UnityUDF();
-                        //var documentTypeID = unityUDF.GetDocumentTypeID(application, documentImport.DocumentTypeName);
-                        ////var newSeqValue = unityUDF.GetSequenceValue("DocBarcodeGroupBarcode");
-                        //var newSeqValue = requestID;
-                        //akValue = string.Format("{1}{0}{2}{0}{3}", documentAK_Separator,
-                        //    documentImport.DataSource, documentTypeID, newSeqValue.ToString().PadLeft(documentAK_LenghtSufix, Convert.ToChar("0")));
-                        //// Upiši ak
-                        //storeDocumentProperties.AddKeyword(keywordNameAK, akValue);
-
-                        //_logger.Debug(string.Format("Upisaćemo: KeywordName {0}, KeywordValue={1}.", keywordNameAK, akValue));
-                        ////.
-                        #endregion
-
-                        var status = string.Empty;
-                        var message = string.Empty;
-
-                        // Skladišti novi dokument / Save the new document
-                        _logger.Debug(string.Format("Skladišti novi dokument: Sesija [{0}]; OnBase konekcija [{1}].", sessionID, application.SessionID));
-                        Document newDocument =
-                            application.Core.Storage.StoreNewDocument(documentImport.FileList, storeDocumentProperties);
-                        long newDocumentID = newDocument.ID; // Uzmi ga odmah
-                        _logger.Debug(string.Format("Usladištili smo novi dokument: Sesija [{0}]; OnBase konekcija [{1}]; DocumentID [{2}].", sessionID, application.SessionID, newDocumentID));
-                        //.
-
-                        #region Izmeni ključnu reč za Alternativni ključ koncept 1 (osnovni sa newDocument.ID)
-                        // Izmeni ključnu reč za Alternativni ključ koncept 1. 
-                        var keywordNameAK = "DocBarcode";
                         if (documentImport.DocumentTypeName == "File Cover Page")
                         {
-                            keywordNameAK = "GroupBarcode";
-                        }
-
-                        _logger.Debug(string.Format("Kreiramo vrednost za alternativni kljuc [{0}].", keywordNameAK));
-
-                        unityUDF = new Algotech.UTL.AlgotechUnityUDF.UnityUDF();
-                        var documentTypeID = unityUDF.GetDocumentTypeID(application, documentImport.DocumentTypeName);
-                        var documentKeyword = new DocumentKeywords
-                        {
-                            DocumentTypeName = documentImport.DocumentTypeName,
-                            KeywordName = keywordNameAK,
-                            // Definiši vrednost newDocument popuni nulama dužine zadane u DocumentAK_LenghtSufix
-                            KeywordValue = string.Format("{1}{0}{2}{0}{3}", documentAK_Separator,
-                                documentImport.DataSource, documentTypeID, newDocumentID.ToString().PadLeft(documentAK_LenghtSufix, Convert.ToChar("0"))),
-                            DataSource = documentImport.DataSource,
-                            UserName = documentImport.UserName,
-                            //.
-                        };
-                        _logger.Debug(string.Format("DocumentKeywordSetValue Sesija [{0}]; OnBase konekcija [{1}].", sessionID, application.SessionID));
-
-                        // Kritični momenat
-                        DocumentKeywordSetValue(application, newDocument, documentKeyword);
-                        //.
-
-                        _logger.Debug(string.Format("Izmenjeno je: KeywordName {0}, KeywordValue={1}.", documentKeyword.KeywordName, documentKeyword.KeywordValue));
-                        //.
-
-                        akValue = documentKeyword.KeywordValue;
-                        //message = string.Format("Dokument je uspešno sačuvan, DocBarcode: {0}.", status);
-                        //.
-                        #endregion
-
-                        status = akValue.ToString();
-
-                        if (status != string.Empty)
-                        {
-                            // Simulacija lošeg responsa umesto prave vrednosti vratiće-1
-                            if (Convert.ToBoolean(System.Configuration.ConfigurationManager.AppSettings["IsEnvPROD"]) == false)
+                            if (requestID == 0)
                             {
-                                if (requestID % 2 != 0)
+                                message = string.Format("File Cover Page je uspešno sačuvan, GroupBarcode: {0}.", status);
+                                result = new DocumentsImportResult
                                 {
-                                    //Neparne vrednosi kvarimo
-                                    requestID--;
-                                }
-                            }
-                            //.
-
-                            if (documentImport.DocumentTypeName == "File Cover Page")
-                            {
-                                if (requestID == 0)
-                                {
-                                    message = string.Format("File Cover Page je uspešno sačuvan, GroupBarcode: {0}.", status);
-                                    result = new DocumentsImportResult
-                                    {
-                                        GroupBarcode = status,
-                                        Message = message
-                                    };
-                                }
-                                else
-                                {
-                                    message = string.Format("Za zahtev broj #{0} 'File Cover Page' je uspešno sačuvan, GroupBarcode: {1}.", requestID, status);
-                                    result = new DocumentsImportResult
-                                    {
-                                        RequestID = requestID,
-                                        GroupBarcode = status,
-                                        Message = message
-                                    };
-                                }
-
+                                    GroupBarcode = status,
+                                    Message = message
+                                };
                             }
                             else
                             {
-                                if (requestID == 0)
+                                message = string.Format("Za zahtev broj #{0} 'File Cover Page' je uspešno sačuvan, GroupBarcode: {1}.", requestID, status);
+                                result = new DocumentsImportResult
                                 {
-                                    message = string.Format("Dokument je uspešno sačuvan, DocBarcode: {0}.", status);
-                                    result = new DocumentsImportResult
-                                    {
-                                        DocBarcode = status,
-                                        Message = message
-                                    };
-                                }
-                                else
-                                {
-                                    message = string.Format("Za zahtev broj #{0} dokument je uspešno sačuvan, DocBarcode: {1}.", requestID, status);
-                                    result = new DocumentsImportResult
-                                    {
-                                        RequestID = requestID,
-                                        DocBarcode = status,
-                                        Message = message
-                                    };
-                                }
+                                    RequestID = requestID,
+                                    GroupBarcode = status,
+                                    Message = message
+                                };
                             }
 
-                            responseMessage = Request.CreateResponse(HttpStatusCode.OK, result);
-
-                            //Kolačić
-                            //https://www.c-sharpcorner.com/UploadFile/2b481f/how-to-set-cookies-in-Asp-Net-web-api/
-                            var nalueCollection = new NameValueCollection
-                            {
-                                ["ID"] = sessionID,
-                                ["AK"] = status,
-                                ["RequestID"] = requestID.ToString()
-                            };
-                            var cookie = new CookieHeaderValue("Session", nalueCollection)
-                            {
-                                Expires = DateTimeOffset.Now.AddDays(1), //AddMilliseconds(1000)
-                                Domain = Request.RequestUri.Host,
-                                Path = "/"
-                            };
-                            responseMessage.Headers.AddCookies(new CookieHeaderValue[] { cookie });
-                            //.
-
-                            // Logger
-                            _logger.Info(string.Format("Response: {0}; UserName: {1}; OrganizationalUnit {2}; SessionID: {3}; OnBase SessionID: {4} RequestID: {5}.",
-                                result.Message, documentImport.UserName, documentImport.OrganizationalUnit, sessionID, application.SessionID, requestID));
-                            //.
                         }
-                  //  }
+                        else
+                        {
+                            if (requestID == 0)
+                            {
+                                message = string.Format("Dokument je uspešno sačuvan, DocBarcode: {0}.", status);
+                                result = new DocumentsImportResult
+                                {
+                                    DocBarcode = status,
+                                    Message = message
+                                };
+                            }
+                            else
+                            {
+                                message = string.Format("Za zahtev broj #{0} dokument je uspešno sačuvan, DocBarcode: {1}.", requestID, status);
+                                result = new DocumentsImportResult
+                                {
+                                    RequestID = requestID,
+                                    DocBarcode = status,
+                                    Message = message
+                                };
+                            }
+                        }
+
+                        responseMessage = Request.CreateResponse(HttpStatusCode.OK, result);
+
+                        //Kolačić
+                        //https://www.c-sharpcorner.com/UploadFile/2b481f/how-to-set-cookies-in-Asp-Net-web-api/
+                        var nalueCollection = new NameValueCollection
+                        {
+                            ["ID"] = sessionID,
+                            ["AK"] = status,
+                            ["RequestID"] = requestID.ToString()
+                        };
+                        var cookie = new CookieHeaderValue("Session", nalueCollection)
+                        {
+                            Expires = DateTimeOffset.Now.AddDays(1), //AddMilliseconds(1000)
+                            Domain = Request.RequestUri.Host,
+                            Path = "/"
+                        };
+                        responseMessage.Headers.AddCookies(new CookieHeaderValue[] { cookie });
+                        //.
+
+                        // Logger
+                        _logger.Info(string.Format("Response: {0}; UserName: {1}; OrganizationalUnit {2}; SessionID: {3}; OnBase SessionID: {4} RequestID: {5}.",
+                            result.Message, documentImport.UserName, documentImport.OrganizationalUnit, sessionID, application.SessionID, requestID));
+                        //.
+                    }
+                    //  }
                 });
 
             }
@@ -471,12 +467,7 @@ namespace AlgotechUnityREST_ckb.Controllers
 
                 Debug.WriteLine("Attempting to delete document...");
 
-                Document document = application.Core.GetDocumentByID(documentID);
-                if (document == null)
-                {
-                    throw new Exception("Document was not found");
-                }
-
+                Document document = application.Core.GetDocumentByID(documentID) ?? throw new Exception("Document was not found");
                 using (DocumentLock documentLock = document.LockDocument())
                 {
                     if (documentLock.Status != DocumentLockStatus.LockObtained)
@@ -782,9 +773,11 @@ namespace AlgotechUnityREST_ckb.Controllers
                     //};
 
                     //JsonSerializerSettings
-                    var jsonSerializerSettings = new Newtonsoft.Json.JsonSerializerSettings();
-                    jsonSerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
-                    jsonSerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
+                    var jsonSerializerSettings = new Newtonsoft.Json.JsonSerializerSettings
+                    {
+                        NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore,
+                        Formatting = Newtonsoft.Json.Formatting.Indented
+                    };
                     //.
 
                     // Formatiranje datuma
@@ -1226,7 +1219,7 @@ namespace AlgotechUnityREST_ckb.Controllers
                         if (documentLock.Status == DocumentLockStatus.AlreadyLocked)
                         {
                             retValue = false;
-                            _logger.Error(string.Format("Zaključavanje dokumenta nije uspelo (AlreadyLocked) : {0} status zaključavanja {2}", document.ID, documentLock.Status));
+                            _logger.Error(string.Format("Zaključavanje dokumenta nije uspelo (AlreadyLocked) : {0} status zaključavanja {1}", document.ID, documentLock.Status));
                             throw new Exception("Zaključavanje dokumenta nije bilo moguće, zaključavanje je izvšio drugi korisnik ili proces.");
                         }
                         // Check if the lock status is LockObtained
