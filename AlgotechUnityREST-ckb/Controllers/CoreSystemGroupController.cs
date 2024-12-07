@@ -20,7 +20,7 @@ namespace AlgotechUnityREST_ckb.Controllers
     /// <summary>
     /// Preuzimaje podataka iz Core sistema o grupama
     /// </summary>
-    [ApiExplorerSettings(IgnoreApi=false)]
+    [ApiExplorerSettings(IgnoreApi = false)]
     public class CoreSystemGroupController : ApiController
     {
         #region Variable 
@@ -40,8 +40,13 @@ namespace AlgotechUnityREST_ckb.Controllers
             /// Idektifikator grupe
             /// </summary>
             public string GroupID { get; set; }
+
             /// <summary>
-            /// Identifikator
+            /// Naziv grupe
+            /// </summary>
+            public string GroupName { get; set; }
+            /// <summary>
+            /// Tip
             /// </summary>
             public string Type { get; set; }
             /// <summary>
@@ -74,12 +79,14 @@ namespace AlgotechUnityREST_ckb.Controllers
             public string Comment { get; set; }
 
             /// <summary>
-            /// Nova svojstva agruden 2024-11-13
+            /// Segment grupe je upitan po poslednjoj informaciji postoji nosilac grupe koji će povući segment
             /// </summary>
-            public string GroupName { get; set; }
             public string GroupSegment { get; set; }
-            public string MemberRating { get; set; }
 
+            /// <summary>
+            /// Rejting člana
+            /// </summary>
+            public string MemberRating { get; set; }
         }
         #endregion
 
@@ -128,6 +135,8 @@ namespace AlgotechUnityREST_ckb.Controllers
                     var obj = new GroupInfoResult()
                     {
                         GroupID = Convert.ToString(reader["grupa_id"]).Trim(),
+                        GroupName = Convert.ToString(reader["grupa_naziv"]).Trim(),
+
                         Type = Convert.ToString(reader["tip"]).Trim(),
                         MBR = Convert.ToString(reader["mbr"]).Trim(),
                         TypeK = Convert.ToString(reader["tipk"]).Trim(),
@@ -137,10 +146,13 @@ namespace AlgotechUnityREST_ckb.Controllers
                         CriteriaID_Description = Convert.ToString(reader["criteria_id_opis"]).Trim(),
                         Comment = Convert.ToString(reader["komentar"]).Trim(),
 
-                        // Nove kolone
-                        GroupName = reader.HasColumn("naziv_grupe") ? Convert.ToString(reader["naziv_grupe"]).Trim() : null,
-                        GroupSegment = reader.HasColumn("segment_grupe") ? Convert.ToString(reader["segment_grupe"]).Trim() : null,
-                        MemberRating = reader.HasColumn("rejting_clana") ? Convert.ToString(reader["rejting_clana"]).Trim() : null
+                        //// Nove kolone
+                        //GroupName = reader.HasColumn("grupa_naziv") ? Convert.ToString(reader["grupa_naziv"]).Trim() : null,
+                        //GroupSegment = reader.HasColumn("segmentation_internal") ? Convert.ToString(reader["segmentation_internal"]).Trim() : null,
+                        //MemberRating = reader.HasColumn("rejting_clan") ? Convert.ToString(reader["rejting_clan"]).Trim() : null
+
+                        GroupSegment = Convert.ToString(reader["segmentation_internal"]).Trim(),
+                        MemberRating = Convert.ToString(reader["rejting_clan"]).Trim()
                     };
                     list.Add(obj);
                 }
@@ -190,18 +202,23 @@ namespace AlgotechUnityREST_ckb.Controllers
         /// </summary>
         /// <param name="groupID">ID grupe</param>
         /// <param name="findValue">String za pretragu naziv ili PIB</param>
+        /// <param name="filterByType">Filtriranje po tipi podrazimevano je N onda se ne vrši pretagana po findValue</param>
         /// <returns></returns>
         /// <remarks>
         /// Primer vrednosti: 
         /// groupID = "46", findValue = "02007819 ili SYSGIHFY OMVOLVAEBUF IQZPWS FJXQ "
         /// </remarks>        
-        //[HttpGet, ActionName("GroupInfoByID")]
-        [HttpGet, Route("api/CoreSystemGroup/GroupInfoByID/{groupID}/{findValue?}")]
+        [HttpGet, Route("api/CoreSystemGroup/GroupInfoByID/{groupID}/{findValue?}/{filterByType?}")]
         [ActionName("GetGroupInfoByID")]
-        public HttpResponseMessage GroupInfoByID(int groupID, string findValue = "")
+        public HttpResponseMessage GroupInfoByID(int groupID, string findValue = null, string filterByType = null)
         {
             Result result;
             string json;
+
+            if (findValue == "-")
+                findValue=string.Empty;
+            if (filterByType == "-")
+                filterByType = string.Empty;
 
             // Defalt error code
             var httpStatusCode = HttpStatusCode.Forbidden;
@@ -228,6 +245,8 @@ namespace AlgotechUnityREST_ckb.Controllers
                     var obj = new GroupInfoResult()
                     {
                         GroupID = Convert.ToString(reader["grupa_id"]).Trim(),
+                        GroupName = Convert.ToString(reader["grupa_naziv"]).Trim(),
+
                         Type = Convert.ToString(reader["tip"]).Trim(),
                         MBR = Convert.ToString(reader["mbr"]).Trim(),
                         TypeK = Convert.ToString(reader["tipk"]).Trim(),
@@ -237,10 +256,10 @@ namespace AlgotechUnityREST_ckb.Controllers
                         CriteriaID_Description = Convert.ToString(reader["criteria_id_opis"]).Trim(),
                         Comment = Convert.ToString(reader["komentar"]).Trim(),
 
-                        // Nove kolone
-                        GroupName = reader.HasColumn("naziv_grupe") ? Convert.ToString(reader["naziv_grupe"]).Trim() : null,
-                        GroupSegment = reader.HasColumn("segment_grupe") ? Convert.ToString(reader["segment_grupe"]).Trim() : null,
-                        MemberRating = reader.HasColumn("rejting_clana") ? Convert.ToString(reader["rejting_clana"]).Trim() : null
+                        //// Nove kolone
+                        //GroupName = reader.HasColumn("grupa_naziv") ? Convert.ToString(reader["grupa_naziv"]).Trim() : null,
+                        GroupSegment = Convert.ToString(reader["segmentation_internal"]).Trim(),
+                        MemberRating = Convert.ToString(reader["rejting_clan"]).Trim() 
                     };
                     list.Add(obj);
                 }
@@ -252,6 +271,12 @@ namespace AlgotechUnityREST_ckb.Controllers
                 if (!string.IsNullOrEmpty(findValue))
                 {
                     list = list.Where(x => x.MemberName.Contains(findValue) || x.MBR.Contains(findValue)).ToList();
+                    _logger.Info(string.Format("Pretraga po nazivu ili PIB: {0}", findValue));
+                }
+                if (filterByType != string.Empty)
+                {
+                    list = list.Where(x => x.Type.Equals(filterByType, StringComparison.OrdinalIgnoreCase)).ToList();
+                    _logger.Info(string.Format("Filtriranje primarnih članova grupe: {0}", filterByType));
                 }
                 //.
 
