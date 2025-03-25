@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 
@@ -93,6 +94,48 @@ namespace AlgotechUnityREST_ckb.Controllers
 
             return result;
         }
+
+
+        // kod sa gui nazivom fajla
+        //public HttpResponseMessage PostFormData()
+        //{
+        //    HttpResponseMessage result;
+
+        //    try
+        //    {
+        //        var uploadFolder = System.Configuration.ConfigurationManager.AppSettings["UploadFolder"];
+        //        if (!Directory.Exists(uploadFolder))
+        //        {
+        //            Directory.CreateDirectory(uploadFolder);
+        //        }
+
+        //        var httpRequest = HttpContext.Current.Request;
+        //        if (httpRequest.Files.Count > 0)
+        //        {
+        //            var docfiles = new List<string>();
+        //            foreach (string file in httpRequest.Files)
+        //            {
+        //                var postedFile = httpRequest.Files[file];
+        //                string uniqueFileName = $"{Path.GetFileNameWithoutExtension(postedFile.FileName)}_{Guid.NewGuid()}{Path.GetExtension(postedFile.FileName)}";
+        //                string filePath = Path.Combine(uploadFolder, uniqueFileName);
+
+        //                postedFile.SaveAs(filePath);
+        //                docfiles.Add(filePath);
+        //            }
+        //            result = Request.CreateResponse(HttpStatusCode.Created, "Datoteke su uspešno prenete na server.");
+        //        }
+        //        else
+        //        {
+        //            result = Request.CreateResponse(HttpStatusCode.BadRequest, "Nema datoteka za prijenos.");
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        result = Request.CreateResponse(HttpStatusCode.InternalServerError, ex.Message);
+        //    }
+
+        //    return result;
+        //}
         #endregion
     }
 }

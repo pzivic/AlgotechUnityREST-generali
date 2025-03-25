@@ -18,7 +18,7 @@ using System.Linq;
 namespace AlgotechUnityREST_ckb.Controllers
 {
     /// <summary>
-    /// Preuzimaje podataka iz Core sistema o grupama
+    /// Preuzimanje podataka iz Core sistema o grupama
     /// </summary>
     [ApiExplorerSettings(IgnoreApi = false)]
     public class CoreSystemGroupController : ApiController
@@ -101,9 +101,12 @@ namespace AlgotechUnityREST_ckb.Controllers
         /// Primer vrednosti: 
         /// clientIdentifier = "02280612", clientType = 1
         /// </remarks>        
-        //[HttpGet, ActionName("GroupInfo")]
-        [HttpGet, Route("api/CoreSystemGroup/GroupInfo/{clientIdentifier}/{clientType}")]
-        [ActionName("GroupInfo")]
+
+        [HttpGet, ActionName("GroupInfo")]
+
+        // Ovo mi pravi problem jer onda traži isklučivo preko /
+        //[HttpGet, Route("api/CoreSystemGroup/GroupInfo/{clientIdentifier}/{clientType}")]
+        //[ActionName("GroupInfo")]
         public HttpResponseMessage GroupInfo(string clientIdentifier, short clientType)
         {
             Result result;
@@ -111,10 +114,27 @@ namespace AlgotechUnityREST_ckb.Controllers
 
             // Defalt error code
             var httpStatusCode = HttpStatusCode.Forbidden;
+            // Definisanje početnog status koda za greške chat kaže InternalServerError
+            //var httpStatusCode = HttpStatusCode.InternalServerError;
 
             try
             {
-                _logger.Info("Metoda GroupInfo");
+                //_logger.Info("Metoda GroupInfo");
+                _logger.Info("Metoda GroupInfo je pozvana.");
+
+                // Validacija ulaznih parametara
+                if (string.IsNullOrEmpty(clientIdentifier) || clientIdentifier.Length > 50)
+                {
+                    _logger.Warn("Nevažeći clientIdentifier.");
+                    return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Nevažeći clientIdentifier.");
+                }
+                if (clientType < 0)
+                {
+                    _logger.Warn("Nevažeći clientType.");
+                    return Request.CreateErrorResponse(HttpStatusCode.BadRequest, "Nevažeći clientType.");
+                }
+                //.
+
                 _logger.Info("Konektujem Oracle");
                 var sqlHelper = new Algotech.DAL.OracleHelper.OracleHelper("connection_string_oracle");
 
@@ -127,6 +147,7 @@ namespace AlgotechUnityREST_ckb.Controllers
 
                 var plSqlProcName = "Dms.dms_tobiis_getdata.get_group_info";
                 _logger.Info(string.Format("Oracle plSqlProcName: {0} param value clientIdentifier: {1} param value clientType: {2}.", plSqlProcName, clientIdentifier, clientType));
+
                 var reader = sqlHelper.ExecuteReader(plSqlProcName, oracleParameter);
 
                 var list = new List<GroupInfoResult>();
@@ -160,19 +181,30 @@ namespace AlgotechUnityREST_ckb.Controllers
                 reader.Dispose();
                 //.
 
-                // Rezultat objekat koji vraćamo serijalizacijom
-                json = Newtonsoft.Json.JsonConvert.SerializeObject(list);
-
-                if (json != string.Empty)
+                if (list.Count == 0)
                 {
                     result = new Result
                     {
-                        Status = json,
-                        Message = "Podacu su uspešno preuzeti."
+                        Status = string.Empty,
+                        Message = "Nema podataka za prosleđene parametre."
                     };
-
                     response = Request.CreateResponse(HttpStatusCode.OK, result);
-                    response.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+                }
+                else 
+                {  
+                    // Rezultat objekat koji vraćamo serijalizacijom
+                    json = Newtonsoft.Json.JsonConvert.SerializeObject(list);
+                    if (json != string.Empty)
+                    {
+                        result = new Result
+                        {
+                            Status = json,
+                            Message = "Podacu su uspešno preuzeti."
+                        };
+
+                        response = Request.CreateResponse(HttpStatusCode.OK, result);
+                        response.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+                    }
                 }
 
             }
@@ -208,8 +240,9 @@ namespace AlgotechUnityREST_ckb.Controllers
         /// Primer vrednosti: 
         /// groupID = "46", findValue = "02007819 ili SYSGIHFY OMVOLVAEBUF IQZPWS FJXQ "
         /// </remarks>        
-        [HttpGet, Route("api/CoreSystemGroup/GroupInfoByID/{groupID}/{findValue?}/{filterByType?}")]
-        [ActionName("GetGroupInfoByID")]
+        [HttpGet, ActionName("GetGroupInfoByID")]
+        //[HttpGet, Route("api/CoreSystemGroup/GroupInfoByID/{groupID}/{findValue?}/{filterByType?}")]
+        //[ActionName("GetGroupInfoByID")]
         public HttpResponseMessage GroupInfoByID(int groupID, string findValue = null, string filterByType = null)
         {
             Result result;

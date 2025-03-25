@@ -1,8 +1,6 @@
 ﻿USE OnBaseUTL
 GO
 
--- 3BANK
-
 -- Kreiramo sekvencu za prefiks
 -- DROP SEQUENCE dbo.RefNoUPI
 /*
