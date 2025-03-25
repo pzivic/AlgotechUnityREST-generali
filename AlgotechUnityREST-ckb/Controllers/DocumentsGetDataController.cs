@@ -30,7 +30,7 @@ namespace AlgotechUnityREST_ckb.Controllers
         HttpResponseMessage response;
         #endregion
 
-        #region DocumentsList
+        #region DocumentsList klasa
         /// <summary>
         /// Privatna klasa za listanje dokumenata
         /// </summary>
@@ -64,7 +64,7 @@ namespace AlgotechUnityREST_ckb.Controllers
         }
         #endregion
 
-        #region DocumentList
+        #region DocumentList metoda
         /// <summary>
         /// Vraća listu dokumenata za prosleđene parametre. Parametri su opcioni, mogu se kombinovati i mora se proslediti bar jedan parametar.
         /// </summary>

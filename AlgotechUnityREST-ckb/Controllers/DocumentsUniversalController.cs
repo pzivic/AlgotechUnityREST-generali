@@ -17,6 +17,7 @@ using AlgotechUnityREST_ckb.Models;
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace AlgotechUnityREST.Controllers
 {
@@ -72,10 +73,25 @@ namespace AlgotechUnityREST.Controllers
             /// </summary>
             [Required]
             public List<Keyword> Keywords { get; set; }
+
+            public long DocumentID { get; set; }
+            public string Name { get; set; }
+            public DateTime DateStored { get; set; }
+            public string DocumentFullPath { get; internal set; }
+            public string DocumentUrlByID { get; internal set; }
+
+            public long RevisionID { get; set; }
+            public DateTime RevisionDate { get; set; }
+
+
+            /// <summary>
+            /// Kolekcija ključnih reči pridruženih dokumentu
+            /// </summary>
+            public Dictionary<string, string> KeywordList { get; set; }
         }
 
         /// <summary>
-        /// Klučne reči
+        /// Ključne reči
         /// </summary>
         public class Keyword
         {
@@ -245,5 +261,290 @@ namespace AlgotechUnityREST.Controllers
             return responseMessage;
         }
         #endregion
+
+        #region DocumentList
+        /// <summary>
+        /// Vraća listu dokumenata za prosleđene parametre. Parametri su opcioni, mogu se kombinovati i mora se proslediti bar jedan parametar.
+        /// </summary>
+        /// <param name="fromDate">Datum kreiranja dokumenta od</param>
+        /// <param name="toDate">Datum kreiranja dokumenta do</param>
+        /// <param name="documentTypeName">Naziv tipa dokumenta u OnBase sistemu</param>
+        /// <param name="keywordName">Naziv ključne reči za pretragu</param>
+        /// <param name="keywordValue">Vrednost klučne reči za pretragu</param>
+        /// <returns></returns>
+        [HttpGet, ActionName("DocumentList")]
+        public HttpResponseMessage DocumentList(
+            DateTime? fromDate = null,
+            DateTime? toDate = null,
+            string documentTypeName = "",
+            string keywordName = "",
+            string keywordValue = ""
+            )
+        {
+            Application application = null;
+            Result result;
+            HttpResponseMessage response;
+
+            var dateTimeStart = DateTime.Now;
+
+            try
+            {
+                // Provera ulaznih parametara pretrage
+                if (!fromDate.HasValue &&
+                    !toDate.HasValue &&
+                    documentTypeName == string.Empty &&
+                    keywordName == string.Empty &&
+                    keywordValue == string.Empty)
+                {
+                    throw new ArgumentException("Niste definisali kriterijum pretrage");
+                }
+
+                if (fromDate.HasValue && !toDate.HasValue)
+                {
+                    throw new ArgumentException("Niste definisali kriterijum datum do a definisali ste kriterijum datum od!");
+                }
+                if (!fromDate.HasValue && toDate.HasValue)
+                {
+                    throw new ArgumentException("Niste definisali kriterijum datum od a definisali ste kriterijum datum do!");
+                }
+                //.
+
+                //Debug.WriteLine(string.Format("Parametri pretrage fromDate: {0} toDate: {1} documentTypeName: {2} clientID: {3} docBarcode {4} groupBarcode {5}.", fromDate, toDate, documentTypeName, clientID, docBarcode, groupBarcode));
+                //_logger.Info(string.Format("Parametri pretrage fromDate: {0} toDate: {1} documentTypeName: {2} clientID: {3} docBarcode {4} groupBarcode {5}.", fromDate, toDate, documentTypeName, clientID, docBarcode, groupBarcode));
+
+                // Konektuj OnBase
+                _logger.Info("OnBase Connect()");
+                var obj = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
+                application = obj.OnBaseConnect();
+                if (application == null)
+                {
+                    _logger.Warn("Greška kod uspostavljanja konekcije sa OnBase");
+                    throw new ArgumentException("Greška kod uspostavljanja konekcije sa OnBase. Kontaktirajte OnBase administratora.");
+                }
+                //.
+
+                // Logijemo od momenta uspostavljanja konekcije
+                dateTimeStart = DateTime.Now;
+                _logger.Info("Metoda:: DocumentList start " + dateTimeStart);
+
+                // Kreiraj DocumentQuery objekat
+                DocumentQuery docQuery = application.Core.CreateDocumentQuery();
+
+                // Datum od do
+                if (fromDate.HasValue && toDate.HasValue)
+                {
+                    docQuery.AddDateRange(Convert.ToDateTime(fromDate), Convert.ToDateTime(toDate));
+                }
+
+                // Dodaj dokument tip u uput
+                if (documentTypeName != string.Empty)
+                {
+                    // Pronalazimo document type
+                    DocumentType documentType = application.Core.DocumentTypes.Find(documentTypeName);
+                    docQuery.AddDocumentType(documentType);
+                }
+
+                // Ključne reči kao filter
+                if (keywordName != string.Empty)
+                {
+                    docQuery.AddKeyword(keywordName, keywordValue, KeywordOperator.Equal, KeywordRelation.Or);
+                }
+                //.
+
+                // Dodajemo sort po datumu dokumenta silazno (descending)
+                docQuery.AddSort(DocumentQuery.SortAttribute.DocumentDate, false);
+
+
+                // Izvrši upit dobijamo listu dokumenata
+                _logger.Info(string.Format("DocumentQuery Execute start {0}.", DateTime.Now));
+                int MAX_DOCUMENTS_TO_RETURN = Convert.ToInt32(System.Configuration.ConfigurationManager.AppSettings["MAX_DOCUMENTS_TO_RETURN"]);
+                DocumentList documentList = docQuery.Execute(MAX_DOCUMENTS_TO_RETURN);
+                _logger.Info(string.Format("DocumentQuery Execute end {0}.", DateTime.Now));
+
+                // Pokupi iz konfiguracije Web klijent adresu
+                var webServerURL = System.Configuration.ConfigurationManager.AppSettings["OnBaseDocPop"];
+                var docPopKeyword = System.Configuration.ConfigurationManager.AppSettings["OnBaseDocPopKeyword"];
+                //
+
+                // „Trči“ po listi i kreira response
+                _logger.Info(string.Format("Pravimo putanju do fajla start {0}.", DateTime.Now));
+                var unityUDF = new Algotech.UTL.AlgotechUnityUDF.UnityUDF();
+                var diskGroupID = Convert.ToInt64(System.Configuration.ConfigurationManager.AppSettings["DiskGroupID"]); // Bankarska dokumentacija
+
+                var list = new List<DocumentsImport>();
+                foreach (var item in documentList)
+                {
+                    // Podaci Dokumenta
+                    var objDocumentsList = new DocumentsImport
+                    {
+                        DocumentID = item.ID,
+                        Name = item.Name,
+                        DateStored = item.DateStored,
+                        DocumentDate = item.DocumentDate,
+                        DocumentFullPath = unityUDF.GetFullPath(diskGroupID, item.ID),
+                        DocumentUrlByID = webServerURL + string.Format(@"&docid={0}", item.ID),
+                        DefaultFileTypeName = item.DefaultFileType.Name,
+                        DocumentTypeName = item.DocumentType.Name
+                    };
+                    //.
+
+                    // Podaci revizije
+                    _logger.Info("Poslednja revizija dokumenta");
+                    Revision latestRevision = item.LatestRevision;
+                    if (latestRevision != null)
+                    {
+                        objDocumentsList.RevisionID = latestRevision.ID;
+                        objDocumentsList.RevisionDate = latestRevision.Date;
+                    }
+
+                    //.
+
+                    // Dodajemo ključne reči
+                    _logger.Info(string.Format("Dodajemo ključne reči start {0}.", DateTime.Now));
+                    Dictionary<string, string> keywordList = new Dictionary<string, string>();
+                    foreach (KeywordRecord keywordRecords in item.KeywordRecords)
+                    {
+                        foreach (Hyland.Unity.Keyword keyword in keywordRecords.Keywords)
+                        {
+                            if (!keyword.IsBlank)
+                            {
+                                //if (keyword.KeywordType.Name == "DataSource")
+                                //    objDocumentsList.DataSource = keyword.Value.ToString();
+
+                                // Konvertovati Hyland.Unity data type u C# trebaće nam možda ovakav kod zbog formatiranja vrednosti
+                                switch (keyword.KeywordType.DataType)
+                                {
+                                    //case KeywordDataType.Numeric9:
+                                    //    keywordList.Add(keyword.KeywordType.Name, keyword.Numeric9Value.ToString());
+                                    //    break;
+
+                                    //case KeywordDataType.Numeric20:
+                                    //    keywordList.Add(keyword.KeywordType.Name, keyword.Numeric20Value.ToString());
+                                    //    break;
+
+                                    //case KeywordDataType.AlphaNumeric:
+                                    //    keywordList.Add(keyword.KeywordType.Name, keyword.AlphaNumericValue.ToString());
+                                    //    break;
+
+                                    //case KeywordDataType.Currency:
+                                    //    keywordList.Add(keyword.KeywordType.Name, keyword.CurrencyValue.ToString());
+                                    //    break;
+
+                                    case KeywordDataType.Date:
+                                        //keywordList.Add(keyword.KeywordType.Name, keyword.DateTimeValue.ToString("G", CultureInfo.CurrentCulture));
+                                        keywordList.Add(keyword.KeywordType.Name, keyword.DateTimeValue.ToString("s"));
+                                        break;
+
+                                    case KeywordDataType.DateTime:
+                                        //keywordList.Add(keyword.KeywordType.Name, keyword.DateTimeValue.ToString("G", CultureInfo.CurrentCulture));
+                                        keywordList.Add(keyword.KeywordType.Name, keyword.DateTimeValue.ToString("s", CultureInfo.CurrentCulture));
+
+                                        _logger.Debug(string.Format(
+                                            "Datum: {0}, " +
+                                            "ToString('o'): {1}, " +
+                                            "ToString('s'): {2}, " +
+                                            "ToString('G'): {3}, " +
+                                            "ToString('yyyy-MM-ddTHH:mm:ssK'): {4}, " +
+                                            "ToString(): {5} " +
+                                            "ToLocalTime: {6},  " +
+                                            "DateTimeFormatInfo.CurrentInfo: {7}",
+                                            keyword.DateTimeValue,
+                                            keyword.DateTimeValue.ToString("o"),
+                                            keyword.DateTimeValue.ToString("s"),
+                                            keyword.DateTimeValue.ToString("G"),
+                                            keyword.DateTimeValue.ToString("yyyy-MM-ddTHH:mm:ssK"),
+                                            keyword.DateTimeValue.ToString(),
+                                            keyword.DateTimeValue.ToLocalTime(),
+                                            DateTimeFormatInfo.CurrentInfo.ToString())); ;
+                                        break;
+
+                                    //case KeywordDataType.FloatingPoint:
+                                    //    keywordList.Add(keyword.KeywordType.Name, keyword.FloatingPointValue.ToString());
+                                    //    break;
+
+                                    default:
+                                        if (keywordList.ContainsKey(keyword.KeywordType.Name))
+                                        {
+                                            // Ako već postoji ukloni da bi dodali poeslenju vrednost
+                                            keywordList.Remove(keyword.KeywordType.Name);
+                                        }
+                                        // Dodajemo
+                                        keywordList.Add(keyword.KeywordType.Name, keyword.Value.ToString());
+                                        break;
+                                }
+                                //..
+                            }
+
+
+                        }
+                    }
+                    _logger.Info(string.Format("Dodajemo ključne reči end {0}.", DateTime.Now));
+                    //.
+                    objDocumentsList.KeywordList = keywordList;
+
+                    list.Add(objDocumentsList);
+                }
+                _logger.Info(string.Format("Pravimo putanju do fajla start {0}.", DateTime.Now));
+                //.
+
+                // Formatiranje
+                var jsonSerializerSettings = new Newtonsoft.Json.JsonSerializerSettings();
+                jsonSerializerSettings.NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore;
+                jsonSerializerSettings.Formatting = Newtonsoft.Json.Formatting.None;
+                var dateFormat = System.Configuration.ConfigurationManager.AppSettings["DateFormat"];
+                if (dateFormat == "IsoDateFormat")
+                {
+                    jsonSerializerSettings.Culture = CultureInfo.CurrentCulture;
+                    jsonSerializerSettings.DateFormatHandling = Newtonsoft.Json.DateFormatHandling.IsoDateFormat;
+                    jsonSerializerSettings.DateTimeZoneHandling = Newtonsoft.Json.DateTimeZoneHandling.Unspecified;
+                }
+                //.
+
+                // Serijalizacija
+                //var json = JsonConvert.SerializeObject(list, Formatting.None);
+                var json = Newtonsoft.Json.JsonConvert.SerializeObject(list, jsonSerializerSettings);
+                //.
+
+                // Dodaj root
+                json = "{\"documents\":" + json + "}";
+
+                // Response bez "/" https://stackoverflow.com/questions/13833900/return-json-but-it-includes-backward-slashes-which-i-dont-want
+                response = Request.CreateResponse(HttpStatusCode.OK);
+                response.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+                //.
+            }
+
+            catch (Exception ex)
+            {
+                // Logger
+                _logger.Error("Greška preuzimaja podataka");
+                _logger.Error(ex.Message);
+                _logger.Error(ex.StackTrace);
+                //.
+
+                result = new Result
+                {
+                    Status = string.Empty,
+                    Message = ex.Message
+                };
+                response = Request.CreateResponse(HttpStatusCode.BadRequest, result);
+            }
+            finally
+            {
+                if (application != null)
+                {
+                    _logger.Info("OnBase Disconnect()");
+                    var obj = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
+                    obj.OnBaseDisconnect(application);
+                }
+
+                var dateTimeEnd = DateTime.Now;
+                var diffInSeconds = (dateTimeEnd - dateTimeStart).TotalSeconds;
+                _logger.Info("Metoda:: DocumentList finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
+            }
+            return response;
+        }
+        #endregion
+
     }
 }
