@@ -520,7 +520,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
         /// </summary>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public KeywordDataType GetKeywordDataType(Application application, string keywordTypeName)
+        public static KeywordDataType GetKeywordDataType(Application application, string keywordTypeName)
         {
             try
             {

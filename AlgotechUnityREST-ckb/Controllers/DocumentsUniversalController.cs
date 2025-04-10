@@ -18,6 +18,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using Algotech.UTL.AlgotechUnityUDF;
 
 namespace AlgotechUnityREST.Controllers
 {
@@ -200,13 +201,61 @@ namespace AlgotechUnityREST.Controllers
                 // Pridružujemo datasource kolekciji ključnih reči 
                 documentImport.Keywords.Add(new Keyword { KeywordName = "DataSource", KeywordValue = documentImport.DataSource });
 
+                //// Upisujemo ključne reči 
+                //foreach (var keyword in documentImport.Keywords)
+                //{
+                //    if (!string.IsNullOrEmpty(keyword.KeywordName))
+                //        storeDocumentProperties.AddKeyword(keyword.KeywordName, keyword.KeywordValue);
+                //}
+                ////.
+
                 // Upisujemo ključne reči 
                 foreach (var keyword in documentImport.Keywords)
                 {
                     if (!string.IsNullOrEmpty(keyword.KeywordName))
-                        storeDocumentProperties.AddKeyword(keyword.KeywordName, keyword.KeywordValue);
+                    {
+                        // Treba nam id ključne reči i tip podatka
+                        //var keywordTypeNameID = UnityUDF.GetKeywordTypeID(application, keyword.KeywordName);
+                        var keywordDataType = UnityUDF.GetKeywordDataType(application, keyword.KeywordName);
+
+                        // Konvertovati Hyland.Unity data type u C#
+                        switch (keywordDataType)
+                        {
+                            case KeywordDataType.Numeric9:
+                                storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToInt32(keyword.KeywordValue));
+                                break;
+
+                            case KeywordDataType.Numeric20:
+                                storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToInt64(keyword.KeywordValue));
+                                break;
+
+                            case KeywordDataType.AlphaNumeric:
+                                storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToString(keyword.KeywordValue));
+                                break;
+
+                            case KeywordDataType.Currency:
+                                storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToDecimal(keyword.KeywordValue));
+                                break;
+
+                            case KeywordDataType.Date:
+                                storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToDateTime(keyword.KeywordValue));
+                                break;
+
+                            case KeywordDataType.DateTime:
+                                storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToDateTime(keyword.KeywordValue));
+                                break;
+
+                            case KeywordDataType.FloatingPoint:
+                                storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToDecimal(keyword.KeywordValue));
+                                break;
+
+                            default:
+                                storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToString(keyword.KeywordValue));
+                                break;
+                        }
+                        Debug.WriteLine("Kriterijum pretrage Keyword type.");
+                    }
                 }
-                //.
 
                 // Skladišti novi dokument
                 var newDocument = application.Core.Storage.StoreNewDocument(documentImport.FileName, storeDocumentProperties);
@@ -366,7 +415,7 @@ namespace AlgotechUnityREST.Controllers
                 var docPopKeyword = System.Configuration.ConfigurationManager.AppSettings["OnBaseDocPopKeyword"];
                 //
 
-                // „Trči“ po listi i kreira response
+                // Trči po listi i kreira response
                 _logger.Info(string.Format("Pravimo putanju do fajla start {0}.", DateTime.Now));
                 var unityUDF = new Algotech.UTL.AlgotechUnityUDF.UnityUDF();
                 var diskGroupID = Convert.ToInt64(System.Configuration.ConfigurationManager.AppSettings["DiskGroupID"]); // Bankarska dokumentacija
