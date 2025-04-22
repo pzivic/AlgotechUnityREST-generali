@@ -1,6 +1,6 @@
 ﻿// Predrag Živić
 // 01.03.2025
-// Univerzalni data import
+// Univerzalni data import i univerzalno listanje dokumenata
 
 using System;
 using System.Web.Http;
@@ -75,13 +75,34 @@ namespace AlgotechUnityREST.Controllers
             [Required]
             public List<Keyword> Keywords { get; set; }
 
+            /// <summary>
+            /// Jedinistveni identifikator dokumenta
+            /// </summary>
             public long DocumentID { get; set; }
+            /// <summary>
+            /// NAziv dokumenta
+            /// </summary>
             public string Name { get; set; }
+            /// <summary>
+            /// Kada je dokument skladišten
+            /// </summary>
             public DateTime DateStored { get; set; }
+            /// <summary>
+            /// Puna putanja do datoteke
+            /// </summary>
             public string DocumentFullPath { get; internal set; }
+            /// <summary>
+            /// Putanja do dokuenta po ID
+            /// </summary>
             public string DocumentUrlByID { get; internal set; }
 
+            /// <summary>
+            /// Broj revizije
+            /// </summary>
             public long RevisionID { get; set; }
+            /// <summary>
+            /// Datum revizije
+            /// </summary>
             public DateTime RevisionDate { get; set; }
 
 
@@ -594,6 +615,5 @@ namespace AlgotechUnityREST.Controllers
             return response;
         }
         #endregion
-
     }
 }
