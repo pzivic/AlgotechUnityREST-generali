@@ -258,6 +258,10 @@ namespace AlgotechUnityREST.Controllers
                                 storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToDecimal(keyword.KeywordValue));
                                 break;
 
+                            case KeywordDataType.SpecificCurrency:
+                                storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToDecimal(keyword.KeywordValue));
+                                break;
+
                             case KeywordDataType.Date:
                                 storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToDateTime(keyword.KeywordValue));
                                 break;
@@ -339,6 +343,7 @@ namespace AlgotechUnityREST.Controllers
         /// <param name="fromDate">Datum kreiranja dokumenta od</param>
         /// <param name="toDate">Datum kreiranja dokumenta do</param>
         /// <param name="documentTypeName">Naziv tipa dokumenta u OnBase sistemu</param>
+        /// <param name="dataSource">Izvor podatka</param>
         /// <param name="keywordName">Naziv ključne reči za pretragu</param>
         /// <param name="keywordValue">Vrednost klučne reči za pretragu</param>
         /// <returns></returns>
@@ -347,6 +352,7 @@ namespace AlgotechUnityREST.Controllers
             DateTime? fromDate = null,
             DateTime? toDate = null,
             string documentTypeName = "",
+            string dataSource = "",
             string keywordName = "",
             string keywordValue = ""
             )
@@ -366,16 +372,16 @@ namespace AlgotechUnityREST.Controllers
                     keywordName == string.Empty &&
                     keywordValue == string.Empty)
                 {
-                    throw new ArgumentException("Niste definisali kriterijum pretrage");
+                    throw new ArgumentException("Niste definisali kriterijum pretrage. Definišite [fromDate] i [toDate].");
                 }
 
                 if (fromDate.HasValue && !toDate.HasValue)
                 {
-                    throw new ArgumentException("Niste definisali kriterijum datum do a definisali ste kriterijum datum od!");
+                    throw new ArgumentException("Niste definisali kriterijum [toDate] a definisali ste kriterijum [fromDate]!");
                 }
                 if (!fromDate.HasValue && toDate.HasValue)
                 {
-                    throw new ArgumentException("Niste definisali kriterijum datum od a definisali ste kriterijum datum do!");
+                    throw new ArgumentException("Niste definisali kriterijum [fromDate] a definisali ste kriterijum [toDate]!");
                 }
                 //.
 
@@ -414,10 +420,57 @@ namespace AlgotechUnityREST.Controllers
                     docQuery.AddDocumentType(documentType);
                 }
 
+                // Dodaj data source fixno
+                if (dataSource != string.Empty)
+                {
+                    docQuery.AddKeyword("DataSource", dataSource, KeywordOperator.Equal, KeywordRelation.Or);
+                }
+
                 // Ključne reči kao filter
                 if (keywordName != string.Empty)
                 {
-                    docQuery.AddKeyword(keywordName, keywordValue, KeywordOperator.Equal, KeywordRelation.Or);
+                    //docQuery.AddKeyword(keywordName, keywordValue, KeywordOperator.Equal, KeywordRelation.Or);
+                    var keywordDataType = UnityUDF.GetKeywordDataType(application, keywordName);
+                    // Konvertovati Hyland.Unity data type u C# 
+                    switch (keywordDataType)
+                    {
+                        case KeywordDataType.Numeric9:
+                            docQuery.AddKeyword(keywordName, Convert.ToInt32(keywordValue), KeywordOperator.Equal, KeywordRelation.Or);
+                            break;
+
+                        case KeywordDataType.Numeric20:
+                            docQuery.AddKeyword(keywordName, Convert.ToInt64(keywordValue), KeywordOperator.Equal, KeywordRelation.Or);
+                            break;
+
+                        case KeywordDataType.AlphaNumeric:
+                            docQuery.AddKeyword(keywordName, Convert.ToString(keywordValue), KeywordOperator.Equal, KeywordRelation.Or);
+                            break;
+
+                        case KeywordDataType.Currency:
+                            docQuery.AddKeyword(keywordName, Convert.ToDecimal(keywordValue), KeywordOperator.Equal, KeywordRelation.Or);
+                            break;
+
+                        case KeywordDataType.SpecificCurrency:
+                            docQuery.AddKeyword(keywordName, Convert.ToDecimal(keywordValue), KeywordOperator.Equal, KeywordRelation.Or);
+                            break;
+
+                        case KeywordDataType.Date:
+                            docQuery.AddKeyword(keywordName, Convert.ToDateTime(keywordValue), KeywordOperator.Equal, KeywordRelation.Or);
+                            break;
+
+                        case KeywordDataType.DateTime:
+                            docQuery.AddKeyword(keywordName, Convert.ToDateTime(keywordValue), KeywordOperator.Equal, KeywordRelation.Or);
+                            break;
+
+                        case KeywordDataType.FloatingPoint:
+                            docQuery.AddKeyword(keywordName, Convert.ToDecimal(keywordValue), KeywordOperator.Equal, KeywordRelation.Or);
+                            break;
+
+                        default:
+                            docQuery.AddKeyword(keywordName, Convert.ToString(keywordValue), KeywordOperator.Equal, KeywordRelation.Or);
+                            break;
+                    }
+                    //..
                 }
                 //.
 
@@ -484,6 +537,7 @@ namespace AlgotechUnityREST.Controllers
                                 // Konvertovati Hyland.Unity data type u C# trebaće nam možda ovakav kod zbog formatiranja vrednosti
                                 switch (keyword.KeywordType.DataType)
                                 {
+                                    // LIsta je string ne mogu orginilanu vrednost da mu dam 
                                     //case KeywordDataType.Numeric9:
                                     //    keywordList.Add(keyword.KeywordType.Name, keyword.Numeric9Value.ToString());
                                     //    break;
@@ -497,6 +551,10 @@ namespace AlgotechUnityREST.Controllers
                                     //    break;
 
                                     //case KeywordDataType.Currency:
+                                    //    keywordList.Add(keyword.KeywordType.Name, keyword.CurrencyValue.ToString());
+                                    //    break;
+
+                                    //case KeywordDataType.SpecificCurrency:
                                     //    keywordList.Add(keyword.KeywordType.Name, keyword.CurrencyValue.ToString());
                                     //    break;
 
@@ -528,9 +586,9 @@ namespace AlgotechUnityREST.Controllers
                                             DateTimeFormatInfo.CurrentInfo.ToString())); ;
                                         break;
 
-                                    //case KeywordDataType.FloatingPoint:
-                                    //    keywordList.Add(keyword.KeywordType.Name, keyword.FloatingPointValue.ToString());
-                                    //    break;
+                                    case KeywordDataType.FloatingPoint:
+                                        keywordList.Add(keyword.KeywordType.Name, keyword.FloatingPointValue.ToString());
+                                        break;
 
                                     default:
                                         if (keywordList.ContainsKey(keyword.KeywordType.Name))

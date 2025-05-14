@@ -105,7 +105,9 @@ namespace AlgotechUnityREST_ckb.Controllers
                     //.
 
                     // Provera da li su vrednosti prosleđene
-                    if (checkingValues == true && documentImport.DocumentTypeName != "File Cover Page")
+                    //if (checkingValues == true && documentImport.DocumentTypeName != "File Cover Page")
+                    //if (checkingValues == true && documentImport.DocumentTypeName.Substring(0, 15) != "File Cover Page")
+                    if (checkingValues == true && !documentImport.DocumentTypeName.StartsWith("File Cover Page"))
                     {
                         _logger.Debug("Validacija dokumenata.");
                         //httpStatusCode = HttpStatusCode.BadRequest;
@@ -131,7 +133,9 @@ namespace AlgotechUnityREST_ckb.Controllers
                     //.
 
                     // Ako je File Cover Page nećemo raditi validaciju u kontekstu dokumenata
-                    if (checkingValues == true && documentImport.DocumentTypeName == "File Cover Page")
+                    //if (checkingValues == true && documentImport.DocumentTypeName == "File Cover Page")
+                    //if (checkingValues == true && documentImport.DocumentTypeName.Substring(0, 15) == "File Cover Page")
+                    if (checkingValues == true && documentImport.DocumentTypeName.StartsWith("File Cover Page"))
                     {
                         _logger.Debug("Validacija File Cover Page.");
                         httpStatusCode = HttpStatusCode.NotFound;
@@ -281,7 +285,9 @@ namespace AlgotechUnityREST_ckb.Controllers
                     #region Izmeni ključnu reč za Alternativni ključ koncept 1 (osnovni sa newDocument.ID)
                     // Izmeni ključnu reč za Alternativni ključ koncept 1. 
                     var keywordNameAK = "DocBarcode";
-                    if (documentImport.DocumentTypeName == "File Cover Page")
+                    //if (documentImport.DocumentTypeName == "File Cover Page")
+                    //if (documentImport.DocumentTypeName.Substring(0, 15) == "File Cover Page")
+                    if (documentImport.DocumentTypeName.StartsWith("File Cover Page"))
                     {
                         keywordNameAK = "GroupBarcode";
                     }
@@ -330,7 +336,9 @@ namespace AlgotechUnityREST_ckb.Controllers
                         }
                         //.
 
-                        if (documentImport.DocumentTypeName == "File Cover Page")
+                        //if (documentImport.DocumentTypeName == "File Cover Page")
+                        //if (documentImport.DocumentTypeName.Substring(0, 15) == "File Cover Page")
+                        if (documentImport.DocumentTypeName.StartsWith("File Cover Page"))
                         {
                             if (requestID == 0)
                             {
@@ -343,7 +351,8 @@ namespace AlgotechUnityREST_ckb.Controllers
                             }
                             else
                             {
-                                message = string.Format("Za zahtev broj #{0} 'File Cover Page' je uspešno sačuvan, GroupBarcode: {1}.", requestID, status);
+                                //message = string.Format("Za zahtev broj #{0} 'File Cover Page' je uspešno sačuvan, GroupBarcode: {1}.", requestID, status);
+                                message = string.Format("Za zahtev broj #{0} '{1}' je uspešno sačuvan, GroupBarcode: {2}.", requestID, documentImport.DocumentTypeName, status);
                                 result = new DocumentsImportResult
                                 {
                                     RequestID = requestID,

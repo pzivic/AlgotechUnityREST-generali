@@ -102,10 +102,10 @@ namespace AlgotechUnityREST_ckb.Controllers
         /// clientIdentifier = "02280612", clientType = 1
         /// </remarks>        
 
-        [HttpGet, ActionName("GroupInfo")]
+        //[HttpGet, ActionName("GroupInfo")]
 
         // Ovo mi pravi problem jer onda traži isklučivo preko /
-        //[HttpGet, Route("api/CoreSystemGroup/GroupInfo/{clientIdentifier}/{clientType}")]
+        [HttpGet, Route("api/CoreSystemGroup/GroupInfo/{clientIdentifier}/{clientType}")]
         //[ActionName("GroupInfo")]
         public HttpResponseMessage GroupInfo(string clientIdentifier, short clientType)
         {
@@ -240,8 +240,8 @@ namespace AlgotechUnityREST_ckb.Controllers
         /// Primer vrednosti: 
         /// groupID = "46", findValue = "02007819 ili SYSGIHFY OMVOLVAEBUF IQZPWS FJXQ "
         /// </remarks>        
-        [HttpGet, ActionName("GetGroupInfoByID")]
-        //[HttpGet, Route("api/CoreSystemGroup/GroupInfoByID/{groupID}/{findValue?}/{filterByType?}")]
+        //[HttpGet, ActionName("GetGroupInfoByID")]
+        [HttpGet, Route("api/CoreSystemGroup/GroupInfoByID/{groupID}/{findValue?}/{filterByType?}")]
         //[ActionName("GetGroupInfoByID")]
         public HttpResponseMessage GroupInfoByID(int groupID, string findValue = null, string filterByType = null)
         {
