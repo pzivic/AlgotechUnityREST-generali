@@ -181,17 +181,17 @@ namespace AlgotechUnityREST_ckb.Controllers
                 reader.Dispose();
                 //.
 
-                if (list.Count == 0)
-                {
-                    result = new Result
-                    {
-                        Status = string.Empty,
-                        Message = "Nema podataka za prosleđene parametre."
-                    };
-                    response = Request.CreateResponse(HttpStatusCode.OK, result);
-                }
-                else 
-                {  
+                //if (list.Count == 0)
+                //{
+                //    result = new Result
+                //    {
+                //        Status = string.Empty,
+                //        Message = "Nema podataka za prosleđene parametre."
+                //    };
+                //    response = Request.CreateResponse(HttpStatusCode.OK, result);
+                //}
+                //else 
+                //{  
                     // Rezultat objekat koji vraćamo serijalizacijom
                     json = Newtonsoft.Json.JsonConvert.SerializeObject(list);
                     if (json != string.Empty)
@@ -205,7 +205,7 @@ namespace AlgotechUnityREST_ckb.Controllers
                         response = Request.CreateResponse(HttpStatusCode.OK, result);
                         response.Content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
                     }
-                }
+//                }
 
             }
             catch (Exception ex)
