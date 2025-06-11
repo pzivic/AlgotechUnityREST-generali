@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net;
 
+
 namespace AlgotechUnityREST_ckb.Controllers
 {
     /// <summary>
@@ -23,6 +24,7 @@ namespace AlgotechUnityREST_ckb.Controllers
         //HttpResponseMessage response;
         #endregion
 
+        # region GetApprovalStatusResult
         private class GetApprovalStatusResult
         {
             public string ApprovalStatus { get; set; }
@@ -31,6 +33,7 @@ namespace AlgotechUnityREST_ckb.Controllers
                 ApprovalStatus = string.Empty;
             }
         }
+        #endregion
 
         #region GetApprovalStatus
         /// <summary>
@@ -55,6 +58,15 @@ namespace AlgotechUnityREST_ckb.Controllers
 
             var result = new GetApprovalStatusResult(); // konstruktor radi svoje
             responseMessage = Request.CreateResponse(httpStatusCode, result);
+
+            if (corporateCreditControlPhase == "1")
+            {
+                corporateCreditControlPhase = "FAZA I";
+            }
+            else if (corporateCreditControlPhase == "2")
+            {
+                corporateCreditControlPhase = "FAZA II";
+            }
 
             try
             {
@@ -105,7 +117,7 @@ namespace AlgotechUnityREST_ckb.Controllers
                 }
 
                 // Pronađi vrednost ključne reči "Request Status" iz prvog dokumenta koji je sadrži
-                var statusValue = string.Empty;
+                var requestStatusKeywordValue = string.Empty;
                 foreach (var item in documents)
                 {
                     var requestStatusKeyword = item.KeywordRecords?
@@ -115,13 +127,27 @@ namespace AlgotechUnityREST_ckb.Controllers
 
                     if (requestStatusKeyword != null)
                     {
-                        statusValue = requestStatusKeyword.Value?.ToString();
+                        requestStatusKeywordValue = requestStatusKeyword.Value?.ToString();
+                        break;
+                    }
+                }
+                var actualPhaseValue = string.Empty;
+                foreach (var item in documents)
+                {
+                    var actualPhaseKeyword = item.KeywordRecords?
+                        .SelectMany(kr => kr.Keywords ?? Enumerable.Empty<Keyword>())
+                        .OrderBy(k => k.KeywordType?.KeysetID)
+                        .FirstOrDefault(k => k.KeywordType?.Name == "CorporateCreditControlPhase");
+
+                    if (actualPhaseValue != null)
+                    {
+                        actualPhaseValue = actualPhaseKeyword.Value?.ToString();
                         break;
                     }
                 }
 
                 var getApprovalStatusResult = new GetApprovalStatusResult();
-                getApprovalStatusResult.ApprovalStatus = GetFinalStatus(corporateCreditControlPhase, statusValue);
+                getApprovalStatusResult.ApprovalStatus = GetFinalStatus(corporateCreditControlPhase, actualPhaseValue, requestStatusKeywordValue);
                 //..
 
                 // Rezultat objekat koji vraćamo serijalizacijom
@@ -162,127 +188,58 @@ namespace AlgotechUnityREST_ckb.Controllers
         #endregion
 
         #region GetFinalStatus
-        //private string GetFinalStatus(string phase, string requestStatus)
-        //{
-        //    switch (phase)
-        //    {
-        //        case "FAZA I":
-        //            switch (requestStatus)
-        //            {
-        //                case "PROVERA RAZLOGA ZA VRACANJE OD STRANE BO TIMA":
-        //                case "PRVA FAZA KREDITNE KONTROLE - DOPUNA":
-        //                case "DOPUNA DOSIJEA - PRVA FAZA RM":
-        //                    return "VRAĆEN NA DOPUNU";
-
-        //                case "PRIPREMA DOKUMENTACIJE ZA UGOVARANJE BO":
-        //                case "POTPISIVANJE UGOVORNE DOKUMENTACIJE RM":
-        //                    return "ODOBRENO";
-
-        //                case "POVUČEN PLASMAN":
-        //                    return "ODBIJENO";
-
-        //                default:
-        //                    return null;
-        //            }
-
-        //        case "FAZA II":
-        //            switch (requestStatus)
-        //            {
-        //                case "PROVERA RAZLOGA ZA VRACANJE BO TIM - FAZA II":
-        //                case "DOPUNA DOSIJEA - DRUGA FAZA":
-        //                case "DRUGA FAZA KREDITNE KONTROLE - DOPUNA":
-        //                    return "VRACEN NA DOPUNU";
-
-        //                case "AKTIVACIJA KREDITA - ADMINISTRACIJA":
-        //                case "AKTIVACIJA KREDITA - REALIZACIJA MANAGER":
-        //                case "AKTIVACIJA KREDITA - REALIZACIJA REFERENT":
-        //                case "AKTIVACIJA KREDITA - REALIZACIJA CORPSUPPORT":
-        //                case "REALIZOVAN PLASMAN":
-        //                    return "ODOBRENO";
-
-        //                case "POVUČEN PLASMAN":
-        //                    return "ODBIJENO";
-
-        //                default:
-        //                    return null;
-        //            }
-
-        //        default:
-        //            return null;
-        //    }
-        //}
-
-
-        /// <summary>
-        /// Logika iz pakla
-        /// </summary>
-        /// <param name="requestedPhase"></param>
-        /// <param name="actualPhase"></param>
-        /// <param name="requestStatus"></param>
-        /// <returns></returns>
         private string GetFinalStatus(string requestedPhase, string actualPhase, string requestStatus)
         {
-            // Normalize input
-            requestedPhase = requestedPhase?.ToUpperInvariant();
-            actualPhase = actualPhase?.ToUpperInvariant();
-            requestStatus = requestStatus?.ToUpperInvariant();
+            //switch (requestedPhase)
+            //{
+            //    case "FAZA I":
+            //        switch (requestStatus)
+            //        {
+            //            case "PROVERA RAZLOGA ZA VRACANJE OD STRANE BO TIMA":
+            //            case "PRVA FAZA KREDITNE KONTROLE - DOPUNA":
+            //            case "DOPUNA DOSIJEA - PRVA FAZA RM":
+            //                return "VRAĆEN NA DOPUNU";
 
-            // Ako je FAZA II upit, a dokument je iz FAZA I → ODOBRENO
-            if (requestedPhase == "FAZA I" && actualPhase == "FAZA II")
-            {
-                return "ODOBRENO";
-            }
+            //            case "PRIPREMA DOKUMENTACIJE ZA UGOVARANJE BO":
+            //            case "POTPISIVANJE UGOVORNE DOKUMENTACIJE RM":
+            //                return "ODOBRENO";
 
-            // Ako je FAZA II upit i dokument je iz FAZA II → proveravamo requestStatus
-            if (requestedPhase == "FAZA II" && actualPhase == "FAZA II")
-            {
-                switch (requestStatus)
-                {
-                    case "PROVERA RAZLOGA ZA VRACANJE BO TIM - FAZA II":
-                    case "DOPUNA DOSIJEA - DRUGA FAZA":
-                    case "DRUGA FAZA KREDITNE KONTROLE - DOPUNA":
-                        return "VRAĆEN NA DOPUNU";
+            //            case "POVUČEN PLASMAN":
+            //                return "ODBIJENO";
 
-                    case "AKTIVACIJA KREDITA - ADMINISTRACIJA":
-                    case "AKTIVACIJA KREDITA - REALIZACIJA MANAGER":
-                    case "AKTIVACIJA KREDITA - REALIZACIJA REFERENT":
-                    case "AKTIVACIJA KREDITA - REALIZACIJA CORPSUPPORT":
-                    case "REALIZOVAN PLASMAN":
-                        return "ODOBRENO";
+            //            default:
+            //                return null;
+            //        }
 
-                    case "POVUČEN PLASMAN":
-                        return "ODBIJENO";
+            //    case "FAZA II":
+            //        switch (requestStatus)
+            //        {
+            //            case "PROVERA RAZLOGA ZA VRACANJE BO TIM - FAZA II":
+            //            case "DOPUNA DOSIJEA - DRUGA FAZA":
+            //            case "DRUGA FAZA KREDITNE KONTROLE - DOPUNA":
+            //                return "VRACEN NA DOPUNU";
 
-                    default:
-                        return "U OBRADI";
-                }
-            }
+            //            case "AKTIVACIJA KREDITA - ADMINISTRACIJA":
+            //            case "AKTIVACIJA KREDITA - REALIZACIJA MANAGER":
+            //            case "AKTIVACIJA KREDITA - REALIZACIJA REFERENT":
+            //            case "AKTIVACIJA KREDITA - REALIZACIJA CORPSUPPORT":
+            //            case "REALIZOVAN PLASMAN":
+            //                return "ODOBRENO";
 
-            // Ako je FAZA I upit i dokument je iz FAZA I → proveravamo requestStatus
-            if (requestedPhase == "FAZA I" && actualPhase == "FAZA I")
-            {
-                switch (requestStatus)
-                {
-                    case "PROVERA RAZLOGA ZA VRACANJE OD STRANE BO TIMA":
-                    case "PRVA FAZA KREDITNE KONTROLE - DOPUNA":
-                    case "DOPUNA DOSIJEA - PRVA FAZA RM":
-                        return "VRAĆEN NA DOPUNU";
+            //            case "POVUČEN PLASMAN":
+            //                return "ODBIJENO";
 
-                    case "PRIPREMA DOKUMENTACIJE ZA UGOVARANJE BO":
-                    case "POTPISIVANJE UGOVORNE DOKUMENTACIJE RM":
-                        return "ODOBRENO";
+            //            default:
+            //                return null;
+            //        }
 
-                    case "POVUČEN PLASMAN":
-                        return "ODBIJENO";
+            //    default:
+            //        return null;
 
-                    default:
-                        return "U OBRADI";
-                }
-            }
+            var finalStatus = string.Empty;
+            var strSQL = string.Format("SELECT FinalStatus FROM DocumentStatusMapping WHERE RequestedPhase = '{0}' AND ActualPhase = '{1}' AND RequestStatus = '{2}'", requestedPhase, actualPhase, requestStatus);
 
-            // Ako je FAZA II upit, a dokument je iz FAZA I → ODOBRENO (već pokriveno gore)
-            // Ako je FAZA I upit, a dokument je iz FAZA II → nije definisano
-            return null;
+            return finalStatus;
         }
         #endregion
 
