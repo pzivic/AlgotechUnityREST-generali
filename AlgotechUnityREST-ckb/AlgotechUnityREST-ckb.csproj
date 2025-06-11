@@ -210,6 +210,7 @@
     <Compile Include="Controllers\AccountsController.cs" />
     <Compile Include="Controllers\CoreSystemGroupController.cs" />
     <Compile Include="Controllers\CoreSystemClientController.cs" />
+    <Compile Include="Controllers\DocumentsStatusController.cs" />
     <Compile Include="Controllers\DocumentsUniversalController.cs" />
     <Compile Include="Controllers\DocumentsController.cs" />
     <Compile Include="Controllers\DocumentsGetDataController.cs" />
@@ -300,6 +301,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Views\DocumentsStatus\" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
