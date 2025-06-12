@@ -10,6 +10,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net;
 
+using DataSystem.DAL.SqlHelper;
 
 namespace AlgotechUnityREST_ckb.Controllers
 {
@@ -21,7 +22,6 @@ namespace AlgotechUnityREST_ckb.Controllers
         #region Variable  
         // Logger
         private static readonly log4net.ILog _logger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-        //HttpResponseMessage response;
         #endregion
 
         # region GetApprovalStatusResult
@@ -46,7 +46,7 @@ namespace AlgotechUnityREST_ckb.Controllers
         /// <exception cref="Exception"></exception>
         //[HttpGet, ActionName("GetApprovalStatus")]
         [HttpGet]
-        [Route("GetApprovalStatus")]
+        [Route("api/DocumentsStatus/GetApprovalStatus")]
         public HttpResponseMessage GetApprovalStatus(string corporateContractID, string corporateAnnexMG, string corporateCreditControlPhase)
         {
             HttpResponseMessage responseMessage;
@@ -56,7 +56,7 @@ namespace AlgotechUnityREST_ckb.Controllers
             var httpStatusCode = HttpStatusCode.Forbidden;
             var dateTimeStart = DateTime.Now;
 
-            var result = new GetApprovalStatusResult(); // konstruktor radi svoje
+            var result = new GetApprovalStatusResult();
             responseMessage = Request.CreateResponse(httpStatusCode, result);
 
             if (corporateCreditControlPhase == "1")
@@ -107,16 +107,17 @@ namespace AlgotechUnityREST_ckb.Controllers
                 DocumentList documents = docQuery.Execute(10);
                 if (documents.Count == 0)
                 {
-                    _logger.Error(string.Format("Br.ugovora: {0} anex: {1} faza: {2} nije pronađen za DocumentType '{1}'!", corporateContractID, corporateAnnexMG, corporateCreditControlPhase, documentTypeName));
-                    throw new Exception(string.Format("Br.ugovora: {0} anex: {1} faza: {2} nije pronađen za DocumentType '{1}'!", corporateContractID, corporateAnnexMG, corporateCreditControlPhase, documentTypeName));
+                    _logger.Error(string.Format("Br.ugovora: {0} anex: {1} faza: {2} nije pronađen za DocumentType '{3}'!", corporateContractID, corporateAnnexMG, corporateCreditControlPhase, documentTypeName));
+                    throw new Exception(string.Format("Br.ugovora: {0} anex: {1} faza: {2} nije pronađen za DocumentType '{3}'!", corporateContractID, corporateAnnexMG, corporateCreditControlPhase, documentTypeName));
                 }
                 if (documents.Count > 1)
                 {
-                    _logger.Error(string.Format("Br.ugovora: {0} anex: {1} faza: {2} nije pronađen za DocumentType '{1}'!", corporateContractID, corporateAnnexMG, corporateCreditControlPhase, documentTypeName));
-                    throw new Exception(string.Format("Br.ugovora: {0} anex: {1} faza: {2} nije pronađen za DocumentType '{1}'!", corporateContractID, corporateAnnexMG, corporateCreditControlPhase, documentTypeName));
+                    _logger.Error(string.Format("Br.ugovora: {0} anex: {1} faza: {2} nije jedinstven za DocumentType '{3}'!", corporateContractID, corporateAnnexMG, corporateCreditControlPhase, documentTypeName));
+                    throw new Exception(string.Format("Br.ugovora: {0} anex: {1} faza: {2} nije jedinstven za DocumentType '{3}'!", corporateContractID, corporateAnnexMG, corporateCreditControlPhase, documentTypeName));
                 }
 
-                // Pronađi vrednost ključne reči "Request Status" iz prvog dokumenta koji je sadrži
+                // Pronađi vrednost ključne reči "Request Status" 
+                _logger.Debug("Pronađi vrednost ključne reči Request Status");
                 var requestStatusKeywordValue = string.Empty;
                 foreach (var item in documents)
                 {
@@ -131,6 +132,10 @@ namespace AlgotechUnityREST_ckb.Controllers
                         break;
                     }
                 }
+                _logger.Debug("Request Status: " + requestStatusKeywordValue);
+
+                // Pronađi vrednost ključne reči "CorporateCreditControlPhase" 
+                _logger.Debug("Pronađi vrednost ključne reči CorporateCreditControlPhase");
                 var actualPhaseValue = string.Empty;
                 foreach (var item in documents)
                 {
@@ -145,10 +150,16 @@ namespace AlgotechUnityREST_ckb.Controllers
                         break;
                     }
                 }
+                _logger.Debug("CorporateCreditControlPhase: " + actualPhaseValue);
 
-                var getApprovalStatusResult = new GetApprovalStatusResult();
-                getApprovalStatusResult.ApprovalStatus = GetFinalStatus(corporateCreditControlPhase, actualPhaseValue, requestStatusKeywordValue);
+                _logger.Debug("Uradi mapiranje statusa");
+                var getApprovalStatusResult = new GetApprovalStatusResult
+                {
+                    ApprovalStatus = GetFinalStatus(corporateCreditControlPhase, actualPhaseValue, requestStatusKeywordValue)
+                };
                 //..
+
+                _logger.Debug("Vraćamo: " + getApprovalStatusResult.ApprovalStatus);
 
                 // Rezultat objekat koji vraćamo serijalizacijom
                 json = Newtonsoft.Json.JsonConvert.SerializeObject(getApprovalStatusResult.ApprovalStatus);
@@ -162,7 +173,7 @@ namespace AlgotechUnityREST_ckb.Controllers
             catch (Exception ex)
             {
                 // Logger
-                _logger.Error("Greška kod preuzimaja podataka o klijentu iz Core sistema.");
+                _logger.Error("Greška kod preuzimaja podataka o statusu dokumenta.");
                 _logger.Error(ex.Message);
                 _logger.Error(ex.StackTrace);
                 //.
@@ -188,60 +199,47 @@ namespace AlgotechUnityREST_ckb.Controllers
         #endregion
 
         #region GetFinalStatus
+        /// <summary>
+        /// Preuzima final staus iz baze podataka
+        /// </summary>
+        /// <param name="requestedPhase"></param>
+        /// <param name="actualPhase"></param>
+        /// <param name="requestStatus"></param>
+        /// <returns></returns>
         private string GetFinalStatus(string requestedPhase, string actualPhase, string requestStatus)
         {
-            //switch (requestedPhase)
-            //{
-            //    case "FAZA I":
-            //        switch (requestStatus)
-            //        {
-            //            case "PROVERA RAZLOGA ZA VRACANJE OD STRANE BO TIMA":
-            //            case "PRVA FAZA KREDITNE KONTROLE - DOPUNA":
-            //            case "DOPUNA DOSIJEA - PRVA FAZA RM":
-            //                return "VRAĆEN NA DOPUNU";
+            _logger.Debug("GetFinalStatus START");
 
-            //            case "PRIPREMA DOKUMENTACIJE ZA UGOVARANJE BO":
-            //            case "POTPISIVANJE UGOVORNE DOKUMENTACIJE RM":
-            //                return "ODOBRENO";
+            var sqlHelper = new SqlHelper("connection_string_mssql");
+            try
+            {
+                var sqlString = string.Format(
+                    "SELECT FinalStatus FROM DocumentStatusMapping WHERE RequestedPhase = '{0}' AND ActualPhase = '{1}' AND RequestStatus = '{2}';",
+                    requestedPhase, actualPhase, requestStatus
+                );
 
-            //            case "POVUČEN PLASMAN":
-            //                return "ODBIJENO";
+                _logger.Debug($"SQL string: {sqlString}");
 
-            //            default:
-            //                return null;
-            //        }
+                var result = sqlHelper.ExecuteScalar(sqlString);
 
-            //    case "FAZA II":
-            //        switch (requestStatus)
-            //        {
-            //            case "PROVERA RAZLOGA ZA VRACANJE BO TIM - FAZA II":
-            //            case "DOPUNA DOSIJEA - DRUGA FAZA":
-            //            case "DRUGA FAZA KREDITNE KONTROLE - DOPUNA":
-            //                return "VRACEN NA DOPUNU";
+                if (result == null || result == DBNull.Value)
+                {
+                    _logger.Warn("Rezultat iz baze je NULL ili DBNull.");
+                    return string.Empty;
+                }
 
-            //            case "AKTIVACIJA KREDITA - ADMINISTRACIJA":
-            //            case "AKTIVACIJA KREDITA - REALIZACIJA MANAGER":
-            //            case "AKTIVACIJA KREDITA - REALIZACIJA REFERENT":
-            //            case "AKTIVACIJA KREDITA - REALIZACIJA CORPSUPPORT":
-            //            case "REALIZOVAN PLASMAN":
-            //                return "ODOBRENO";
-
-            //            case "POVUČEN PLASMAN":
-            //                return "ODBIJENO";
-
-            //            default:
-            //                return null;
-            //        }
-
-            //    default:
-            //        return null;
-
-            var finalStatus = string.Empty;
-            var strSQL = string.Format("SELECT FinalStatus FROM DocumentStatusMapping WHERE RequestedPhase = '{0}' AND ActualPhase = '{1}' AND RequestStatus = '{2}'", requestedPhase, actualPhase, requestStatus);
-
-            return finalStatus;
+                return result.ToString();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Greška u GetFinalStatus metodi", ex);
+                return string.Empty;
+            }
+            finally
+            {
+                _logger.Debug("GetFinalStatus END");
+            }
         }
         #endregion
-
     }
 }
