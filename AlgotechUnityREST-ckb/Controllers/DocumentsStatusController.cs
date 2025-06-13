@@ -24,11 +24,11 @@ namespace AlgotechUnityREST_ckb.Controllers
         private static readonly log4net.ILog _logger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         #endregion
 
-        # region GetApprovalStatusResult
-        private class GetApprovalStatusResult
+        # region ApprovalStatusResult
+        private class ApprovalStatusResult
         {
             public string ApprovalStatus { get; set; }
-            public GetApprovalStatusResult()
+            public ApprovalStatusResult()
             {
                 ApprovalStatus = string.Empty;
             }
@@ -47,7 +47,7 @@ namespace AlgotechUnityREST_ckb.Controllers
         //[HttpGet, ActionName("GetApprovalStatus")]
         [HttpGet]
         [Route("api/DocumentsStatus/GetApprovalStatus")]
-        public HttpResponseMessage GetApprovalStatus(string corporateContractID, string corporateAnnexMG, string corporateCreditControlPhase)
+        public HttpResponseMessage GetApprovalStatus(string corporateCreditControlPhase, string corporateContractID, string corporateAnnexMG = "")
         {
             HttpResponseMessage responseMessage;
             Application application = null;
@@ -56,7 +56,7 @@ namespace AlgotechUnityREST_ckb.Controllers
             var httpStatusCode = HttpStatusCode.Forbidden;
             var dateTimeStart = DateTime.Now;
 
-            var result = new GetApprovalStatusResult();
+            var result = new ApprovalStatusResult();
             responseMessage = Request.CreateResponse(httpStatusCode, result);
 
             if (corporateCreditControlPhase == "1")
@@ -72,9 +72,9 @@ namespace AlgotechUnityREST_ckb.Controllers
             {
                 var documentTypeName = "Zahtev za Ugovor Corporate - exZAK";
 
-                if (corporateContractID == string.Empty) { throw new ArgumentException("Parametar corporateContractID mora da bude prosleđen"); }
-                if (corporateAnnexMG == string.Empty) { throw new ArgumentException("Parametar corporateAnnexMG mora da bude prosleđen"); }
                 if (corporateCreditControlPhase == string.Empty) { throw new ArgumentException("Parametar corporateCreditControlPhase mora da bude prosleđen"); }
+                if (corporateContractID == string.Empty) { throw new ArgumentException("Parametar corporateContractID mora da bude prosleđen"); }
+                //if (corporateAnnexMG == string.Empty) { throw new ArgumentException("Parametar corporateAnnexMG mora da bude prosleđen"); }
 
                 _logger.Debug("Početak GetApprovalStatus: " + dateTimeStart);
 
@@ -99,21 +99,34 @@ namespace AlgotechUnityREST_ckb.Controllers
                     _logger.Error(string.Format("Nije pronađen DocumentType '{0}'.", documentTypeName));
                     throw new Exception(string.Format("Nije pronađen DocumentType '{0}'.", documentTypeName));
                 }
+
+                // Pravimo filter sa klučnim rečima
                 docQuery.AddDocumentType(documentType);
-                docQuery.AddKeyword("CorporateContractID", corporateContractID, KeywordOperator.Equal, KeywordRelation.Or);
-                docQuery.AddKeyword("CorporateAnnexMG", corporateAnnexMG, KeywordOperator.Equal, KeywordRelation.Or);
-                docQuery.AddKeyword("CorporateCreditControlPhase", corporateCreditControlPhase, KeywordOperator.Equal, KeywordRelation.Or);
+
+                docQuery.AddKeyword("CorporateContractID", corporateContractID);
+                if (!string.IsNullOrWhiteSpace(corporateAnnexMG))
+                {
+                    docQuery.AddKeyword("CorporateAnnexMG", corporateAnnexMG, KeywordOperator.Equal, KeywordRelation.And);
+                }
+                docQuery.AddKeyword("CorporatePlacementType", "LIZING", KeywordOperator.Equal, KeywordRelation.Or);
+                docQuery.AddKeyword("CorporatePlacementType", "ANEKS LIZINGA", KeywordOperator.Equal, KeywordRelation.Or);
+
+                //// Ispis za debug
+                //foreach (var filter in docQuery.add)
+                //{
+                //    _logger.Debug("Filter dodat: " + filter);
+                //}
 
                 DocumentList documents = docQuery.Execute(10);
                 if (documents.Count == 0)
                 {
-                    _logger.Error(string.Format("Br.ugovora: {0} anex: {1} faza: {2} nije pronađen za DocumentType '{3}'!", corporateContractID, corporateAnnexMG, corporateCreditControlPhase, documentTypeName));
-                    throw new Exception(string.Format("Br.ugovora: {0} anex: {1} faza: {2} nije pronađen za DocumentType '{3}'!", corporateContractID, corporateAnnexMG, corporateCreditControlPhase, documentTypeName));
+                    _logger.Error(string.Format("Br.ugovora: '{0}' anex: '{1}' nije pronađen za DocumentType '{2}'!", corporateContractID, corporateAnnexMG, documentTypeName));
+                    throw new Exception(string.Format("Br.ugovora: '{0}' anex: '{1}' nije pronađen za DocumentType '{2}'!", corporateContractID, corporateAnnexMG, documentTypeName));
                 }
                 if (documents.Count > 1)
                 {
-                    _logger.Error(string.Format("Br.ugovora: {0} anex: {1} faza: {2} nije jedinstven za DocumentType '{3}'!", corporateContractID, corporateAnnexMG, corporateCreditControlPhase, documentTypeName));
-                    throw new Exception(string.Format("Br.ugovora: {0} anex: {1} faza: {2} nije jedinstven za DocumentType '{3}'!", corporateContractID, corporateAnnexMG, corporateCreditControlPhase, documentTypeName));
+                    _logger.Error(string.Format("Br.ugovora: '{0}' anex: '{1}' nije jedinstven za DocumentType '{2}'!", corporateContractID, corporateAnnexMG, documentTypeName));
+                    throw new Exception(string.Format("Br.ugovora: '{0}' anex: '{1}' nije jedinstven za DocumentType '{2}'!", corporateContractID, corporateAnnexMG, documentTypeName));
                 }
 
                 // Pronađi vrednost ključne reči "Request Status" 
@@ -128,7 +141,7 @@ namespace AlgotechUnityREST_ckb.Controllers
 
                     if (requestStatusKeyword != null)
                     {
-                        requestStatusKeywordValue = requestStatusKeyword.Value?.ToString();
+                        requestStatusKeywordValue = requestStatusKeyword.Value?.ToString() ?? string.Empty;
                         break;
                     }
                 }
@@ -136,7 +149,7 @@ namespace AlgotechUnityREST_ckb.Controllers
 
                 // Pronađi vrednost ključne reči "CorporateCreditControlPhase" 
                 _logger.Debug("Pronađi vrednost ključne reči CorporateCreditControlPhase");
-                var actualPhaseValue = string.Empty;
+                var actualPhaseKeywordValue = string.Empty;
                 foreach (var item in documents)
                 {
                     var actualPhaseKeyword = item.KeywordRecords?
@@ -144,25 +157,31 @@ namespace AlgotechUnityREST_ckb.Controllers
                         .OrderBy(k => k.KeywordType?.KeysetID)
                         .FirstOrDefault(k => k.KeywordType?.Name == "CorporateCreditControlPhase");
 
-                    if (actualPhaseValue != null)
+                    //if (actualPhaseKeywordValue != null)
+                    //{
+                    //    actualPhaseKeywordValue = actualPhaseKeyword.Value?.ToString();
+                    //    break;
+                    //}
+
+                    if (actualPhaseKeyword != null)
                     {
-                        actualPhaseValue = actualPhaseKeyword.Value?.ToString();
+                        actualPhaseKeywordValue = actualPhaseKeyword.Value?.ToString() ?? string.Empty;
                         break;
                     }
                 }
-                _logger.Debug("CorporateCreditControlPhase: " + actualPhaseValue);
+                _logger.Debug("CorporateCreditControlPhase: " + actualPhaseKeywordValue);
 
                 _logger.Debug("Uradi mapiranje statusa");
-                var getApprovalStatusResult = new GetApprovalStatusResult
+                var approvalStatusResult = new ApprovalStatusResult
                 {
-                    ApprovalStatus = GetFinalStatus(corporateCreditControlPhase, actualPhaseValue, requestStatusKeywordValue)
+                    ApprovalStatus = GetFinalStatus(corporateCreditControlPhase, actualPhaseKeywordValue, requestStatusKeywordValue)
                 };
-                //..
+                //..                
 
-                _logger.Debug("Vraćamo: " + getApprovalStatusResult.ApprovalStatus);
+                _logger.Debug("Vraćamo: " + approvalStatusResult.ApprovalStatus);
 
                 // Rezultat objekat koji vraćamo serijalizacijom
-                json = Newtonsoft.Json.JsonConvert.SerializeObject(getApprovalStatusResult.ApprovalStatus);
+                json = Newtonsoft.Json.JsonConvert.SerializeObject(approvalStatusResult.ApprovalStatus);
 
                 if (json != string.Empty)
                 {
@@ -214,21 +233,33 @@ namespace AlgotechUnityREST_ckb.Controllers
             try
             {
                 var sqlString = string.Format(
-                    "SELECT FinalStatus FROM DocumentStatusMapping WHERE RequestedPhase = '{0}' AND ActualPhase = '{1}' AND RequestStatus = '{2}';",
+                    "SELECT FinalStatus FROM DocumentStatusMapping WHERE RequestedPhase=N'{0}' AND ActualPhase=N'{1}' AND RequestStatus=N'{2}';",
                     requestedPhase, actualPhase, requestStatus
                 );
 
                 _logger.Debug($"SQL string: {sqlString}");
 
-                var result = sqlHelper.ExecuteScalar(sqlString);
+                var obj = sqlHelper.ExecuteScalar(sqlString);
 
-                if (result == null || result == DBNull.Value)
+                var finalStatus = (obj == null || obj == DBNull.Value)
+                    ? string.Empty
+                    : obj.ToString();
+
+                if (string.IsNullOrEmpty(finalStatus))
                 {
-                    _logger.Warn("Rezultat iz baze je NULL ili DBNull.");
-                    return string.Empty;
+                    if ((requestedPhase == "FAZA I" && actualPhase == "FAZA I") ||
+                        (requestedPhase == "FAZA II" && actualPhase == "FAZA II"))
+                    {
+                        return "N/A";
+                    }
+                    if (requestedPhase == "FAZA I" && actualPhase == "FAZA II")
+                    {
+                        return "ODOBRENO - Kredit je prošao fazu KK iz tačke 3";
+                    }
                 }
 
-                return result.ToString();
+                return finalStatus;
+
             }
             catch (Exception ex)
             {
