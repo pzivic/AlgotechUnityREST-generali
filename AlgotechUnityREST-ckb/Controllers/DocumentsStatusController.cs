@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Net;
 
 using DataSystem.DAL.SqlHelper;
+using AlgotechUnityREST_ckb.Models;
 
 namespace AlgotechUnityREST_ckb.Controllers
 {
@@ -22,17 +23,6 @@ namespace AlgotechUnityREST_ckb.Controllers
         #region Variable  
         // Logger
         private static readonly log4net.ILog _logger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-        #endregion
-
-        # region ApprovalStatusResult
-        private class ApprovalStatusResult
-        {
-            public string ApprovalStatus { get; set; }
-            public ApprovalStatusResult()
-            {
-                ApprovalStatus = string.Empty;
-            }
-        }
         #endregion
 
         #region GetApprovalStatus
@@ -56,7 +46,7 @@ namespace AlgotechUnityREST_ckb.Controllers
             var httpStatusCode = HttpStatusCode.Forbidden;
             var dateTimeStart = DateTime.Now;
 
-            var result = new ApprovalStatusResult();
+            var result = new Result();
             responseMessage = Request.CreateResponse(httpStatusCode, result);
 
             if (corporateCreditControlPhase == "1")
@@ -90,7 +80,6 @@ namespace AlgotechUnityREST_ckb.Controllers
                 //.
 
                 DocumentQuery docQuery = application.Core.CreateDocumentQuery();
-
                 // 
                 _logger.Debug("Provera da li imamo DocumentType");
                 DocumentType documentType = application.Core.DocumentTypes.Find(documentTypeName);
@@ -157,12 +146,6 @@ namespace AlgotechUnityREST_ckb.Controllers
                         .OrderBy(k => k.KeywordType?.KeysetID)
                         .FirstOrDefault(k => k.KeywordType?.Name == "CorporateCreditControlPhase");
 
-                    //if (actualPhaseKeywordValue != null)
-                    //{
-                    //    actualPhaseKeywordValue = actualPhaseKeyword.Value?.ToString();
-                    //    break;
-                    //}
-
                     if (actualPhaseKeyword != null)
                     {
                         actualPhaseKeywordValue = actualPhaseKeyword.Value?.ToString() ?? string.Empty;
@@ -172,16 +155,24 @@ namespace AlgotechUnityREST_ckb.Controllers
                 _logger.Debug("CorporateCreditControlPhase: " + actualPhaseKeywordValue);
 
                 _logger.Debug("Uradi mapiranje statusa");
-                var approvalStatusResult = new ApprovalStatusResult
-                {
-                    ApprovalStatus = GetFinalStatus(corporateCreditControlPhase, actualPhaseKeywordValue, requestStatusKeywordValue)
-                };
-                //..                
+            
 
-                _logger.Debug("Vraćamo: " + approvalStatusResult.ApprovalStatus);
+                var approvalStatus = GetFinalStatus(corporateCreditControlPhase, actualPhaseKeywordValue, requestStatusKeywordValue);
+                _logger.Debug("Vraćamo: " + approvalStatus);
+
+                string[] parts = approvalStatus.Split('–');
+
+                // Formiraj response
+                result = new Result
+                {
+                    Status = parts.Length > 1 ? parts[0].Trim() : approvalStatus.Trim(),
+                    Message = approvalStatus
+                };
+                responseMessage = Request.CreateResponse(httpStatusCode, result);
+                //.
 
                 // Rezultat objekat koji vraćamo serijalizacijom
-                json = Newtonsoft.Json.JsonConvert.SerializeObject(approvalStatusResult.ApprovalStatus);
+                json = Newtonsoft.Json.JsonConvert.SerializeObject(result);
 
                 if (json != string.Empty)
                 {
@@ -197,7 +188,14 @@ namespace AlgotechUnityREST_ckb.Controllers
                 _logger.Error(ex.StackTrace);
                 //.
 
-                responseMessage = Request.CreateResponse(httpStatusCode, result);
+                // Formiraj response
+                var resultValue = new Result
+                {
+                    Status = httpStatusCode.ToString(),
+                    Message = ex.Message
+                };
+                responseMessage = Request.CreateResponse(httpStatusCode, resultValue);
+                //.
             }
 
             finally
