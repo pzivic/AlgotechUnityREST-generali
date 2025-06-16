@@ -29,9 +29,9 @@ namespace AlgotechUnityREST_ckb.Controllers
         /// <summary>
         /// Za ulazne parametre vraća status odobravanja
         /// </summary>
+        /// <param name="corporateCreditControlPhase">Naziv faze</param>
         /// <param name="corporateContractID">Broj ugovora</param>
         /// <param name="corporateAnnexMG">Broj anexa</param>
-        /// <param name="corporateCreditControlPhase">Naziv faze</param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
         //[HttpGet, ActionName("GetApprovalStatus")]
