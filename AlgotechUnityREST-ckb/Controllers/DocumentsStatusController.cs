@@ -155,9 +155,7 @@ namespace AlgotechUnityREST_ckb.Controllers
                 _logger.Debug("CorporateCreditControlPhase: " + actualPhaseKeywordValue);
 
                 _logger.Debug("Uradi mapiranje statusa");
-            
-
-                var approvalStatus = GetFinalStatus(corporateCreditControlPhase, actualPhaseKeywordValue, requestStatusKeywordValue);
+                 var approvalStatus = GetFinalStatus(corporateCreditControlPhase, actualPhaseKeywordValue, requestStatusKeywordValue);
                 _logger.Debug("Vraćamo: " + approvalStatus);
 
                 string[] parts = approvalStatus.Split('–');
@@ -245,6 +243,8 @@ namespace AlgotechUnityREST_ckb.Controllers
 
                 if (string.IsNullOrEmpty(finalStatus))
                 {
+                    _logger.Debug($"Nemamo kombinaciju: RequestedPhase={requestedPhase}; ActualPhase={actualPhase}; RequestStatus={requestStatus}!");
+
                     if ((requestedPhase == "FAZA I" && actualPhase == "FAZA I") ||
                         (requestedPhase == "FAZA II" && actualPhase == "FAZA II"))
                     {
