@@ -219,21 +219,13 @@ namespace AlgotechUnityREST.Controllers
                 //storeDocumentProperties.Options = StoreDocumentOptions.SkipWorkflow;
                 //.
 
-                // Pridružujemo datasource kolekciji ključnih reči 
+                // Pridružujemo datasource kolekciji ključnih reči ali odimo računa da ne dupliramo DataSource koji ide fiksno ne kao kolekcija ključna reči
                 documentImport.Keywords.Add(new Keyword { KeywordName = "DataSource", KeywordValue = documentImport.DataSource });
-
-                //// Upisujemo ključne reči 
-                //foreach (var keyword in documentImport.Keywords)
-                //{
-                //    if (!string.IsNullOrEmpty(keyword.KeywordName))
-                //        storeDocumentProperties.AddKeyword(keyword.KeywordName, keyword.KeywordValue);
-                //}
-                ////.
 
                 // Upisujemo ključne reči 
                 foreach (var keyword in documentImport.Keywords)
                 {
-                    if (!string.IsNullOrEmpty(keyword.KeywordName))
+                    if (!string.IsNullOrEmpty(keyword.KeywordName) && (keyword.KeywordName != "DataSouce"))
                     {
                         // Treba nam id ključne reči i tip podatka
                         //var keywordTypeNameID = UnityUDF.GetKeywordTypeID(application, keyword.KeywordName);

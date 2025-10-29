@@ -89,6 +89,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
             _logger.Debug(string.Format("Pomoćna funkcija:: OnBaseConnect url: {0}, datasource {1}; start: {2}.", _appServerURL, _dataSource, dateTimeStart));
 
             var isAppPoolConnection = Convert.ToBoolean(System.Configuration.ConfigurationManager.AppSettings["IsAppPoolConnection"]);
+            _logger.Info (string.Format("Ovo je bitno mora da postoji u web.config IsAppPoolConnection={0}.", isAppPoolConnection));
 
             #region Native Connection
             if (isAppPoolConnection == false)
@@ -102,7 +103,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
                 //authProps.LicenseType = LicenseType.QueryMetering;
                 //authProps.LicenseType = LicenseType.EnterpriseCoreAPI;
 
-                _logger.Debug(string.Format("Pokušaj uspostavljanja veze na klasičan način sa identitetom: {0} i licencom: {1}.", userName, authProps.LicenseType));
+                _logger.Debug(string.Format("Pokušaj uspostavljanja veze na klasičan (nativ) način sa identitetom: {0} i licencom: {1}.", userName, authProps.LicenseType));
 
                 try
                 {
@@ -148,7 +149,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
                     // Vidi web.config
                     var timeOut = Convert.ToInt32(System.Configuration.ConfigurationManager.AppSettings["APPLICATION_TIMEOUT"]);
 
-                    _logger.Info(string.Format("Pokušaj uspostavljanja veze sa identitetom: [{0}] i licencom: [{1}].", userName, authProps.LicenseType));
+                    _logger.Info(string.Format("Pokušaj uspostavljanja veze (AppPoolConnection) sa identitetom: [{0}] i licencom: [{1}].", userName, authProps.LicenseType));
                     try
                     {
                         app = Application.Connect(authProps);
