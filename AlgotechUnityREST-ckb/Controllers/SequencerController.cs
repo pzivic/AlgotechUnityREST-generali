@@ -9,6 +9,22 @@ using System.Web.Http;
 using System.Web.Http.Description;
 using AlgotechUnityREST_ckb.Models;
 
+/*
+-- Predrag Živić
+-- 05.06.2024
+
+USE OnBaseUTL
+GO
+
+CREATE SEQUENCE dbo.RefNoMBP AS int START WITH 1 INCREMENT BY 1;
+GO
+GRANT UPDATE ON dbo.RefNoMBP TO web_access
+GO
+
+-- Resetovanje sekvence na početku godine 01.01.2026
+ALTER SEQUENCE dbo.RefNoMBP RESTART WITH 1
+ */
+
 namespace AlgotechUnityREST_ckb.Controllers
 {
     /// <summary>

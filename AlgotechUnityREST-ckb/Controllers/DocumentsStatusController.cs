@@ -69,7 +69,7 @@ namespace AlgotechUnityREST_ckb.Controllers
                 _logger.Debug("Početak GetApprovalStatus: " + dateTimeStart);
 
                 // Konekcija na OnBase
-                _logger.Info("DocumentImport OnBase Connect()");
+                _logger.Info("GetApprovalStatus OnBase Connect()");
                 var obj = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
                 application = obj.OnBaseConnect();
                 if (application == null)
@@ -97,6 +97,12 @@ namespace AlgotechUnityREST_ckb.Controllers
                 {
                     docQuery.AddKeyword("CorporateAnnexMG", corporateAnnexMG, KeywordOperator.Equal, KeywordRelation.And);
                 }
+
+                //if (!string.IsNullOrWhiteSpace(corporateAnnexMG) && corporateAnnexMG.Trim() != "0")
+                //{
+                //    docQuery.AddKeyword("CorporateAnnexMG", corporateAnnexMG.Trim(), KeywordOperator.Equal, KeywordRelation.And);
+                //}
+
                 docQuery.AddKeyword("CorporatePlacementType", "LIZING", KeywordOperator.Equal, KeywordRelation.Or);
                 docQuery.AddKeyword("CorporatePlacementType", "ANEKS LIZINGA", KeywordOperator.Equal, KeywordRelation.Or);
 

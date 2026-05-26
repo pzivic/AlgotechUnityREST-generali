@@ -191,14 +191,22 @@ namespace AlgotechUnityREST_ckb.Controllers
                 switch (searchMode)
                 {
                     case 1:
+                        //                        sqlString = string.Format(@"SELECT acName2 AS EntityName, acCode AS PIB, acRegNo AS MBR, UPPER(acSubject) AS EntityNameShort, UPPER(acAddress) AS Adress, acPost AS Post, acCountry AS Country FROM tHE_SetSubj
+                        //WHERE  (LEN(acCode) = 9) AND (acActive = 'T') AND (acSubject NOT IN ('001', '001 Alisa', '002', '076')) AND (acCode='{0}')
+                        //ORDER BY acSubject", clientSearch, maxClients);
+
                         sqlString = string.Format(@"SELECT acName2 AS EntityName, acCode AS PIB, acRegNo AS MBR, UPPER(acSubject) AS EntityNameShort, UPPER(acAddress) AS Adress, acPost AS Post, acCountry AS Country FROM tHE_SetSubj
-WHERE  (LEN(acCode) = 9) AND (acActive = 'T') AND (acSubject NOT IN ('001', '001 Alisa', '002', '076')) AND (acCode='{0}')
-ORDER BY acSubject", clientSearch, maxClients);
+                        WHERE  (LEN(acCode) > 7) AND (acActive = 'T') AND (acSubject NOT IN ('001', '001 Alisa', '002', '076')) AND (acCode='{0}')
+                        ORDER BY acSubject", clientSearch, maxClients);
+
                         break;
                     case 2:
+                        //                        sqlString = string.Format(@"SELECT acName2 AS EntityName, acCode AS PIB, acRegNo AS MBR, UPPER(acSubject) AS EntityNameShort, UPPER(acAddress) AS Adress, acPost AS Post, acCountry AS Country FROM tHE_SetSubj
+                        //WHERE  (LEN(acCode) = 9) AND (acActive = 'T') AND (acSubject NOT IN ('001', '001 Alisa', '002', '076')) AND (acName2 LIKE '%{0}%')
+                        //ORDER BY acSubject", clientSearch, maxClients);
                         sqlString = string.Format(@"SELECT acName2 AS EntityName, acCode AS PIB, acRegNo AS MBR, UPPER(acSubject) AS EntityNameShort, UPPER(acAddress) AS Adress, acPost AS Post, acCountry AS Country FROM tHE_SetSubj
-WHERE  (LEN(acCode) = 9) AND (acActive = 'T') AND (acSubject NOT IN ('001', '001 Alisa', '002', '076')) AND (acName2 LIKE '%{0}%')
-ORDER BY acSubject", clientSearch, maxClients);
+                        WHERE  (LEN(acCode) > 7) AND (acActive = 'T') AND (acSubject NOT IN ('001', '001 Alisa', '002', '076')) AND (acName2 LIKE '%{0}%')
+                        ORDER BY acSubject", clientSearch, maxClients);
                         break;
                 }
                 //.
