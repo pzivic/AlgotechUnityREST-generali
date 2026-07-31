@@ -48,11 +48,11 @@
     <DocumentationFile>bin\AlgotechUnityREST-ckb.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Hyland.Types, Version=21.1.12.1000, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Hyland.Types, Version=25.1.23.1000, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>bin\Hyland.Types.dll</HintPath>
     </Reference>
-    <Reference Include="Hyland.Unity, Version=21.1.12.1000, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Hyland.Unity, Version=25.1.23.1000, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>bin\Hyland.Unity.dll</HintPath>
     </Reference>
