@@ -18,6 +18,7 @@ namespace AlgotechUnityREST_ckb.Controllers
     /// <summary>
     /// Korisnički nalozi
     /// </summary>
+    [Authorize]
     [ApiExplorerSettings(IgnoreApi = true)]
     public class AccountsController : ApiController
     {

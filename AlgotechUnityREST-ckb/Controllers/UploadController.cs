@@ -16,6 +16,7 @@ namespace AlgotechUnityREST_ckb.Controllers
     /// <summary>
     /// Upload datoteke na server
     /// </summary>
+    [Authorize]
     [ApiExplorerSettings(IgnoreApi = false)]
     public class UploadController : ApiController
     {

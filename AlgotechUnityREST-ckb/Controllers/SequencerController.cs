@@ -30,6 +30,7 @@ namespace AlgotechUnityREST_ckb.Controllers
     /// <summary>
     /// Generator sekvenci
     /// </summary>
+    [Authorize]
     [ApiExplorerSettings(IgnoreApi=false)]
     public class SequencerController : ApiController
     {

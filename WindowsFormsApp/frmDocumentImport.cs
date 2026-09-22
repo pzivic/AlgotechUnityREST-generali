@@ -1,26 +1,80 @@
 ﻿// Predrag Živić
-// 20.0.5.2024
+// 20.05.2024
 // Pozivanje forme za Import dokumenata u OnBase
-
-using System;
-
-using System.Net.Http;
-using System.Text;
-
-using System.Windows.Forms;
 
 using Newtonsoft.Json;
 
+using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Threading;
+using System.Text;
+
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 
 namespace WindowsFormsApp
 {
     public partial class frmDocumentImport : Form
     {
+        #region OAuth2
+        /// <summary>
+        /// Token response class for deserializing the OAuth2 token response.
+        /// </summary>
+        public class OAuthTokenResponse
+        {
+            [JsonProperty("access_token")]
+            public string AccessToken { get; set; }
+
+            [JsonProperty("token_type")]
+            public string TokenType { get; set; }
+
+            [JsonProperty("expires_in")]
+            public int ExpiresIn { get; set; }
+        }
+
+        /// <summary>
+        /// Dobijanje OAuth2 access token-a za autentifikaciju prema REST servisu.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        private async Task<string> GetAccessTokenAsync()
+        {
+            var tokenUrl = "http://localhost/AlgotechUnityREST-ckb/oauth2/token";
+            var clientId = "ALGOTECH_REST_CLIENT_ID";
+            var clientSecret = "ALGOTECH_REST_SECRET";
+
+            using (var client = new HttpClient())
+            {
+                client.Timeout = TimeSpan.FromSeconds(30);
+
+                var parameters = new Dictionary<string, string>
+                {
+                    { "grant_type", "client_credentials" },
+                    { "client_id", clientId },
+                    { "client_secret", clientSecret }
+                };
+
+                using (var content = new FormUrlEncodedContent(parameters))
+                using (var response = await client.PostAsync(tokenUrl, content))
+                {
+                    response.EnsureSuccessStatusCode();
+
+                    var responseBody = await response.Content.ReadAsStringAsync();
+                    var tokenResponse = JsonConvert.DeserializeObject<OAuthTokenResponse>(responseBody);
+
+                    if (tokenResponse == null || string.IsNullOrWhiteSpace(tokenResponse.AccessToken))
+                    {
+                        throw new Exception("OAuth2 access token nije dobijen.");
+                    }
+
+                    return tokenResponse.AccessToken;
+                }
+            }
+        }
+        #endregion
+
         #region frmDocumentImport
         public frmDocumentImport()
         {
@@ -81,47 +135,74 @@ namespace WindowsFormsApp
         #region butSubmit_Click
         private void butSubmit_Click(object sender, EventArgs e)
         {
+            Cursor = Cursors.WaitCursor;
+
             toolStripStatusLabel1.Text = string.Empty;
             txtResults.Text = string.Empty;
 
             var task = DocumentImportToOnBaseAsync(Convert.ToInt32(txtResponse1.Text));
 
-            toolStripStatusLabel1.Text = toolStripStatusLabel1.Text + " TaskID: " + task.Id.ToString() + " Status: " +  task.Status.ToString();
+            toolStripStatusLabel1.Text = toolStripStatusLabel1.Text + " TaskID: " + task.Id.ToString() + " Status: " + task.Status.ToString();
+            Cursor = Cursors.Default;
         }
 
         #endregion
 
         #region butSubmitByCounter_Click
-        private void butSubmitByCounter_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Poziva DocumentImportToOnBaseAsync() više puta u petlji, broj poziva se određuje iz txtCounter.Text
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void butSubmitByCounter_Click(object sender, EventArgs e)
         {
             try
             {
+                Cursor = Cursors.WaitCursor;
+
                 toolStripStatusLabel1.Text = string.Empty;
                 txtResults.Text = string.Empty;
 
-                Task task;
-                for (int i = 0; i < Convert.ToInt16(txtCounter.Text); i++)
+                int counter = Convert.ToInt32(txtCounter.Text);
+                int requestId = Convert.ToInt32(txtResponse1.Text);
+
+                for (int i = 0; i < counter; i++)
                 {
-                    task = DocumentImportToOnBaseAsync(Convert.ToInt32(txtResponse1.Text)+i);
-                    toolStripStatusLabel1.Text = "Poziv: " + i.ToString();
+                    toolStripStatusLabel1.Text =
+                        "Poziv: " + (i + 1).ToString();
+
+                    await DocumentImportToOnBaseAsync(requestId + i);
                 }
 
-                toolStripStatusLabel1.Text = toolStripStatusLabel1.Text + " Završeno!";
+                toolStripStatusLabel1.Text =
+                    "Završeno! Ukupno poziva: " + counter;
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Greška");
             }
+            finally
+            {
+                Cursor = Cursors.Default;
+            }
         }
         #endregion
 
         #region DocumentImport
+
         private async Task DocumentImportToOnBaseAsync(long requestID)
         {
             var url = comboBox1.Text;
 
+            // Pribavljanje OAuth2 access token-a
+            var accessToken = await GetAccessTokenAsync();
+
             // Body
-            var list = new List<string> { @"D:\Temp\OnBase\Upload\dummy-file.pdf" };
+            var list = new List<string>
+            {
+                @"D:\Temp\OnBase\Upload\dummy-file.pdf"
+            };
+
             var data = new DocumentImport()
             {
                 RequestID = requestID,
@@ -141,40 +222,30 @@ namespace WindowsFormsApp
                 FileList = list
             };
 
-            // Serijalizacija u JSon format
+            // Serijalizacija u JSON format
             var json = JsonConvert.SerializeObject(data);
-            HttpContent content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            using (var client = new HttpClient() )
+            using (var content = new StringContent(json, Encoding.UTF8, "application/json"))
+            using (var client = new HttpClient())
             {
                 try
                 {
                     client.Timeout = TimeSpan.FromSeconds(300);
 
                     // Header
-                    //client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-
-                    // Dodavanje zaglavlja
                     client.DefaultRequestHeaders.Accept.Clear();
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                     client.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
-                    client.DefaultRequestHeaders.Add("Set-Cookie", string.Format("Session=ID={0}&RequestID={1}", Guid.NewGuid(), requestID));
+                    client.DefaultRequestHeaders.Add("Set-Cookie", string.Format("Session=ID={0}&RequestID={1}",Guid.NewGuid(), requestID));
 
-                    // Autorizacija
-                    //client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic",
-                    //Convert.ToBase64String(System.Text.ASCIIEncoding.ASCII.GetBytes(string.Format("{0}:{1}", username, password))));
+                    // OAuth2 Bearer autorizacija
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
-                    //// Asinhroni poziv 1, način await se koristi da bi se sačekao odgovor bez blokiranja niti 
-                    //var response = await client.PostAsync(url, content);
-                    //response.EnsureSuccessStatusCode();
-                    //var responseBody = await response.Content.ReadAsStringAsync();
-                    //txtResults.Text = txtResults.Text + responseBody + "\r\n";
-                    ////.
-
-                    // Asinhroni poziv 2 način, await se koristi da bi se sačekao odgovor bez blokiranja niti
-                    using (HttpResponseMessage response = client.PostAsync(url, content).Result)
+                    // Asinhroni poziv
+                    using (HttpResponseMessage response = await client.PostAsync(url, content))
                     {
                         response.EnsureSuccessStatusCode();
+
                         var responseBody = await response.Content.ReadAsStringAsync();
 
                         Console.WriteLine(response.Headers.ETag);
@@ -183,64 +254,32 @@ namespace WindowsFormsApp
 
                         txtResults.Text = txtResults.Text + responseBody + "\r\n";
 
-                        // Deserijalizacija json objekata
+                        // Deserijalizacija JSON objekta
                         var documentsImportResult = JsonConvert.DeserializeObject<DocumentsImportResult>(responseBody);
+
                         txtRequestID.Text = documentsImportResult.RequestID.ToString();
                         txtDocBarcode.Text = documentsImportResult.DocBarcode;
                         txtMessage.Text = documentsImportResult.Message;
+
                         if (data.RequestID.ToString() != txtRequestID.Text)
                         {
                             MessageBox.Show(string.Format("Greška različit RequestID {0} {1}.", data.RequestID, txtRequestID.Text), "Greška");
                         }
-                        //.
                     }
-                    //.
-
-                    //// Asinhroni poziv 3 način
-                    //using (HttpResponseMessage response = await client.PostAsync(url, content))
-                    //{
-                    //    response.EnsureSuccessStatusCode();
-                    //    var responseBody = await response.Content.ReadAsStringAsync();
-                    //    txtResults.Text = txtResults.Text + responseBody + "\r\n";
-                    //    Console.WriteLine(responseBody);
-                    //}
-
-                    // Ovaj primer neće hvatati u UI txtResults.Text ali radi brzo
-                    //using (HttpResponseMessage response = await client.PostAsync(url, content).ConfigureAwait(false))
-                    //{
-                    //    response.EnsureSuccessStatusCode();
-                    //    var responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    //    Console.WriteLine("responseBody: " + responseBody);
-
-                    //    // Deserijalizacija json objekata
-                    //    var documentsImportResult = JsonConvert.DeserializeObject<DocumentsImportResult>(responseBody);
-                    //    txtRequestID.Text = documentsImportResult.RequestID.ToString();
-                    //    txtDocBarcode.Text = documentsImportResult.DocBarcode;
-                    //    txtMessage.Text = documentsImportResult.Message;
-                    //    //.
-                    //}
-
                 }
                 catch (HttpRequestException ex)
                 {
-                    Console.WriteLine($"Request error: {ex.Message}");
-                    txtResults.Text = $"Request error: {ex.Message}"; ;
+                    Console.WriteLine("Request error: " + ex.Message);
+                    txtResults.Text = "Request error: " + ex.Message;
                 }
-
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Unexpected error: {ex.Message}");
-                    txtResults.Text = $"Unexpected error: {ex.Message}";
+                    Console.WriteLine("Unexpected error: " + ex.Message);
+                    txtResults.Text = "Unexpected error: " + ex.Message;
                 }
             }
         }
-
         #endregion
-
-        private void butSimple_Click(object sender, EventArgs e)
-        {
-
-        }
 
         #region Main
         private async Task Simple()
@@ -294,10 +333,17 @@ namespace WindowsFormsApp
         }
         #endregion
 
+        #region button1_Click_1
+        /// <summary>
+        /// Poziva DocumentImportToOnBaseAsync() tri puta u isto vreme, sa različitim RequestID vrednostima
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void button1_Click_1(object sender, EventArgs e)
         {
             try
             {
+                Cursor = Cursors.WaitCursor;    
                 toolStripStatusLabel1.Text = string.Empty;
                 txtResults.Text = string.Empty;
 
@@ -318,6 +364,12 @@ namespace WindowsFormsApp
             {
                 MessageBox.Show(ex.Message, "Greška");
             }
+            finally
+            {
+                Cursor = Cursors.Default;
+            }
         }
+        #endregion
+
     }
 }

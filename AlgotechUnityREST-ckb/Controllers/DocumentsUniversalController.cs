@@ -27,6 +27,7 @@ namespace AlgotechUnityREST.Controllers
     /// Metoda treba da prihvati fajl dokumenta iz opsega podržanih OnBase tipova (PDF, Image File...) zajedno sa kolekcijom ključnih reči kao ulaznim parametrima, 
     /// omogućavajući fleksibilan i prilagodljiv import u sistem.
     /// </summary>
+    [Authorize]
     public class DocumentsUniversalController : ApiController
     {
         #region Klasa
@@ -138,7 +139,6 @@ namespace AlgotechUnityREST.Controllers
         #region Variable  
         // Logger
         private static readonly log4net.ILog _logger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-        //private static HttpResponseMessage response;
         #endregion
 
         #region DocumentImport
@@ -147,6 +147,7 @@ namespace AlgotechUnityREST.Controllers
         /// </summary>
         /// <param name="documentImport">Objekat Documents</param>
         /// <returns></returns>
+        [Authorize]
         [HttpPost, ActionName("DocumentImport")]
         public HttpResponseMessage DocumentImport([FromBody] DocumentsImport documentImport)
         {
@@ -339,6 +340,7 @@ namespace AlgotechUnityREST.Controllers
         /// <param name="keywordName">Naziv ključne reči za pretragu</param>
         /// <param name="keywordValue">Vrednost klučne reči za pretragu</param>
         /// <returns></returns>
+        [Authorize]
         [HttpGet, ActionName("DocumentList")]
         public HttpResponseMessage DocumentList(
             DateTime? fromDate = null,

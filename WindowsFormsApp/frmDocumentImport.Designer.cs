@@ -45,7 +45,6 @@
             this.txtRequestID = new System.Windows.Forms.TextBox();
             this.txtResponse3 = new System.Windows.Forms.TextBox();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
-            this.butSimple = new System.Windows.Forms.Button();
             this.statusStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -87,7 +86,7 @@
             // 
             // button1
             // 
-            this.button1.Location = new System.Drawing.Point(394, 87);
+            this.button1.Location = new System.Drawing.Point(526, 85);
             this.button1.Name = "button1";
             this.button1.Size = new System.Drawing.Size(206, 42);
             this.button1.TabIndex = 4;
@@ -117,7 +116,7 @@
             this.txtCounter.Name = "txtCounter";
             this.txtCounter.Size = new System.Drawing.Size(100, 24);
             this.txtCounter.TabIndex = 7;
-            this.txtCounter.Text = "0";
+            this.txtCounter.Text = "1";
             // 
             // label1
             // 
@@ -194,22 +193,11 @@
             this.comboBox1.Size = new System.Drawing.Size(723, 25);
             this.comboBox1.TabIndex = 16;
             // 
-            // butSimple
-            // 
-            this.butSimple.Location = new System.Drawing.Point(567, 161);
-            this.butSimple.Name = "butSimple";
-            this.butSimple.Size = new System.Drawing.Size(165, 39);
-            this.butSimple.TabIndex = 17;
-            this.butSimple.Text = "Jednostavan poziv";
-            this.butSimple.UseVisualStyleBackColor = true;
-            this.butSimple.Click += new System.EventHandler(this.butSimple_Click);
-            // 
             // frmDocumentImport
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(763, 606);
-            this.Controls.Add(this.butSimple);
             this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.txtResponse3);
             this.Controls.Add(this.txtRequestID);
@@ -257,7 +245,6 @@
         private System.Windows.Forms.TextBox txtRequestID;
         private System.Windows.Forms.TextBox txtResponse3;
         private System.Windows.Forms.ComboBox comboBox1;
-        private System.Windows.Forms.Button butSimple;
     }
 }
 

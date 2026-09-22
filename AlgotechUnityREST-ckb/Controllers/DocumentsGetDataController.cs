@@ -20,6 +20,7 @@ namespace AlgotechUnityREST_ckb.Controllers
     /// <summary>
     /// Pretraga dokumenata
     /// </summary>
+    [Authorize]
     public class DocumentsGetDataController : ApiController
     {
 
