@@ -369,7 +369,8 @@ namespace Algotech.UTL.AlgotechUnityUDF
         /// <param name="diskGroupID">Disk grupa u kojoj se nalazi dokument</param>
         /// <param name="documentID">OnBase Document Handle</param>
         /// <returns></returns>
-        public string GetFullPath(long diskGroupID, long documentID)
+        //public string GetFullPath(long diskGroupID, long documentID)
+        public string GetFullPath(long documentID)
         {
             var dateTimeStart = DateTime.Now;
             var ret = string.Empty;
@@ -386,12 +387,21 @@ namespace Algotech.UTL.AlgotechUnityUDF
                 //    "INNER JOIN hsi.physicalplatter ON hsi.itemdatapage.logicalplatternum = hsi.physicalplatter.logicalplatternum " +
                 //    "WHERE (hsi.itemdata.itemnum={0}) AND(hsi.physicalplatter.diskgroupnum={1}) AND(hsi.physicalplatter.physicalplatternum=1)", documentID, diskGroupID);
 
+                // Da disk grupim
+                //sqlString = string.Format("SELECT TOP(1) RTRIM(hsi.physicalplatter.lastuseddrive) + " +
+                //    "RTRIM(hsi.itemdatapage.filepath) AS FullPath FROM hsi.itemdata " +
+                //    "INNER JOIN hsi.itemdatapage ON hsi.itemdata.itemnum = hsi.itemdatapage.itemnum " +
+                //    "INNER JOIN hsi.physicalplatter ON hsi.itemdatapage.logicalplatternum = hsi.physicalplatter.logicalplatternum " +
+                //    "WHERE (hsi.itemdata.itemnum={0}) AND (hsi.physicalplatter.diskgroupnum={1}) AND (hsi.physicalplatter.physicalplatternum=1) AND (hsi.itemdatapage.itempagenum=0) " +
+                //    "ORDER BY hsi.itemdatapage.docrevnum DESC", documentID, diskGroupID);
+
+                // Bez disk grupe
                 sqlString = string.Format("SELECT TOP(1) RTRIM(hsi.physicalplatter.lastuseddrive) + " +
                     "RTRIM(hsi.itemdatapage.filepath) AS FullPath FROM hsi.itemdata " +
                     "INNER JOIN hsi.itemdatapage ON hsi.itemdata.itemnum = hsi.itemdatapage.itemnum " +
                     "INNER JOIN hsi.physicalplatter ON hsi.itemdatapage.logicalplatternum = hsi.physicalplatter.logicalplatternum " +
-                    "WHERE (hsi.itemdata.itemnum={0}) AND (hsi.physicalplatter.diskgroupnum={1}) AND (hsi.physicalplatter.physicalplatternum=1) AND (hsi.itemdatapage.itempagenum=0) " +
-                    "ORDER BY hsi.itemdatapage.docrevnum DESC", documentID, diskGroupID);
+                    "WHERE (hsi.itemdata.itemnum={0}) AND (hsi.physicalplatter.physicalplatternum=1) AND (hsi.itemdatapage.itempagenum=0) " +
+                    "ORDER BY hsi.itemdatapage.docrevnum DESC", documentID);
 
                 _logger.Debug(string.Format("SQL string: {0}", sqlString));
 
@@ -471,8 +481,8 @@ namespace Algotech.UTL.AlgotechUnityUDF
         /// <summary>
         /// Vraća putanju datoteke
         /// </summary>
-        /// <param name="groupType">OnBase DocumetType </param>
-        /// <param name="docType">Keyword docType</param>
+        /// <param name="documentTypeName">OnBase documentTypeName </param>
+        /// <param name="groupType">Keyword groupType</param>
         /// <returns></returns>
         public bool IsValidGroupType(string documentTypeName, string groupType)
         {

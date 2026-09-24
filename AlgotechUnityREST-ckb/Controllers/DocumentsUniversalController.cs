@@ -409,8 +409,10 @@ namespace AlgotechUnityREST.Controllers
                 // Dodaj dokument tip u uput
                 if (documentTypeName != string.Empty)
                 {
-                    // Pronalazimo document type
-                    DocumentType documentType = application.Core.DocumentTypes.Find(documentTypeName);
+                    DocumentType documentType = 
+                        application.Core.DocumentTypes.Find(documentTypeName) ?? 
+                        throw new Exception(string.Format("Tip dokumenta '{0}' nije pronađen ili nisu podešena prava pristupa servisnom nalogu.", 
+                        documentTypeName));
                     docQuery.AddDocumentType(documentType);
                 }
 
@@ -486,7 +488,7 @@ namespace AlgotechUnityREST.Controllers
                 // Trči po listi i kreira response
                 _logger.Info(string.Format("Pravimo putanju do fajla start {0}.", DateTime.Now));
                 var unityUDF = new Algotech.UTL.AlgotechUnityUDF.UnityUDF();
-                var diskGroupID = Convert.ToInt64(System.Configuration.ConfigurationManager.AppSettings["DiskGroupID"]); // Bankarska dokumentacija
+                //var diskGroupID = Convert.ToInt64(System.Configuration.ConfigurationManager.AppSettings["DiskGroupID"]); // Bankarska dokumentacija
 
                 var list = new List<DocumentsImport>();
                 foreach (var item in documentList)
@@ -498,7 +500,8 @@ namespace AlgotechUnityREST.Controllers
                         Name = item.Name,
                         DateStored = item.DateStored,
                         DocumentDate = item.DocumentDate,
-                        DocumentFullPath = unityUDF.GetFullPath(diskGroupID, item.ID),
+                        //DocumentFullPath = unityUDF.GetFullPath(diskGroupID, item.ID),
+                        DocumentFullPath = unityUDF.GetFullPath(item.ID),
                         DocumentUrlByID = webServerURL + string.Format(@"&docid={0}", item.ID),
                         DefaultFileTypeName = item.DefaultFileType.Name,
                         DocumentTypeName = item.DocumentType.Name

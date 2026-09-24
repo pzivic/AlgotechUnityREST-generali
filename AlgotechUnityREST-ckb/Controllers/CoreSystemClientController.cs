@@ -17,7 +17,7 @@ namespace AlgotechUnityREST_ckb.Controllers
     /// <summary>
     /// Preuzimaje podataka iz Core sistema o klijentima
     /// </summary>
-    [Authorize]
+    //[Authorize]
     [ApiExplorerSettings(IgnoreApi=false)]
     public class CoreSystemClientController : ApiController
     {

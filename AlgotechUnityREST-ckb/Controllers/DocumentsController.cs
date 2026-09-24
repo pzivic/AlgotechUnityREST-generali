@@ -648,9 +648,12 @@ namespace AlgotechUnityREST_ckb.Controllers
                 objDocuments.DocumentUrlByID = webServerURL + string.Format(@"&docid={0}", objDocuments.DocumentID);
 
                 // Ne znamo u kojoj je disk grupi da bi vratili putanju diskgrupe
-                var diskGroupID = Convert.ToInt64(System.Configuration.ConfigurationManager.AppSettings["DiskGroupID"]);
-                _logger.Debug(string.Format("Pokušaćemo da dohvatilo putanju do datoteke diskGroupID: {0}, documentID: {1}", diskGroupID, documentID));
-                objDocuments.DocumentFullPath = unityUDF.GetFullPath(diskGroupID, documentID);
+                //var diskGroupID = Convert.ToInt64(System.Configuration.ConfigurationManager.AppSettings["DiskGroupID"]);
+
+                //_logger.Debug(string.Format("Pokušaćemo da dohvatilo putanju do datoteke diskGroupID: {0}, documentID: {1}", diskGroupID, documentID));
+                _logger.Debug(string.Format("Pokušaćemo da dohvatilo putanju do datoteke documentID: {0}", documentID));
+                //objDocuments.DocumentFullPath = unityUDF.GetFullPath(diskGroupID, documentID);
+                objDocuments.DocumentFullPath = unityUDF.GetFullPath(documentID);
 
                 // Idemo bez liste fajlova
                 //List<string> documentFileList = new List<string>();

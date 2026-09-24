@@ -205,7 +205,7 @@ namespace AlgotechUnityREST_ckb.Controllers
                 // „Trči“ po listi i kreira response
                 _logger.Info(string.Format("Pravimo putanju do fajla start {0}.", DateTime.Now));
                 var unityUDF = new Algotech.UTL.AlgotechUnityUDF.UnityUDF();
-                var diskGroupID = Convert.ToInt64(System.Configuration.ConfigurationManager.AppSettings["DiskGroupID"]); // Bankarska dokumentacija
+                //var diskGroupID = Convert.ToInt64(System.Configuration.ConfigurationManager.AppSettings["DiskGroupID"]); // Bankarska dokumentacija
 
                 var list = new List<DocumentsList>();
                 foreach (var item in documentList)
@@ -218,7 +218,9 @@ namespace AlgotechUnityREST_ckb.Controllers
                         DateStored = item.DateStored,
                         DocumentDate = item.DocumentDate,
 
-                        DocumentFullPath = unityUDF.GetFullPath(diskGroupID, item.ID),
+                        //DocumentFullPath = unityUDF.GetFullPath(diskGroupID, item.ID),
+                        DocumentFullPath = unityUDF.GetFullPath(item.ID),
+
                         DocumentUrlByID = webServerURL + string.Format(@"&docid={0}", item.ID),
                         DefaultFileTypeName = item.DefaultFileType.Name,
                         DocumentTypeName = item.DocumentType.Name

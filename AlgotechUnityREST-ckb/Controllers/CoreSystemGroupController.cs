@@ -20,7 +20,7 @@ namespace AlgotechUnityREST_ckb.Controllers
     /// <summary>
     /// Preuzimanje podataka iz Core sistema o grupama
     /// </summary>
-    [Authorize]
+    //[Authorize]
     [ApiExplorerSettings(IgnoreApi = false)]
     public class CoreSystemGroupController : ApiController
     {
