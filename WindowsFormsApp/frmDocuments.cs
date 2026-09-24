@@ -170,10 +170,11 @@ namespace WindowsFormsApp
                 using (var content = new FormUrlEncodedContent(parameters))
                 using (var response = await client.PostAsync(tokenUrl, content))
                 {
-                    response.EnsureSuccessStatusCode();
 
                     var responseBody = await response.Content.ReadAsStringAsync();
                     var tokenResponse = JsonConvert.DeserializeObject<OAuthTokenResponse>(responseBody);
+
+                    response.EnsureSuccessStatusCode();
 
                     if (tokenResponse == null || string.IsNullOrWhiteSpace(tokenResponse.AccessToken))
                     {
@@ -329,12 +330,6 @@ namespace WindowsFormsApp
 
         private async Task DocumentImportToOnBaseAsync(string baseUrl, string accessToken, long requestID)
         {
-            // Body
-            var list = new List<string>
-            {
-                @"D:\Temp\OnBase\Upload\dummy-file.pdf"
-            };
-
             // Kreiranje objekta za serijalizaciju u JSON
             var data = new DocumentImportRequest
             {
@@ -370,7 +365,12 @@ namespace WindowsFormsApp
                     {
                         KeywordName = "EMail",
                         KeywordValue = "petar.petrovic@algotech.rs"
-                    }
+                    },
+                    //new DocumentKeyword
+                    //{
+                    //    KeywordName = "LSG_RequestNo",
+                    //    KeywordValue = "123-"+requestID.ToString()
+                    //}
                 }
             };
             //.
@@ -391,7 +391,7 @@ namespace WindowsFormsApp
                     client.DefaultRequestHeaders.Accept.Clear();
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                     client.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
-                    client.DefaultRequestHeaders.Add("Set-Cookie", string.Format("Session=ID={0}", Guid.NewGuid()));
+                    //client.DefaultRequestHeaders.Add("Set-Cookie", string.Format("Session=ID={0}", Guid.NewGuid()));
 
                     // OAuth2 Bearer autorizacija
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
@@ -399,24 +399,27 @@ namespace WindowsFormsApp
                     // Asinhroni poziv
                     using (HttpResponseMessage response = await client.PostAsync(url, content))
                     {
-                        response.EnsureSuccessStatusCode();
+                        string responseBody =
+                            await response.Content.ReadAsStringAsync();
 
-                        var responseBody = await response.Content.ReadAsStringAsync();
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            throw new Exception(
+                                "DocumentImport error " +
+                                (int)response.StatusCode + " " +
+                                response.ReasonPhrase +
+                                Environment.NewLine +
+                                responseBody);
+                        }
 
-                        Console.WriteLine(response.Headers.ETag);
-                        Console.WriteLine(response.Headers.Location);
-                        Console.WriteLine(responseBody);
+                        var DocumentsImportResult =
+                            JsonConvert.DeserializeObject<DocumentsImportResult>(
+                                responseBody);
 
-                        // Deserijalizacija JSON objekta
-                        var documentsImportResult = JsonConvert.DeserializeObject<DocumentsImportResult>(responseBody);
-
-
-                        var status = documentsImportResult.Status;
-                        var messageText = documentsImportResult.Message;
-
+                        // DocumentsImportResult.Status
                         MessageBox.Show(
-                            status + ": " + messageText,
-                            "Unexpected error",
+                            DocumentsImportResult.Message,
+                            "DocumentImport",
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Information);
                     }
