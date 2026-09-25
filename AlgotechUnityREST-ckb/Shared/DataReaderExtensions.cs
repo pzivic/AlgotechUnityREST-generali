@@ -5,6 +5,7 @@ using System;
 using System.Data;
 using Oracle.ManagedDataAccess.Client;
 
+
 /// <summary>
 /// Pomoćna klasa za priširenje DataReader za Oracle
 /// </summary>

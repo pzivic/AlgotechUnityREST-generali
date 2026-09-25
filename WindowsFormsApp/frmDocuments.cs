@@ -1,4 +1,17 @@
-﻿
+﻿// ============================================================================
+// Autor:           Predrag Živić
+// Datum kreiranja: 24.09.2026
+// Naziv skripte:   Test demo poziva REST servisa za import dokumenata u OnBase
+//
+// Opis:
+// Uvedena je autorizacija prema REST servisu koristeći OAuth2 protokol.
+// Implementirana je funkcionalnost za preuzimanje liste dokumenata i import dokumenata u OnBase sistem.
+// Korisnik može odabrati tip dokumenta, definisati vremenski period i izvršiti import dokumenata sa definisanim ključnim rečima.
+//
+// Istorija izmena:
+// 24.09.2026 - Predrag Živić - Inicijalna verzija
+// ============================================================================
+
 using Newtonsoft.Json;
 
 using System;
@@ -8,8 +21,6 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
-using static WindowsFormsApp.frmDocumentImport;
 
 namespace WindowsFormsApp
 {
@@ -104,15 +115,9 @@ namespace WindowsFormsApp
             public string DataSource { get; set; }
             public string ClientAK { get; set; }
         }
-        private class DocumentsImportResult
-        {
-            public string Status { get; set; }
-            public string Message { get; set; }
-        }
-
         #endregion
 
-
+        #region DocumentImport klase
         public class DocumentImportRequest
         {
             public string DocumentTypeName { get; set; }
@@ -128,6 +133,13 @@ namespace WindowsFormsApp
             public string KeywordName { get; set; }
             public object KeywordValue { get; set; }
         }
+
+        private class DocumentsImportResult
+        {
+            public string Status { get; set; }
+            public string Message { get; set; }
+        }
+        #endregion
 
         #region OAuth2
         /// <summary>
@@ -240,7 +252,7 @@ namespace WindowsFormsApp
         }
         #endregion
 
-        #region Task
+        #region Task - DocumentList
         /// <summary>
         /// Preuzimanje podataka o dokumentima iz REST servisa.
         /// </summary>
@@ -325,9 +337,7 @@ namespace WindowsFormsApp
         }
         #endregion
 
-
-        #region DocumentImport
-
+        #region Task - DocumentImport
         private async Task DocumentImportToOnBaseAsync(string baseUrl, string accessToken, long requestID)
         {
             // Kreiranje objekta za serijalizaciju u JSON
@@ -450,9 +460,5 @@ namespace WindowsFormsApp
         }
         #endregion
 
-        private void txtResponse_TextChanged(object sender, EventArgs e)
-        {
-
-        }
     }
 }

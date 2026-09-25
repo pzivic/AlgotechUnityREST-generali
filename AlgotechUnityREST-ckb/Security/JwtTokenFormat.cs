@@ -17,7 +17,7 @@ using Microsoft.Owin.Security;
 using Microsoft.IdentityModel.Tokens;
 
 
-namespace AlgotechUnityREST
+namespace AlgotechUnityREST_ckb.Security
 {
     /// <summary>
     /// Token format za JWT (JSON Web Token) koji implementira ISecureDataFormat interfejs.

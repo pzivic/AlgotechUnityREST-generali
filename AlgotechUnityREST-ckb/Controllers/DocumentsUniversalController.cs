@@ -20,7 +20,7 @@ using System.Diagnostics;
 using System.Globalization;
 using Algotech.UTL.AlgotechUnityUDF;
 
-namespace AlgotechUnityREST.Controllers
+namespace AlgotechUnityREST_ckb.Controllers
 {
     /// <summary>
     /// Univerzalnu metodu REST servisa za uvoz dokumenata koja koristi generičke meta podatke. 

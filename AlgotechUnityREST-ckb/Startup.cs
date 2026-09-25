@@ -7,9 +7,9 @@ using Microsoft.Owin.Security.OAuth;
 
 using Owin;
 
-[assembly: OwinStartup(typeof(AlgotechUnityREST.Startup))]
+[assembly: OwinStartup(typeof(AlgotechUnityREST_ckb.Startup))]
 
-namespace AlgotechUnityREST
+namespace AlgotechUnityREST_ckb
 {
     /// <summary>
     /// Configures application authentication using OAuth 2.0 and JWT bearer tokens.
@@ -38,7 +38,7 @@ namespace AlgotechUnityREST
             var audience = ConfigurationManager.AppSettings["OAuthAudience"];
             var signingKey = ConfigurationManager.AppSettings["OAuthSigningKey"];
 
-            var jwtFormat = new JwtTokenFormat(
+            var jwtFormat = new AlgotechUnityREST_ckb.Security.JwtTokenFormat(
                 issuer,
                 audience,
                 signingKey);
@@ -58,7 +58,7 @@ namespace AlgotechUnityREST
                     AccessTokenExpireTimeSpan = 
                         TimeSpan.FromMinutes(Convert.ToInt16(ConfigurationManager.AppSettings["OAuthAccessTokenExpire"])),
 
-                    Provider = new ClientCredentialsProvider(),
+                    Provider = new Security.ClientCredentialsProvider(),
 
                     AccessTokenFormat = jwtFormat
                 });

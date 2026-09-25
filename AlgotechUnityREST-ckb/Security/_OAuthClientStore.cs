@@ -22,9 +22,7 @@ public static class OAuthClientStore
     /// <param name="clientId"></param>
     /// <param name="clientSecret"></param>
     /// <returns></returns>
-    public static bool Validate(
-        string clientId,
-        string clientSecret)
+    public static bool Validate(string clientId, string clientSecret)
     {
         // Za početak / POC
         var configuredClientId =
