@@ -16,6 +16,7 @@ using Newtonsoft.Json;
 
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -164,9 +165,10 @@ namespace WindowsFormsApp
         /// <exception cref="Exception"></exception>
         private async Task<string> GetAccessTokenAsync()
         {
-            var tokenUrl = "http://localhost/AlgotechUnityREST-ckb/oauth2/token";
-            var clientId = "Algotech_DEV";
-            var clientSecret = "F861F83BE9F64F91B5B8FDE9C67406F410DC440DDE68496D892E8B3EB9464B93";
+            // Učitavanje konfiguracionih parametara iz App.config za autorizaciju prema REST servisu
+            var tokenUrl = ConfigurationManager.AppSettings["OAuthTokenUrl"];
+            var clientID = ConfigurationManager.AppSettings["OAuthClientID"];
+            var clientSecret = ConfigurationManager.AppSettings["OAuthClientSecret"];
 
             using (var client = new HttpClient())
             {
@@ -175,7 +177,7 @@ namespace WindowsFormsApp
                 var parameters = new Dictionary<string, string>
                 {
                     { "grant_type", "client_credentials" },
-                    { "client_id", clientId },
+                    { "client_id", clientID },
                     { "client_secret", clientSecret }
                 };
 

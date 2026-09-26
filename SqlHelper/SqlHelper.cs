@@ -1,18 +1,19 @@
-﻿//Autor... Predrag Živić
-//Datum... 23.04.2008
-//Opis... Komponenta omogućava lakši rad sa ADO.NET metodama za pristup podacima.
-
+﻿// Autor... Predrag Živić
+// Datum... 23.04.2008
+// Opis.... Komponenta omogućava lakši rad sa ADO.NET metodama za pristup podacima.
+//
+// Istorija izmena:
 // 15.07.2011, C# 3.0 optimizacija
 // 13.04.2012, .NET 4.0
 // 12.11.2022, .NET 4.8
 // 12.03.2024, fixirano je ovo sa ownder nad stored procedurama i sql izratima cmd parametar
 // 14.05.2024 log4net
+// 29.01.2026 Poboljšano učitavanje connection string-a i owner-a iz config-a za scenario windows servis i web aplikacija
 
 using System.Data;
 using System.Data.SqlClient;
 using System.Configuration;
 using System;
-
 
 namespace DataSystem.DAL.SqlHelper
 {
@@ -24,36 +25,71 @@ namespace DataSystem.DAL.SqlHelper
         private readonly string _connectionString = "";
         private readonly string _owner = "dbo";
 
-        #region SqlHelper
-        //Pokupi konekcioni string baze podataka
-        public SqlHelper(string confingString)
+        //#region SqlHelper
+        ////Pokupi konekcioni string baze podataka
+        //public SqlHelper(string confingString)
+        //{
+        //    if (confingString == "exe")
+        //    {
+        //        // Ako je exe moraš iz .exe.config
+        //        // Hardcode
+        //        // var config = ConfigurationManager.OpenExeConfiguration(@"D:\Users\pzivic\Source\Repos\AlgotechUnity\AlgotechADWinService\bin\Release\AlgotechADWinService.exe");
+
+        //        var fileName = AppDomain.CurrentDomain.SetupInformation.ConfigurationFile;
+        //        var configMap = new ExeConfigurationFileMap
+        //        {
+        //            ExeConfigFilename = fileName
+        //        };
+        //        var config = ConfigurationManager.OpenMappedExeConfiguration(configMap, ConfigurationUserLevel.None);
+
+        //        _connectionString = config.AppSettings.Settings["connection_string"].Value;
+
+        //        _logger.Debug(string.Format("ConfigurationFile: {0}.", fileName));
+        //        _logger.Debug(string.Format("ConnectionString: {0}.", _connectionString));
+        //    }
+        //    else
+        //    {
+        //        _connectionString = confingString == "" ? ConfigurationManager.ConnectionStrings["connection_string"].ConnectionString : ConfigurationManager.ConnectionStrings[confingString].ConnectionString;
+        //    }
+        //    _owner = ConfigurationManager.AppSettings["dbOwner"];
+        //}
+        //#endregion
+
+
+        // Default konstruktor: koristi standardni key
+
+        # region SqlHelper
+        public SqlHelper() : this("connection_string")
         {
-            if (confingString == "exe")
-            {
-                // Ako je exe moraš iz .exe.config
-                // Hardcode
-                // var config = ConfigurationManager.OpenExeConfiguration(@"D:\Users\pzivic\Source\Repos\AlgotechUnity\AlgotechADWinService\bin\Release\AlgotechADWinService.exe");
-
-                var fileName = AppDomain.CurrentDomain.SetupInformation.ConfigurationFile;
-                var configMap = new ExeConfigurationFileMap
-                {
-                    ExeConfigFilename = fileName
-                };
-                var config = ConfigurationManager.OpenMappedExeConfiguration(configMap, ConfigurationUserLevel.None);
-
-                _connectionString = config.AppSettings.Settings["connection_string"].Value;
-
-                _logger.Debug(string.Format("ConfigurationFile: {0}.", fileName));
-                _logger.Debug(string.Format("ConnectionString: {0}.", _connectionString));
-            }
-            else
-            {
-                _connectionString = confingString == "" ? ConfigurationManager.ConnectionStrings["connection_string"].ConnectionString : ConfigurationManager.ConnectionStrings[confingString].ConnectionString;
-                _logger.Debug(string.Format("ConnectionString: {0}.", _connectionString));
-            }
-            _owner = ConfigurationManager.AppSettings["dbOwner"];
         }
 
+        // Konstruktor koji prima ime connection string-a iz <connectionStrings>
+        public SqlHelper(string connectionStringName)
+        {
+            if (string.IsNullOrWhiteSpace(connectionStringName))
+                connectionStringName = "connection_string";
+
+            _connectionString = GetConnectionStringOrThrow(connectionStringName);
+            _owner = (ConfigurationManager.AppSettings["dbOwner"] ?? "dbo").Trim();
+
+            // Ovo je OK za debug: putanja config-a, ali ne connection string.
+            _logger.Debug($"SqlHelper initialized. Config file: {AppDomain.CurrentDomain.SetupInformation.ConfigurationFile}. " +
+                          $"ConnectionStringName: {connectionStringName}. Owner: {_owner}.");
+        }
+
+        private static string GetConnectionStringOrThrow(string name)
+        {
+            var cs = ConfigurationManager.ConnectionStrings[name]?.ConnectionString;
+
+            if (string.IsNullOrWhiteSpace(cs))
+            {
+                var configFile = AppDomain.CurrentDomain.SetupInformation.ConfigurationFile;
+                throw new InvalidOperationException(
+                    $"Nedostaje ConnectionStrings['{name}'] u konfiguraciji ({configFile}).");
+            }
+
+            return cs;
+        }
         #endregion
 
         #region ExecuteNonQuery
@@ -62,7 +98,7 @@ namespace DataSystem.DAL.SqlHelper
         {
             var cnn = new SqlConnection(_connectionString);
             SqlCommand cmd;
-       
+
             if (query.StartsWith("INSERT") | query.StartsWith("insert") | query.StartsWith("UPDATE") | query.StartsWith("update") | query.StartsWith("DELETE") | query.StartsWith("delete"))
             {
                 cmd = new SqlCommand(query, cnn);
@@ -96,7 +132,7 @@ namespace DataSystem.DAL.SqlHelper
         {
             var cnn = new SqlConnection(_connectionString);
             SqlCommand cmd;
-            
+
             if (query.StartsWith("INSERT") | query.StartsWith("insert") | query.StartsWith("UPDATE") | query.StartsWith("update") | query.StartsWith("DELETE") | query.StartsWith("delete"))
             {
                 cmd = new SqlCommand(query, cnn);
@@ -178,7 +214,7 @@ namespace DataSystem.DAL.SqlHelper
         public SqlDataReader ExecuteReader(string query)
         {
             var cnn = new SqlConnection(_connectionString);
-            SqlCommand cmd; 
+            SqlCommand cmd;
 
             if (query.StartsWith("SELECT") | query.StartsWith("select"))
             {

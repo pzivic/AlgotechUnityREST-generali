@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Security.Cryptography;
 
-namespace AlgotechUnityREST_ckb.Shared
+namespace AlgotechUnityREST.Shared
 {
     /// <summary>
     /// 
@@ -204,54 +204,13 @@ namespace AlgotechUnityREST_ckb.Shared
         }
         #endregion
 
+        #region VerifyClientSecret
         /// <summary>
-        /// Generisanje klijentskog tajnog ključa. Primer 5p7X7n9d1d8mV1Tq9LJmQJ7m7cVdD2xY2t3Xg2w8nLo=
-        /// </summary>
-        /// <returns></returns>
-        public static string GenerateClientSecret()
-        {
-            byte[] Buffer = new byte[32];
-
-            using (var Rng = RandomNumberGenerator.Create())
-            {
-                Rng.GetBytes(Buffer);
-            }
-
-            return Convert.ToBase64String(Buffer);
-        }
-
-        /// <summary>
-        /// Heširanje klijentskog tajnog ključa. Primer 100000.P2xfrh9Es63grzk+fLueug==.pEHfLjUXJXl69mFxPJ3DqEIMwKtn8FyRVzdtAzTfNCQ=
+        /// Proverava da li je klijentski tajni ključ validan u odnosu na sačuvani heš. Vraća true ako je validan, false ako nije.
         /// </summary>
         /// <param name="clientSecret"></param>
+        /// <param name="storedHash"></param>
         /// <returns></returns>
-        public static string HashClientSecret(string clientSecret)
-        {
-            byte[] salt = new byte[16];
-
-            using (var Rng = RandomNumberGenerator.Create())
-            {
-                Rng.GetBytes(salt);
-            }
-
-            const int Iterations = 100000;
-
-            using (var Pbkdf2 = new Rfc2898DeriveBytes(
-                clientSecret,
-                salt,
-                Iterations,
-                HashAlgorithmName.SHA256))
-            {
-                byte[] hash = Pbkdf2.GetBytes(32);
-
-                return string.Format(
-                    "{0}.{1}.{2}",
-                    Iterations,
-                    Convert.ToBase64String(salt),
-                    Convert.ToBase64String(hash));
-            }
-        }
-
         public static bool VerifyClientSecret(string clientSecret, string storedHash)
         {
             string[] parts = storedHash.Split('.');
@@ -295,7 +254,6 @@ namespace AlgotechUnityREST_ckb.Shared
 
             return Difference == 0;
         }
+        #endregion
     }
-
-
 }

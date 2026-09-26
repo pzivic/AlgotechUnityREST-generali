@@ -30,6 +30,11 @@ namespace AlgotechUnityREST_ckb.Controllers
     [Authorize]
     public class DocumentsUniversalController : ApiController
     {
+        #region Variable  
+        // Logger
+        private static readonly log4net.ILog _logger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        #endregion
+
         #region Klasa
         /// <summary>
         /// Dokument
@@ -134,11 +139,6 @@ namespace AlgotechUnityREST_ckb.Controllers
             /// </summary>
             public string KeywordDataType { get; set; } = "string";
         }
-        #endregion
-
-        #region Variable  
-        // Logger
-        private static readonly log4net.ILog _logger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         #endregion
 
         #region DocumentImport

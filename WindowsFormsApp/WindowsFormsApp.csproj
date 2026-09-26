@@ -52,6 +52,7 @@
       <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -64,6 +65,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="frmOAuth.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmOAuth.Designer.cs">
+      <DependentUpon>frmOAuth.cs</DependentUpon>
+    </Compile>
     <Compile Include="frmDocumentImport.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -83,6 +90,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="frmDocuments.resx">
       <DependentUpon>frmDocuments.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmOAuth.resx">
+      <DependentUpon>frmOAuth.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -118,6 +128,12 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SqlHelper\SqlHelper.csproj">
+      <Project>{76187855-E094-4393-9D0A-596FEAFD9250}</Project>
+      <Name>SqlHelper</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

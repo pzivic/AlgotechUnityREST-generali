@@ -265,8 +265,8 @@
     <Compile Include="Controllers\TestDocumentsController.cs" />
     <Compile Include="Controllers\UploadController.cs" />
     <Compile Include="Models\OAuthClient.cs" />
-    <Compile Include="Security\JwtTokenFormat.cs" />
     <Compile Include="Security\ClientCredentialsProvider.cs" />
+    <Compile Include="Security\JwtTokenFormat.cs" />
     <Compile Include="Shared\ChartConvert.cs" />
     <Compile Include="Security\OAuth.cs" />
     <Compile Include="Shared\Util.cs" />

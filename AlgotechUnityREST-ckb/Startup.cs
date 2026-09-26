@@ -38,7 +38,7 @@ namespace AlgotechUnityREST_ckb
             var audience = ConfigurationManager.AppSettings["OAuthAudience"];
             var signingKey = ConfigurationManager.AppSettings["OAuthSigningKey"];
 
-            var jwtFormat = new AlgotechUnityREST_ckb.Security.JwtTokenFormat(
+            var jwtFormat = new AlgotechUnityREST.Security.JwtTokenFormat(
                 issuer,
                 audience,
                 signingKey);
@@ -49,30 +49,21 @@ namespace AlgotechUnityREST_ckb
                 {
                     //AllowInsecureHttp = false,
                     AllowInsecureHttp = true,
-
-                    TokenEndpointPath =
-                        new PathString("/oauth2/token"),
-
+                    TokenEndpointPath = new PathString("/oauth2/token"),
                     // Rok trajanja pristupnog tokena (u minutama)
-                    //AccessTokenExpireTimeSpan = TimeSpan.FromMinutes(30),
-                    AccessTokenExpireTimeSpan = 
-                        TimeSpan.FromMinutes(Convert.ToInt16(ConfigurationManager.AppSettings["OAuthAccessTokenExpire"])),
-
-                    Provider = new Security.ClientCredentialsProvider(),
-
-                    AccessTokenFormat = jwtFormat
+                    AccessTokenExpireTimeSpan = TimeSpan.FromMinutes(
+                        Convert.ToInt16(ConfigurationManager.AppSettings["OAuthAccessTokenExpire"])),
+                        Provider = new AlgotechUnityREST.Security.ClientCredentialsProvider(),
+                        AccessTokenFormat = jwtFormat
                 });
 
             // Bearer token authentication
             app.UseOAuthBearerAuthentication(
                 new OAuthBearerAuthenticationOptions
-                {
-                    AuthenticationMode =
-                        AuthenticationMode.Active,
-
-                    AccessTokenFormat =
-                        jwtFormat
-                });
+            {
+                AuthenticationMode = AuthenticationMode.Active,
+                AccessTokenFormat = jwtFormat
+            });
         }
         #endregion region
     }

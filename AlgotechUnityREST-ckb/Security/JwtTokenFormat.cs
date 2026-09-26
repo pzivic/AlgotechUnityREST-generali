@@ -17,7 +17,7 @@ using Microsoft.Owin.Security;
 using Microsoft.IdentityModel.Tokens;
 
 
-namespace AlgotechUnityREST_ckb.Security
+namespace AlgotechUnityREST.Security
 {
     /// <summary>
     /// Token format za JWT (JSON Web Token) koji implementira ISecureDataFormat interfejs.
@@ -51,7 +51,7 @@ namespace AlgotechUnityREST_ckb.Security
 
         #region Protect
         /// <summary>
-        /// Zaštićuje AuthenticationTicket i generiše JWT token.
+        /// Zaštita AuthenticationTicket i generiše JWT token.
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
@@ -87,8 +87,13 @@ namespace AlgotechUnityREST_ckb.Security
                 .WriteToken(token);
         }
         #endregion
-        
+
         #region Unprotect
+        /// <summary>
+        /// Uklanja zaštitu sa JWT tokena i vraća AuthenticationTicket.
+        /// </summary>
+        /// <param name="protectedText"></param>
+        /// <returns></returns>
         public AuthenticationTicket Unprotect(
             string protectedText)
         {

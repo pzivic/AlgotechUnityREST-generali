@@ -3,7 +3,7 @@
 // konverzija tekstova iz Latinice u ćirilicu (radi konverziju i YUSCII)
 
 
-namespace AlgotechUnityREST_ckb.Shared
+namespace AlgotechUnityREST.Shared
 {
     /// <summary>
     /// Konveryija
