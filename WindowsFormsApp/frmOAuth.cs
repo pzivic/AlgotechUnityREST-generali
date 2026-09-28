@@ -62,7 +62,7 @@ namespace WindowsFormsApp
         }
         #endregion
 
-        #region 
+        #region HashClientSecret
         /// <summary>
         /// Heširanje klijentskog tajnog ključa. Primer 100000.P2xfrh9Es63grzk+fLueug==.pEHfLjUXJXl69mFxPJ3DqEIMwKtn8FyRVzdtAzTfNCQ=
         /// </summary>

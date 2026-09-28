@@ -1,6 +1,12 @@
-﻿// Autor... Predrag Živić
-// Datum... 23.04.2008
-// Opis.... Komponenta omogućava lakši rad sa ADO.NET metodama za pristup podacima.
+﻿// ============================================================================
+// Autor:           Predrag Živić
+// Datum kreiranja: 23.04.2008
+// Naziv:           Komponenta omogućava lakši rad sa ADO.NET metodama za pristup podacima.
+//
+// Opis:
+// Unity Script koji se poziva iz OnBase Workflow-a preko System Task-a.
+// Skripta poziva eksterni REST servis radi pokretanja procesa digitalnog
+// potpisivanja dokumenata.
 //
 // Istorija izmena:
 // 15.07.2011, C# 3.0 optimizacija
@@ -9,6 +15,8 @@
 // 12.03.2024, fixirano je ovo sa ownder nad stored procedurama i sql izratima cmd parametar
 // 14.05.2024 log4net
 // 29.01.2026 Poboljšano učitavanje connection string-a i owner-a iz config-a za scenario windows servis i web aplikacija
+// ============================================================================
+
 
 using System.Data;
 using System.Data.SqlClient;
