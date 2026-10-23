@@ -16,9 +16,9 @@ namespace WindowsFormsApp
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            //Application.Run(new frmDocumentImport());
+            Application.Run(new frmDocumentImport());
             //Application.Run(new frmDocuments());
-            Application.Run(new frmOAuth());
+            //Application.Run(new frmOAuth());
         }
     }
 }

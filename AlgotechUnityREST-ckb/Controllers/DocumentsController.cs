@@ -29,7 +29,7 @@ namespace AlgotechUnityREST_ckb.Controllers
     /// <summary>
     /// U osnovi OnBase sistema je dokument. Kotroler sadrži metode sa rad sa dokumentima.
     /// </summary>
-    [Authorize]
+    //[Authorize]
     public class DocumentsController : ApiController
     {
 

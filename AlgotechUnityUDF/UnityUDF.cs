@@ -381,13 +381,14 @@ namespace Algotech.UTL.AlgotechUnityUDF
                 var sqlHelper = new SqlHelper("connection_string_onbase");
                 var sqlString = string.Empty;
 
+                // Prva verzija
                 //sqlString = string.Format("SELECT RTRIM(hsi.physicalplatter.lastuseddrive) + " +
                 //    "RTRIM(hsi.itemdatapage.filepath) AS FullPath FROM hsi.itemdata " +
                 //    "INNER JOIN hsi.itemdatapage ON hsi.itemdata.itemnum = hsi.itemdatapage.itemnum " +
                 //    "INNER JOIN hsi.physicalplatter ON hsi.itemdatapage.logicalplatternum = hsi.physicalplatter.logicalplatternum " +
                 //    "WHERE (hsi.itemdata.itemnum={0}) AND(hsi.physicalplatter.diskgroupnum={1}) AND(hsi.physicalplatter.physicalplatternum=1)", documentID, diskGroupID);
 
-                // Da disk grupim
+                // Sa disk grupim
                 //sqlString = string.Format("SELECT TOP(1) RTRIM(hsi.physicalplatter.lastuseddrive) + " +
                 //    "RTRIM(hsi.itemdatapage.filepath) AS FullPath FROM hsi.itemdata " +
                 //    "INNER JOIN hsi.itemdatapage ON hsi.itemdata.itemnum = hsi.itemdatapage.itemnum " +
@@ -395,17 +396,46 @@ namespace Algotech.UTL.AlgotechUnityUDF
                 //    "WHERE (hsi.itemdata.itemnum={0}) AND (hsi.physicalplatter.diskgroupnum={1}) AND (hsi.physicalplatter.physicalplatternum=1) AND (hsi.itemdatapage.itempagenum=0) " +
                 //    "ORDER BY hsi.itemdatapage.docrevnum DESC", documentID, diskGroupID);
 
-                // Bez disk grupe
-                sqlString = string.Format("SELECT TOP(1) RTRIM(hsi.physicalplatter.lastuseddrive) + " +
-                    "RTRIM(hsi.itemdatapage.filepath) AS FullPath FROM hsi.itemdata " +
+                //// Bez disk grupe
+                //sqlString = string.Format("SELECT TOP(1) RTRIM(hsi.physicalplatter.lastuseddrive) + " +
+                //    "RTRIM(hsi.itemdatapage.filepath) AS FullPath FROM hsi.itemdata " +
+                //    "INNER JOIN hsi.itemdatapage ON hsi.itemdata.itemnum = hsi.itemdatapage.itemnum " +
+                //    "INNER JOIN hsi.physicalplatter ON hsi.itemdatapage.logicalplatternum = hsi.physicalplatter.logicalplatternum " +
+                //    "WHERE (hsi.itemdata.itemnum={0}) AND (hsi.physicalplatter.physicalplatternum=1) AND (hsi.itemdatapage.itempagenum=0) " +
+                //    "ORDER BY hsi.itemdatapage.docrevnum DESC", documentID);
+
+                //_logger.Debug(string.Format("SQL string: {0}", sqlString));
+
+                //ret = sqlHelper.ExecuteScalar(sqlString).ToString();
+
+                sqlString = string.Format("SELECT TOP(1) RTRIM(hsi.physicalplatter.lastuseddrive) AS LastUsedDrive, " +
+                    "RTRIM(hsi.itemdatapage.filepath) AS FilePath, " +
+                    "RTRIM(hsi.physicalplatter.lastuseddrive) + " +
+                    "RTRIM(hsi.itemdatapage.filepath) AS FullPath " +
+                    "FROM hsi.itemdata " +
                     "INNER JOIN hsi.itemdatapage ON hsi.itemdata.itemnum = hsi.itemdatapage.itemnum " +
                     "INNER JOIN hsi.physicalplatter ON hsi.itemdatapage.logicalplatternum = hsi.physicalplatter.logicalplatternum " +
                     "WHERE (hsi.itemdata.itemnum={0}) AND (hsi.physicalplatter.physicalplatternum=1) AND (hsi.itemdatapage.itempagenum=0) " +
-                    "ORDER BY hsi.itemdatapage.docrevnum DESC", documentID);
+                    "ORDER BY hsi.itemdatapage.docrevnum DESC;", documentID);
 
                 _logger.Debug(string.Format("SQL string: {0}", sqlString));
 
-                ret = sqlHelper.ExecuteScalar(sqlString).ToString();
+                var dfsNameSpace = System.Configuration.ConfigurationManager.AppSettings["DfsNameSpace"].ToString(); 
+
+                var reader = sqlHelper.ExecuteReader(sqlString);
+                while (reader.Read())
+                {
+                    if (dfsNameSpace == string.Empty)
+                    {
+                        ret = Convert.ToString(reader["LastUsedDrive"] + Convert.ToString(reader["FilePath"]));
+                    }
+                    else
+                    { 
+                        ret = dfsNameSpace + Convert.ToString(reader["FilePath"]);
+                    }
+                }
+                reader.Close();
+                return ret;
             }
             catch (Exception ex)
             {

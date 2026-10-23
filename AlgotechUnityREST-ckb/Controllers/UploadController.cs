@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
+
 using System.Net;
 using System.Net.Http;
 
@@ -16,7 +16,7 @@ namespace AlgotechUnityREST_ckb.Controllers
     /// <summary>
     /// Upload datoteke na server
     /// </summary>
-    [Authorize]
+    //[Authorize]
     [ApiExplorerSettings(IgnoreApi = false)]
     public class UploadController : ApiController
     {

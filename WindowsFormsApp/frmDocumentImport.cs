@@ -3,16 +3,15 @@
 // Pozivanje forme za Import dokumenata u OnBase
 
 using Newtonsoft.Json;
-
 using System;
 using System.Collections.Generic;
+
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
 
 namespace WindowsFormsApp
 {
@@ -236,7 +235,7 @@ namespace WindowsFormsApp
                     client.DefaultRequestHeaders.Accept.Clear();
                     client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                     client.DefaultRequestHeaders.Add("Cache-Control", "no-cache");
-                    client.DefaultRequestHeaders.Add("Set-Cookie", string.Format("Session=ID={0}&RequestID={1}",Guid.NewGuid(), requestID));
+                    client.DefaultRequestHeaders.Add("Set-Cookie", string.Format("Session=ID={0}&RequestID={1}", Guid.NewGuid(), requestID));
 
                     // OAuth2 Bearer autorizacija
                     client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
@@ -343,7 +342,7 @@ namespace WindowsFormsApp
         {
             try
             {
-                Cursor = Cursors.WaitCursor;    
+                Cursor = Cursors.WaitCursor;
                 toolStripStatusLabel1.Text = string.Empty;
                 txtResults.Text = string.Empty;
 
@@ -371,5 +370,114 @@ namespace WindowsFormsApp
         }
         #endregion
 
+        #region butUpload_Click
+        //private void butUpload_Click(object sender, EventArgs e)
+        //{
+        //    using (var openFileDialog = new OpenFileDialog())
+        //    {
+        //        openFileDialog.Title = "Izaberite fajl za upload";
+
+        //        if (openFileDialog.ShowDialog() != DialogResult.OK)
+        //            return;
+
+        //        string fullPath = openFileDialog.FileName;
+
+        //        var baseUrl = "https://sbonbase.algotech.test/";
+        //        var uploadEndpoint = "AlgotechUnityREST-ckb/Api/Upload/PostFormData";
+
+        //        using (var httpClient = new HttpClient())
+        //        using (var form = new MultipartFormDataContent())
+        //        {
+        //            httpClient.BaseAddress = new Uri(baseUrl);
+
+        //            var fileContent = new ByteArrayContent(File.ReadAllBytes(fullPath));
+        //            fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("application/octet-stream");
+
+        //            form.Add(fileContent, "file", Path.GetFileName(fullPath));
+
+        //            var response = httpClient.PostAsync(uploadEndpoint, form).Result;
+        //            var result = response.Content.ReadAsStringAsync().Result;
+
+        //            if (response.IsSuccessStatusCode)
+        //            {
+        //                toolStripStatusLabel1.Text = result.Replace("\"", string.Empty);
+        //            }
+        //            else
+        //            {
+        //                MessageBox.Show("Greška: " + response.StatusCode + " - " + result);
+        //            }
+        //        }
+        //    }
+        //}
+
+        private void butUpload_Click(object sender, EventArgs e)
+        {
+            using (var openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Title = "Izaberite fajl za upload";
+
+                if (openFileDialog.ShowDialog() != DialogResult.OK)
+                    return;
+
+                string fullPath = openFileDialog.FileName;
+                string accessToken = GetAccessToken();
+
+                var baseUrl = "https://sbonbase.algotech.test/";
+                var uploadEndpoint = "AlgotechUnityREST-demo/api/Upload/PostFile";
+
+                using (var httpClient = new HttpClient())
+                using (var form = new MultipartFormDataContent())
+                {
+                    httpClient.BaseAddress = new Uri(baseUrl);
+                    httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+
+                    var fileContent = new ByteArrayContent(File.ReadAllBytes(fullPath));
+                    fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("application/octet-stream");
+
+                    form.Add(fileContent, "file", Path.GetFileName(fullPath));
+
+                    var response = httpClient.PostAsync(uploadEndpoint, form).Result;
+                    var result = response.Content.ReadAsStringAsync().Result;
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        toolStripStatusLabel1.Text = result.Replace("\"", string.Empty);
+                    }
+                    else
+                    {
+                        MessageBox.Show("Greška: " + response.StatusCode + " - " + result);
+                    }
+                }
+            }
+        }
+        #endregion
+        private string GetAccessToken()
+        {
+            var tokenUrl = "https://sbonbase.algotech.test/AlgotechUnityREST-ckb/oauth2/token";
+            var clientID = "Algotech_TEST";
+            var clientSecret = "FLqPf1JTqGmT+/DtVapinomm0VOgIbuiL630SCnnLAY=";
+
+            using (var httpClient = new HttpClient())
+            {
+                var content = new FormUrlEncodedContent(new[]               {
+                    new KeyValuePair<string, string>("grant_type", "client_credentials"),
+                    new KeyValuePair<string, string>("client_id", clientID),
+                    new KeyValuePair<string, string>("client_secret", clientSecret)
+            });
+
+                var response = httpClient.PostAsync(tokenUrl, content).Result;
+                var result = response.Content.ReadAsStringAsync().Result;
+
+                if (!response.IsSuccessStatusCode)
+                    throw new Exception("Greška pri pribavljanju access token-a: " + response.StatusCode + " - " + result);
+
+                var token = JsonConvert.DeserializeObject<OAuthTokenResponse>(result);
+
+                if (token == null || string.IsNullOrWhiteSpace(token.AccessToken))
+                    throw new Exception("Access token nije vraćen.");
+
+                return token.AccessToken;
+            }
+        }
     }
 }

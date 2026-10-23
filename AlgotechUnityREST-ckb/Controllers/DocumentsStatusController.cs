@@ -18,7 +18,7 @@ namespace AlgotechUnityREST_ckb.Controllers
     /// <summary>
     /// Status dokumenata
     /// </summary>
-    [Authorize]
+    //[Authorize]
     public class DocumentsStatusController : ApiController
     {
         #region Variable  
