@@ -1,4 +1,4 @@
-namespace AlgotechUnityREST_ckb.Areas.HelpPage
+namespace AlgotechUnityREST_generali.Areas.HelpPage
 {
     /// <summary>
     /// Indicates whether the sample is used for request or response

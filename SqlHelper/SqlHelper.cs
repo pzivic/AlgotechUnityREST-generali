@@ -33,7 +33,7 @@ namespace DataSystem.DAL.SqlHelper
         private readonly string _connectionString = "";
         private readonly string _owner = "dbo";
 
-        //#region SqlHelper
+        #region SqlHelper old
         ////Pokupi konekcioni string baze podataka
         //public SqlHelper(string confingString)
         //{
@@ -61,11 +61,9 @@ namespace DataSystem.DAL.SqlHelper
         //    }
         //    _owner = ConfigurationManager.AppSettings["dbOwner"];
         //}
-        //#endregion
-
+        #endregion
 
         // Default konstruktor: koristi standardni key
-
         # region SqlHelper
         public SqlHelper() : this("connection_string")
         {

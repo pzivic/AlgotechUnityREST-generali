@@ -5,9 +5,9 @@ using System.Reflection;
 using System.Web.Http.Controllers;
 using System.Web.Http.Description;
 using System.Xml.XPath;
-using AlgotechUnityREST_ckb.Areas.HelpPage.ModelDescriptions;
+using AlgotechUnityREST_generali.Areas.HelpPage.ModelDescriptions;
 
-namespace AlgotechUnityREST_ckb.Areas.HelpPage
+namespace AlgotechUnityREST_generali.Areas.HelpPage
 {
     /// <summary>
     /// A custom <see cref="IDocumentationProvider"/> that reads the API documentation from an XML documentation file.

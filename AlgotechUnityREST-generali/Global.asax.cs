@@ -6,7 +6,7 @@ using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
 
-namespace AlgotechUnityREST_ckb
+namespace AlgotechUnityREST_generali
 {
     /// <summary>
     /// WebApiApplication 

@@ -9,13 +9,13 @@ using System.Web.Http;
 
 using Hyland.Unity;
 
-using AlgotechUnityREST_ckb.Models;
+using AlgotechUnityREST_generali.Models;
 
 using System.Diagnostics;
 using System.Globalization;
 
 
-namespace AlgotechUnityREST_ckb.Controllers
+namespace AlgotechUnityREST_generali.Controllers
 {
     /// <summary>
     /// Pretraga dokumenata

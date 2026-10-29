@@ -1,7 +1,7 @@
 ﻿using System.Web;
 using System.Web.Mvc;
 
-namespace AlgotechUnityREST_ckb
+namespace AlgotechUnityREST_generali
 {
     public class FilterConfig
     {

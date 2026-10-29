@@ -7,9 +7,9 @@ using System.Web.Http;
 using Hyland.Unity;
 using Newtonsoft.Json;
 
-using AlgotechUnityREST_ckb.Models;
+using AlgotechUnityREST_generali.Models;
 
-namespace AlgotechUnityREST_ckb.Controllers
+namespace AlgotechUnityREST_generali.Controllers
 {
     /// <summary>
     /// Ključne reči.

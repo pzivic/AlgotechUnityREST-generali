@@ -1,5 +1,15 @@
-﻿// Predrag Živić
-// Verzija ckb 01.11.2023
+﻿
+// ============================================================================
+// Autor:           Predrag Živić
+// Datum kreiranja: 01.11.2023
+// Naziv:           Osnovne metode za rad sa dokumentima u OnBase 
+//
+// Opis:
+// Ovaj kontroler sadrži osnovne metode za rad sa dokumentima u OnBase sistemu. 
+//
+// Istorija izmena:
+// ============================================================================
+
 
 using System;
 using System.Web.Http;
@@ -10,7 +20,7 @@ using System.Text;
 using Hyland.Unity;
 using Hyland.Unity.Extensions;
 
-using AlgotechUnityREST_ckb.Models;
+using AlgotechUnityREST_generali.Models;
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -24,7 +34,7 @@ using System.Collections.Specialized;
 
 using System.Threading.Tasks;
 
-namespace AlgotechUnityREST_ckb.Controllers
+namespace AlgotechUnityREST_generali.Controllers
 {
     /// <summary>
     /// U osnovi OnBase sistema je dokument. Kotroler sadrži metode sa rad sa dokumentima.
@@ -994,160 +1004,7 @@ namespace AlgotechUnityREST_ckb.Controllers
         }
         #endregion
 
-        #region DocumentKeywordSetValue 1
-        //        /// <summary>
-        //        /// Upisuje vrednost ključne reči u document za prosleđenim documentID. Objekat DocumentKeywords sadrži informaciju o tipu dokumenta, nazivu i vrednosti ključne reči
-        //        /// </summary>
-        //        /// <param name="application"></param>
-        //        /// <param name="documentKeyword">Objekat documentKeyword.</param>
-        //        /// <param name="documentID">Broj zahteva.</param>
-        //        //[HttpPost, ActionName("DocumentKeywordSetValue")]
-        //        private HttpResponseMessage DocumentKeywordSetValue(Application application, DocumentKeywords documentKeyword, long documentID)
-        //        {
-        //            Result result;
-        //            var dateTimeStart = DateTime.Now;
-
-        //            if (documentID == 0) { throw new ArgumentException("Parametar documentID mora da bude definisan."); }
-
-        //            // Defalt error code
-        //            var httpStatusCode = HttpStatusCode.Forbidden;
-        //            try
-        //            {
-        //                //_logger.Debug("Metoda:: SetDocumentKeyword");
-        //                _logger.Debug("Metoda:: DocumentKeywordSetValue");
-        //                _logger.Debug(string.Format("DataSource: {0}", documentKeyword.DataSource));
-        //                _logger.Debug(string.Format("UserName: {0}", documentKeyword.UserName));
-
-        //                if (documentKeyword.DocumentTypeName == string.Empty) { throw new ArgumentException("Svojstvo DocumentTypeName mora da bude definisano."); }
-        //                if (documentKeyword.KeywordName == string.Empty) { throw new ArgumentException("Svojstvo KeywordName mora da bude definisano."); }
-        //                if (documentKeyword.KeywordValue == string.Empty) { throw new ArgumentException("Svojstvo KeywordValue mora da bude definisano."); }
-
-        //                var documentTypeName = documentKeyword.DocumentTypeName;
-        //                var keywordName = documentKeyword.KeywordName;
-        //                var keywordValue = documentKeyword.KeywordValue;
-
-        //                dateTimeStart = DateTime.Now;
-        //                _logger.Debug("SetDocumentKeyword start " + dateTimeStart);
-
-        //                // Validacija Tipa dokumenta
-        //                var documentTypeValidate = application.Core.DocumentTypes.Find(documentTypeName) ?? throw new Exception(string.Format("Tip dokumenta '{0}' nije pronađen.", documentTypeName));
-        //                //.
-
-        //                // Nađi dokument preko ID 
-        //                var document = application.Core.GetDocumentByID(documentID);
-        //                if (document == null)
-        //                {
-        //                    httpStatusCode = HttpStatusCode.NotFound;
-        //                    _logger.Error(string.Format("Dokument za DocumentType '{0}' nije pronađen!", documentTypeName));
-        //                    throw new Exception(string.Format("Dokument za DocumentType '{0}' nije pronađen!", documentTypeName));
-        //                }
-        //                //. 
-
-        //                // Daj tip dokumenta iz objekta dokumenta.
-        //                var documentType = document.DocumentType;
-
-        //                //var keywordTypeAccountNum = documentType.KeywordRecordTypes.FindKeywordType("AccountNum");
-        //                var keywordTypeName = documentType.KeywordRecordTypes.FindKeywordType(keywordName);
-        //                if (keywordTypeName == null)
-        //                {
-        //                    _logger.Error(string.Format("Tip ključne reči '{0}' nije pronađen ili se ne nalazi na tipu dokumenta sa imenom: {1}.", keywordName, documentType.Name));
-        //                    throw new Exception(string.Format("Tip ključne reči '{0}' nije pronađen ili se ne nalazi na tipu dokumenta sa imenom: {1}.", keywordName, documentType.Name));
-        //                }
-        //                if (!keywordTypeName.TryCreateKeyword(keywordValue, out Keyword newKeywordValue))
-        //                {
-        //                    _logger.Error(string.Format("Vrednost {1} za tip ključne reči {0} nije nije uspešno upisana.", keywordValue, keywordName));
-        //                    throw new Exception(string.Format("Vrednost {1} za tip ključne reči {0} nije nije uspešno upisana.", keywordValue, keywordName));
-        //                }
-
-        //                // Create the KeywordModifier from the document
-        //                KeywordModifier keywordModifier = document.CreateKeywordModifier();
-        //                // Find the keyword record that contains our keyword type.
-        //                KeywordRecord keywordRecord = document.KeywordRecords.Find(keywordTypeName);
-        //                if (keywordRecord != null)
-        //                {
-        //                    // Find the old keyword from the record of the keyword type.
-        //                    var oldKeywordValue = keywordRecord.Keywords.Find(keywordTypeName);
-        //                    keywordModifier.UpdateKeyword(oldKeywordValue, newKeywordValue);
-        //                }
-        //                else
-        //                {
-        //                    // else if the keyword record is null
-        //                    keywordModifier.AddKeyword(newKeywordValue);
-        //                }
-
-        //                var forceLockDocument = System.Configuration.ConfigurationManager.AppSettings["ForceLockDocument"] == "True";
-        //                if (forceLockDocument == true)
-        //                {
-        //                    // Zaključavanje dokumenta
-        //                    _logger.Debug(string.Format("Zaključavanje dokumenta : {0}", documentID));
-        //                    using (DocumentLock documentLock = document.LockDocument())
-        //                    {
-        //                        // Check if the lock status is Already Locked
-        //                        if (documentLock.Status == DocumentLockStatus.AlreadyLocked)
-        //                        {
-        //                            httpStatusCode = HttpStatusCode.Conflict;
-        //                            _logger.Error(string.Format("Zaključavanje dokumenta nije uspelo (AlreadyLocked) : {0} status zaključavanja {2}", documentID, documentLock.Status));
-        //                            throw new Exception("Zaključavanje dokumenta nije bilo moguće, zaključavanje je izvšio drugi korisnik ili proces.");
-        //                        }
-        //                        // Check if the lock status is LockObtained
-        //                        if (documentLock.Status == DocumentLockStatus.LockObtained)
-        //                        {
-        //                            // If not locked, apply the changes to the database.
-        //                            keywordModifier.ApplyChanges();
-        //                            _logger.Debug(string.Format("Okinuli smo ApplyChanges sa zaključavanjem dokumenta DocumentID: {0}; OnBase SessionID: [{1}].", documentID, application.SessionID));
-        //                        }
-        //                    }
-        //                    //.
-        //                }
-        //                else
-        //                {
-        //                    keywordModifier.ApplyChanges();
-        //                    _logger.Debug(string.Format("Okinuli smo ApplyChanges bez zaključavanja dokumentaza DocumentID: {0}; OnBase SessionID: [{1}].", documentID, application.SessionID));
-        //                }
-
-        //                result = new Result
-        //                {
-        //                    Status = newKeywordValue.ToString(),
-        //                    Message = "Uspešno je upisana vrednost ključne reči."
-        //                };
-
-        //#if !DEBUG
-        //                response = Request.CreateResponse(HttpStatusCode.OK, result);
-        //#endif
-
-        //                // Logger
-        //                _logger.Debug(result.Message);
-        //                //.
-        //            }
-        //            catch (Exception ex)
-        //            {
-        //                // Logger
-        //                _logger.Error(
-        //                    string.Format("Greska kod upisa vrednosti kljucne reci dokumenta: {0}", documentKeyword.DocumentTypeName));
-        //                _logger.Error(ex.Message);
-        //                _logger.Error(ex.StackTrace);
-        //                //.
-
-        //                result = new Result
-        //                {
-        //                    Status = string.Empty,
-        //                    Message = "ERROR - " + ex.Message
-        //                };
-        //                response = Request.CreateResponse(httpStatusCode, result);
-        //            }
-
-        //            finally
-        //            {
-        //                var dateTimeEnd = DateTime.Now;
-        //                var diffInSeconds = (dateTimeEnd - dateTimeStart).TotalSeconds;
-        //                _logger.Debug("DocumentKeywordSetValue finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
-
-        //           }
-        //            return response;
-        //        }
-        #endregion
-
-        #region DocumentKeywordSetValue 2
+        #region DocumentKeywordSetValue
         /// <summary>
         /// Upisuje vrednost ključne reči u dokument za prosleđenim objekat Document. DocumentKeywords objekat sadrži informaciju o tipu dokumenta, nazivu i vrednosti ključne reči
         /// </summary>

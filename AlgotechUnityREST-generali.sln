@@ -11,8 +11,6 @@ Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Database", "Database\Databa
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DAL", "DAL", "{8EDCD062-4777-44BC-B8DD-6206580584BF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OracleHelper", "OracleHelper\OracleHelper.csproj", "{C3179A41-C7CE-4D79-9E0C-CDB3025386A2}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SqlHelper", "SqlHelper\SqlHelper.csproj", "{76187855-E094-4393-9D0A-596FEAFD9250}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsFormsApp", "WindowsFormsApp\WindowsFormsApp.csproj", "{DC072EF2-C96A-440D-AD53-512116EC8F3E}"
@@ -37,10 +35,6 @@ Global
 		{1C36B871-B916-4F29-93B0-D47E12EDD448}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1C36B871-B916-4F29-93B0-D47E12EDD448}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1C36B871-B916-4F29-93B0-D47E12EDD448}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{C3179A41-C7CE-4D79-9E0C-CDB3025386A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C3179A41-C7CE-4D79-9E0C-CDB3025386A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C3179A41-C7CE-4D79-9E0C-CDB3025386A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C3179A41-C7CE-4D79-9E0C-CDB3025386A2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{76187855-E094-4393-9D0A-596FEAFD9250}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{76187855-E094-4393-9D0A-596FEAFD9250}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{76187855-E094-4393-9D0A-596FEAFD9250}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -54,7 +48,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{C3179A41-C7CE-4D79-9E0C-CDB3025386A2} = {8EDCD062-4777-44BC-B8DD-6206580584BF}
 		{76187855-E094-4393-9D0A-596FEAFD9250} = {8EDCD062-4777-44BC-B8DD-6206580584BF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution

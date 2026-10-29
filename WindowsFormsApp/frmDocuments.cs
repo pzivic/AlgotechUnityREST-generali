@@ -272,7 +272,7 @@ namespace WindowsFormsApp
 
             string url =
                 baseUrl.TrimEnd('/') +
-                "/AlgotechUnityREST-ckb/api/DocumentsUniversal/DocumentList" +
+                "/AlgotechUnityREST-generali/api/DocumentsUniversal/DocumentList" +
                 "?fromDate=" + Uri.EscapeDataString(fromDate) +
                 "&toDate=" + Uri.EscapeDataString(toDate) +
                 "&documentTypeName=" + Uri.EscapeDataString(documentTypeName);
@@ -397,7 +397,7 @@ namespace WindowsFormsApp
                 {
                     client.Timeout = TimeSpan.FromSeconds(300);
 
-                    string url = baseUrl.TrimEnd('/') + "/AlgotechUnityREST-ckb/Api/DocumentsUniversal/DocumentImport";
+                    string url = baseUrl.TrimEnd('/') + "/AlgotechUnityREST-generali/Api/DocumentsUniversal/DocumentImport";
 
                     // Header
                     client.DefaultRequestHeaders.Accept.Clear();

@@ -251,18 +251,12 @@
     <Compile Include="Areas\HelpPage\SampleGeneration\TextSample.cs" />
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
     <Compile Include="Controllers\AccountsController.cs" />
-    <Compile Include="Controllers\CoreSystemGroupController.cs" />
-    <Compile Include="Controllers\CoreSystemClientController.cs" />
-    <Compile Include="Controllers\DocumentsStatusController.cs" />
     <Compile Include="Controllers\DocumentsUniversalController.cs" />
     <Compile Include="Controllers\DocumentsController.cs" />
     <Compile Include="Controllers\DocumentsGetDataController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\DocumentsKeywordsController.cs" />
     <Compile Include="Controllers\SequencerController.cs" />
-    <Compile Include="Controllers\TestClientDataController.cs" />
-    <Compile Include="Controllers\TestController.cs" />
-    <Compile Include="Controllers\TestDocumentsController.cs" />
     <Compile Include="Controllers\UploadController.cs" />
     <Compile Include="Models\OAuthClient.cs" />
     <Compile Include="Security\ClientCredentialsProvider.cs" />
@@ -360,10 +354,6 @@
     <ProjectReference Include="..\AlgotechUnityUDF\AlgotechUnityUDF.csproj">
       <Project>{0a9709db-fb38-4255-91b3-a115a5932857}</Project>
       <Name>AlgotechUnityUDF</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\OracleHelper\OracleHelper.csproj">
-      <Project>{c3179a41-c7ce-4d79-9e0c-cdb3025386a2}</Project>
-      <Name>OracleHelper</Name>
     </ProjectReference>
     <ProjectReference Include="..\SqlHelper\SqlHelper.csproj">
       <Project>{76187855-e094-4393-9d0a-596feafd9250}</Project>

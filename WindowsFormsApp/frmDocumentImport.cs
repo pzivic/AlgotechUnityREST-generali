@@ -40,7 +40,7 @@ namespace WindowsFormsApp
         /// <exception cref="Exception"></exception>
         private async Task<string> GetAccessTokenAsync()
         {
-            var tokenUrl = "http://localhost/AlgotechUnityREST-ckb/oauth2/token";
+            var tokenUrl = "http://localhost/AlgotechUnityREST-generali/oauth2/token";
             var clientId = "ALGOTECH_REST_CLIENT_ID";
             var clientSecret = "ALGOTECH_REST_SECRET";
 
@@ -90,8 +90,8 @@ namespace WindowsFormsApp
             //txtUrl.Text = @"http://localhost/AlgotechUnityREST/Api/Request/SetStatus";
             //txtUrl.Text = @"http://localhost/AlgotechUnityREST/Api/Documents/SetDocumentKeyword?requestID=202304031";
 
-            comboBox1.Items.Add(@"http://localhost/AlgotechUnityREST-ckb/Api/Documents/DocumentImport");
-            comboBox1.Items.Add(@"http://sbonbase.algotech.test/AlgotechUnityREST-ckb/Api/Documents/DocumentImport");
+            comboBox1.Items.Add(@"http://localhost/AlgotechUnityREST-generali/Api/Documents/DocumentImport");
+            comboBox1.Items.Add(@"http://sbonbase.algotech.test/AlgotechUnityREST-generali/Api/Documents/DocumentImport");
             //comboBox1.Items.Add(@"http://sbonbase.algotech.test:84/Api/Documents/DocumentImport");
             comboBox1.SelectedIndex = 0;
         }
@@ -383,7 +383,7 @@ namespace WindowsFormsApp
         //        string fullPath = openFileDialog.FileName;
 
         //        var baseUrl = "https://sbonbase.algotech.test/";
-        //        var uploadEndpoint = "AlgotechUnityREST-ckb/Api/Upload/PostFormData";
+        //        var uploadEndpoint = "AlgotechUnityREST-generali/Api/Upload/PostFormData";
 
         //        using (var httpClient = new HttpClient())
         //        using (var form = new MultipartFormDataContent())
@@ -453,7 +453,7 @@ namespace WindowsFormsApp
         #endregion
         private string GetAccessToken()
         {
-            var tokenUrl = "https://sbonbase.algotech.test/AlgotechUnityREST-ckb/oauth2/token";
+            var tokenUrl = "https://sbonbase.algotech.test/AlgotechUnityREST-generali/oauth2/token";
             var clientID = "Algotech_TEST";
             var clientSecret = "FLqPf1JTqGmT+/DtVapinomm0VOgIbuiL630SCnnLAY=";
 

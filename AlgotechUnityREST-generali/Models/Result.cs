@@ -1,7 +1,7 @@
 ﻿// Predrag Živić
 // 18.09.2022
 
-namespace AlgotechUnityREST_ckb.Models
+namespace AlgotechUnityREST_generali.Models
 {
     /// <summary>
     /// Rezultat izvršavanja metode

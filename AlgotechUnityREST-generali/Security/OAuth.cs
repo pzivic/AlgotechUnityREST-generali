@@ -15,7 +15,7 @@ using System.Data;
 using System.Data.SqlClient;
 
 using DataSystem.DAL.SqlHelper;
-using AlgotechUnityREST_ckb.Models;
+using AlgotechUnityREST_generali.Models;
 
 namespace AlgotechUnityREST.Security
 {

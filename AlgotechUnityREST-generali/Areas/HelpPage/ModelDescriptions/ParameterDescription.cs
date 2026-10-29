@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 
-namespace AlgotechUnityREST_ckb.Areas.HelpPage.ModelDescriptions
+namespace AlgotechUnityREST_generali.Areas.HelpPage.ModelDescriptions
 {
     public class ParameterDescription
     {

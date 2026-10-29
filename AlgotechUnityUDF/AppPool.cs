@@ -75,7 +75,7 @@ namespace Algotech.UTL.AlgotechUnityUDF
         public List<AppPool> GetAppPoolsByText(short appPoolStatus)
         {
             // Putanja do fajla koji želite da otvorite
-            string filePath = @"D:\Users\pzivic\Source\Repos\AlgotechUnityREST-ckb\AlgotechUnityREST-ckb\app_pool.txt";
+            string filePath = @"D:\Users\pzivic\Source\Repos\AlgotechUnityREST-generali\AlgotechUnityREST-generali\app_pool.txt";
 
             var list = new List<AppPool>();
 

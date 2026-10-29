@@ -1,7 +1,7 @@
 ﻿// Korisnički nalozi
 // 08.03.2024
 
-namespace AlgotechUnityREST_ckb.Models
+namespace AlgotechUnityREST_generali.Models
 {
     /// <summary>
     /// Model dokumenta

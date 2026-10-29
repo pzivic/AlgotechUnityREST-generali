@@ -1,4 +1,4 @@
-﻿namespace AlgotechUnityREST_ckb.Models
+﻿namespace AlgotechUnityREST_generali.Models
 {
     public class OAuthClient
     {

@@ -2,9 +2,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net.Http.Headers;
 using System.Web.Http.Description;
-using AlgotechUnityREST_ckb.Areas.HelpPage.ModelDescriptions;
+using AlgotechUnityREST_generali.Areas.HelpPage.ModelDescriptions;
 
-namespace AlgotechUnityREST_ckb.Areas.HelpPage.Models
+namespace AlgotechUnityREST_generali.Areas.HelpPage.Models
 {
     /// <summary>
     /// The model that represents an API displayed on the help page.

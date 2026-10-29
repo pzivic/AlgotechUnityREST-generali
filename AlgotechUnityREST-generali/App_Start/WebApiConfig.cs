@@ -2,7 +2,7 @@
 using Newtonsoft.Json.Converters;
 using System.Web.Http;
 
-namespace AlgotechUnityREST_ckb
+namespace AlgotechUnityREST_generali
 {
     /// <summary>
     /// WebApiConfig

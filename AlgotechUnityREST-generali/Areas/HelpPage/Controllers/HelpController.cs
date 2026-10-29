@@ -2,10 +2,10 @@ using System;
 using System.Web.Http;
 using System.Web.Mvc;
 
-using AlgotechUnityREST_ckb.Areas.HelpPage.ModelDescriptions;
-using AlgotechUnityREST_ckb.Areas.HelpPage.Models;
+using AlgotechUnityREST_generali.Areas.HelpPage.ModelDescriptions;
+using AlgotechUnityREST_generali.Areas.HelpPage.Models;
 
-namespace AlgotechUnityREST_ckb.Areas.HelpPage.Controllers
+namespace AlgotechUnityREST_generali.Areas.HelpPage.Controllers
 {
     /// <summary>
     /// The controller that will handle requests for the help page.

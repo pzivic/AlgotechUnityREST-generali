@@ -3,7 +3,7 @@
 
 using System;
 
-namespace AlgotechUnityREST_ckb.Models
+namespace AlgotechUnityREST_generali.Models
 {
     /// <summary>
     /// Ključne reči

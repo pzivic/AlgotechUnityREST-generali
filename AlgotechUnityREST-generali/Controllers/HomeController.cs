@@ -4,7 +4,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 
-namespace AlgotechUnityREST_ckb.Controllers
+namespace AlgotechUnityREST_generali.Controllers
 {
     public class HomeController : Controller
     {

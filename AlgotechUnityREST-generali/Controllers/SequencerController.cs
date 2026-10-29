@@ -7,7 +7,7 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
-using AlgotechUnityREST_ckb.Models;
+using AlgotechUnityREST_generali.Models;
 
 /*
 -- Predrag Živić
@@ -25,7 +25,7 @@ GO
 ALTER SEQUENCE dbo.RefNoMBP RESTART WITH 1
  */
 
-namespace AlgotechUnityREST_ckb.Controllers
+namespace AlgotechUnityREST_generali.Controllers
 {
     /// <summary>
     /// Generator sekvenci

@@ -11,10 +11,10 @@ using System.Net.Http.Headers;
 using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.Description;
-using AlgotechUnityREST_ckb.Areas.HelpPage.ModelDescriptions;
-using AlgotechUnityREST_ckb.Areas.HelpPage.Models;
+using AlgotechUnityREST_generali.Areas.HelpPage.ModelDescriptions;
+using AlgotechUnityREST_generali.Areas.HelpPage.Models;
 
-namespace AlgotechUnityREST_ckb.Areas.HelpPage
+namespace AlgotechUnityREST_generali.Areas.HelpPage
 {
     public static class HelpPageConfigurationExtensions
     {

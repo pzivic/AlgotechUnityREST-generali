@@ -1,6 +1,16 @@
-﻿// Predrag Živić
-// 01.03.2025
-// Univerzalni data import i univerzalno listanje dokumenata
+﻿
+// ============================================================================
+// Autor:           Predrag Živić
+// Datum kreiranja: 01.03.2025
+// Naziv:           Univerzalni data import i univerzalno listanje dokumenata
+//
+// Opis:
+// Univerzaalna metoda REST servisa za uvoz dokumenata koja koristi generičke meta podatke.
+// Metoda treba da prihvati fajl dokumenta iz opsega podržanih OnBase tipova (PDF, Image File...)
+// zajedno sa kolekcijom ključnih reči kao ulaznim parametrima, omogućavajući fleksibilan i prilagodljiv import u sistem.
+//
+// Istorija izmena:
+// ============================================================================
 
 using System;
 using System.Web.Http;
@@ -12,7 +22,7 @@ using Hyland.Unity;
 using System.Net.Http;
 using System.Net;
 
-using AlgotechUnityREST_ckb.Models;
+using AlgotechUnityREST_generali.Models;
 
 using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
@@ -20,7 +30,7 @@ using System.Diagnostics;
 using System.Globalization;
 using Algotech.UTL.AlgotechUnityUDF;
 
-namespace AlgotechUnityREST_ckb.Controllers
+namespace AlgotechUnityREST_generali.Controllers
 {
     /// <summary>
     /// Univerzalnu metodu REST servisa za uvoz dokumenata koja koristi generičke meta podatke. 

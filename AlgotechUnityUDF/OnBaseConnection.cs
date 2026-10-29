@@ -1,5 +1,6 @@
 ﻿// Predrag Živić
 // 10.04.2023
+// Konekcija na on base
 
 using System;
 using System.Linq;
@@ -25,55 +26,6 @@ namespace Algotech.UTL.AlgotechUnityUDF
         private readonly string _dataSource = System.Configuration.ConfigurationManager.AppSettings["DataSource"];
         private readonly string _licenceType = System.Configuration.ConfigurationManager.AppSettings["LicenceType"];
         #endregion
-
-        //#region OnBaseConnect
-        ///// <summary>
-        ///// Konektovanje OnBase sistema
-        ///// </summary>
-        ///// <returns></returns>
-        //public Application OnBaseConnect()
-        //{
-        //    Application app = null;
-
-        //    // Logijemo od momenta uspostavljanja konekcije
-        //    var dateTimeStart = DateTime.Now;
-        //    //_logger.Debug("Pomoćna funkcija:: OnBaseConnect start " + dateTimeStart);
-        //    _logger.Debug(string.Format("Pomoćna funkcija:: OnBaseConnect url: {0}, datasource {1}; start: {2}.", _appServerURL, _dataSource, dateTimeStart));
-
-        //    var userName = System.Configuration.ConfigurationManager.AppSettings["UserName"];
-        //    var userPassword = System.Configuration.ConfigurationManager.AppSettings["UserPassword"];
-        //    OnBaseAuthenticationProperties authProps = Application.CreateOnBaseAuthenticationProperties(_appServerURL, userName, userPassword, _dataSource);
-
-        //    _logger.Debug(string.Format("Pokušaj uspostavljanja veze na klasičan način sa identitetom: {0}.", userName));
-
-        //    authProps.IdentitySettings = authProps.CreateIdentitySettings("AlgotechUnityREST");
-        //    authProps.LicenseType = LicenseType.Default;
-
-        //    try
-        //    {
-        //        app = Application.Connect(authProps);
-        //    }
-        //    catch (InvalidLicensingException)
-        //    {
-        //        // Ne loguj kao grešku više warning jer nedostaju licence
-        //        _logger.Warn(string.Format("Error: Invalid Licensing. Neuspešnо uspostavljanja veze sa identitetom: {0}.", userName));
-        //    }
-
-        //    catch (Exception ex)
-        //    {
-        //        _logger.Error(ex.Message);
-        //    }
-
-        //    if (app != null)
-        //    {
-        //        _logger.Debug(string.Format("Konekcija je uspešno uspostavljena identitetom {0}. SessionID: {1}.", userName, app.SessionID));
-        //    }
-
-        //    _logger.Debug("Pomoćna funkcija:: OnBaseConnect end " + DateTime.Now + " sec " + (DateTime.Now - dateTimeStart).TotalSeconds.ToString());
-
-        //    return app;
-        //}
-        //#endregion
 
         #region OnBaseConnect
         /// <summary>

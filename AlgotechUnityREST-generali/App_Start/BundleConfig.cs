@@ -1,7 +1,7 @@
 ﻿
 using System.Web.Optimization;
 
-namespace AlgotechUnityREST_ckb
+namespace AlgotechUnityREST_generali
 {
     public class BundleConfig
     {

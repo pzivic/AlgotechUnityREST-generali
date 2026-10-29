@@ -8,12 +8,12 @@ using System.Net;
 using System.Web.Http;
 
 using Hyland.Unity;
-using AlgotechUnityREST_ckb.Models;
+using AlgotechUnityREST_generali.Models;
 using Newtonsoft.Json;
 using System.Linq;
 using System.Web.Http.Description;
 
-namespace AlgotechUnityREST_ckb.Controllers
+namespace AlgotechUnityREST_generali.Controllers
 {
     /// <summary>
     /// Korisnički nalozi.

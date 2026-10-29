@@ -11,7 +11,7 @@ using System.Web;
 using System.Web.Http;
 using System.Web.Http.Description;
 
-namespace AlgotechUnityREST_ckb.Controllers
+namespace AlgotechUnityREST_generali.Controllers
 {
     /// <summary>
     /// Upload datoteke na server

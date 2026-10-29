@@ -7,9 +7,9 @@ using Microsoft.Owin.Security.OAuth;
 
 using Owin;
 
-[assembly: OwinStartup(typeof(AlgotechUnityREST_ckb.Startup))]
+[assembly: OwinStartup(typeof(AlgotechUnityREST_generali.Startup))]
 
-namespace AlgotechUnityREST_ckb
+namespace AlgotechUnityREST_generali
 {
     /// <summary>
     /// Configures application authentication using OAuth 2.0 and JWT bearer tokens.

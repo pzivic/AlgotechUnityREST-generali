@@ -3,7 +3,7 @@ using System.Text;
 using System.Web;
 using System.Web.Http.Description;
 
-namespace AlgotechUnityREST_ckb.Areas.HelpPage
+namespace AlgotechUnityREST_generali.Areas.HelpPage
 {
     public static class ApiDescriptionExtensions
     {

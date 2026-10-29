@@ -1,1 +1,1 @@
-﻿<%@ Application Codebehind="Global.asax.cs" Inherits="AlgotechUnityREST_ckb.WebApiApplication" Language="C#" %>
+﻿<%@ Application Codebehind="Global.asax.cs" Inherits="AlgotechUnityREST_generali.WebApiApplication" Language="C#" %>

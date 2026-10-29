@@ -8,8 +8,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Algotech")]
-[assembly: AssemblyProduct("AlgotechUnityREST_ckb")]
-[assembly: AssemblyCopyright("Copyright ©  2023-2025")]
+[assembly: AssemblyProduct("AlgotechUnityREST_generali")]
+[assembly: AssemblyCopyright("Copyright ©  2023-2026")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

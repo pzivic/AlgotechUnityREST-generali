@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 
-namespace AlgotechUnityREST_ckb.Areas.HelpPage.ModelDescriptions
+namespace AlgotechUnityREST_generali.Areas.HelpPage.ModelDescriptions
 {
     internal static class ModelNameHelper
     {

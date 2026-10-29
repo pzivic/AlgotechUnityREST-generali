@@ -11,7 +11,7 @@ using System.Web.Http.Description;
 using System.Xml.Serialization;
 using Newtonsoft.Json;
 
-namespace AlgotechUnityREST_ckb.Areas.HelpPage.ModelDescriptions
+namespace AlgotechUnityREST_generali.Areas.HelpPage.ModelDescriptions
 {
     /// <summary>
     /// Generates model descriptions for given types.

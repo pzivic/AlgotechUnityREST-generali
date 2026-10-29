@@ -1,7 +1,7 @@
 using System.Web.Http;
 using System.Web.Mvc;
 
-namespace AlgotechUnityREST_ckb.Areas.HelpPage
+namespace AlgotechUnityREST_generali.Areas.HelpPage
 {
     public class HelpPageAreaRegistration : AreaRegistration
     {
