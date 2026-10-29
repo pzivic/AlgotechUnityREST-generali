@@ -12,7 +12,7 @@ using AlgotechUnityREST_ckb.Models;
 namespace AlgotechUnityREST_ckb.Controllers
 {
     /// <summary>
-    /// Ključne reči
+    /// Ključne reči.
     /// </summary>
     [Authorize]
     public class DocumentsKeywordsController : ApiController
