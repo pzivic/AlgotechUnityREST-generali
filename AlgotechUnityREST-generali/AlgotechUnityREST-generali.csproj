@@ -8,12 +8,12 @@
     <ProductVersion>
     </ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{D67C8F3E-8159-482D-99B2-B4C58F9265DC}</ProjectGuid>
+    <ProjectGuid>{64C73ABF-37D7-4BB1-8A57-7B5D39A77835}</ProjectGuid>
     <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>AlgotechUnityREST_ckb</RootNamespace>
-    <AssemblyName>AlgotechUnityREST-ckb</AssemblyName>
+    <RootNamespace>AlgotechUnityREST_generali</RootNamespace>
+    <AssemblyName>AlgotechUnityREST-generali</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
     <UseIISExpress>false</UseIISExpress>
@@ -35,7 +35,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\AlgotechUnityREST-ckb.xml</DocumentationFile>
+    <DocumentationFile>bin\AlgotechUnityREST-generali.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -45,7 +45,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\AlgotechUnityREST-ckb.xml</DocumentationFile>
+    <DocumentationFile>bin\AlgotechUnityREST-generali.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Hyland.Types, Version=25.1.23.1000, Culture=neutral, processorArchitecture=MSIL">
@@ -287,7 +287,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\HelpPage\HelpPage.css" />
-    <Content Include="bin\AlgotechUnityREST-ckb.xml">
+    <Content Include="bin\AlgotechUnityREST-generali.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Content\bootstrap-theme.css" />
@@ -388,7 +388,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>50828</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost/AlgotechUnityREST-ckb</IISUrl>
+          <IISUrl>http://localhost/AlgotechUnityREST-generali</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

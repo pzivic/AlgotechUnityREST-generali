@@ -14,7 +14,7 @@ namespace AlgotechUnityREST_ckb.Controllers
     /// <summary>
     /// Ključne reči
     /// </summary>
-    //[Authorize]
+    [Authorize]
     public class DocumentsKeywordsController : ApiController
     {
 

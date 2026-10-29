@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlgotechUnityREST-ckb", "AlgotechUnityREST-ckb\AlgotechUnityREST-ckb.csproj", "{D67C8F3E-8159-482D-99B2-B4C58F9265DC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlgotechUnityREST-generali", "AlgotechUnityREST-generali\AlgotechUnityREST-generali.csproj", "{64C73ABF-37D7-4BB1-8A57-7B5D39A77835}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlgotechUnityUDF", "AlgotechUnityUDF\AlgotechUnityUDF.csproj", "{0A9709DB-FB38-4255-91B3-A115A5932857}"
 EndProject
@@ -23,10 +23,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D67C8F3E-8159-482D-99B2-B4C58F9265DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D67C8F3E-8159-482D-99B2-B4C58F9265DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D67C8F3E-8159-482D-99B2-B4C58F9265DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D67C8F3E-8159-482D-99B2-B4C58F9265DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64C73ABF-37D7-4BB1-8A57-7B5D39A77835}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64C73ABF-37D7-4BB1-8A57-7B5D39A77835}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64C73ABF-37D7-4BB1-8A57-7B5D39A77835}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64C73ABF-37D7-4BB1-8A57-7B5D39A77835}.Release|Any CPU.Build.0 = Release|Any CPU
 		{0A9709DB-FB38-4255-91B3-A115A5932857}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{0A9709DB-FB38-4255-91B3-A115A5932857}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0A9709DB-FB38-4255-91B3-A115A5932857}.Release|Any CPU.ActiveCfg = Release|Any CPU
