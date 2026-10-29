@@ -16,7 +16,7 @@ using System.Web.Http.Description;
 namespace AlgotechUnityREST_ckb.Controllers
 {
     /// <summary>
-    /// Korisnički nalozi
+    /// Korisnički nalozi.
     /// </summary>
     //[Authorize]
     [ApiExplorerSettings(IgnoreApi = true)]
