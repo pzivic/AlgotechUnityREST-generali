@@ -252,12 +252,9 @@
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
     <Compile Include="Controllers\AccountsController.cs" />
     <Compile Include="Controllers\DocumentsUniversalController.cs" />
-    <Compile Include="Controllers\DocumentsController.cs" />
-    <Compile Include="Controllers\DocumentsGetDataController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\DocumentsKeywordsController.cs" />
     <Compile Include="Controllers\SequencerController.cs" />
-    <Compile Include="Controllers\UploadController.cs" />
     <Compile Include="Models\OAuthClient.cs" />
     <Compile Include="Security\ClientCredentialsProvider.cs" />
     <Compile Include="Security\JwtTokenFormat.cs" />
