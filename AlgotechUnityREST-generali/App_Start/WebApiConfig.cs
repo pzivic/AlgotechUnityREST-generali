@@ -1,6 +1,4 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using System.Web.Http;
+﻿using System.Web.Http;
 
 namespace AlgotechUnityREST_generali
 {
@@ -29,6 +27,11 @@ namespace AlgotechUnityREST_generali
             config.Routes.MapHttpRoute(
                 name: "DefaultApi",
                 routeTemplate: "api/{controller}/{id}",
+                defaults: new { id = RouteParameter.Optional });
+
+            config.Routes.MapHttpRoute(
+                name: "ApiWithAction",
+                routeTemplate: "api/{controller}/{action}/{id}",
                 defaults: new { id = RouteParameter.Optional }
 
             );

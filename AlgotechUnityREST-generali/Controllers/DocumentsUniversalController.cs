@@ -25,7 +25,9 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Web;
 using System.Web.Http;
+using static AlgotechUnityREST_generali.Controllers.UploadController;
 
 namespace AlgotechUnityREST_generali.Controllers
 {
@@ -149,226 +151,6 @@ namespace AlgotechUnityREST_generali.Controllers
         #endregion
 
         #region DocumentImport
-        ///// <summary>
-        ///// Preuzimanje datoteke i unos u OnBase
-        ///// </summary>
-        ///// <param name="documentImport">Objekat Documents</param>
-        ///// <returns></returns>
-        //[Authorize]
-        //[HttpPost, ActionName("DocumentImport")]
-        //public HttpResponseMessage DocumentImport([FromBody] DocumentsImport documentImport)
-        //{
-        //    HttpResponseMessage responseMessage;
-        //    Application application = null;
-
-        //    var dateTimeStart = DateTime.Now;
-
-        //    var httpStatusCode = HttpStatusCode.BadRequest;
-        //    var result = new Result();
-        //    responseMessage = Request.CreateResponse(httpStatusCode, result);
-
-        //    try
-        //    {
-        //        _logger.Info("Metoda:: DocumentImport Univerzalni");
-
-        //        var status = string.Empty;
-        //        var message = string.Empty;
-
-        //        // Provera da li su vrednosti prosleđene
-        //        if (documentImport == null) { throw new ArgumentException("Niste definisali Dokument!"); }
-        //        //if (!documentImport.DocumentDate.HasValue) { throw new ArgumentException("Niste definisali datum dokumenta!");               }
-
-        //        if (string.IsNullOrEmpty(documentImport.DocumentTypeName)) { throw new ArgumentException("Niste definisali OnBase tip dokumenta!"); }
-        //        if (string.IsNullOrEmpty(documentImport.DefaultFileTypeName)) { throw new ArgumentException("Niste definisali tip datoteke!"); }
-        //        if (string.IsNullOrEmpty(documentImport.DataSource)) { throw new ArgumentException("Niste definisali izvor podatka!"); }
-
-        //        //if (documentImport.FileName == null) { throw new ArgumentException("Niste definisali datoteku!"); }
-        //        if (documentImport.FileName == null || documentImport.FileName.Count == 0) { throw new ArgumentException("Niste definisali datoteku."); }
-        //        if (documentImport.Keywords == null) { throw new ArgumentException("Niste definisali ključne reči!"); }
-        //        //.
-
-        //        // Ključne reči definicija
-        //        Console.WriteLine($"Received document: {documentImport.DocumentTypeName}");
-        //        foreach (var keyword in documentImport.Keywords)
-        //        {
-        //            Debug.WriteLine($"KeywordName: {keyword.KeywordName} Value: {keyword.KeywordValue} DataType: {keyword.KeywordDataType}");
-        //            _logger.Info($"KeywordName: {keyword.KeywordName} Value: {keyword.KeywordValue} DataType: {keyword.KeywordDataType}");
-        //        }
-        //        //.
-
-        //        // Konekcija na OnBase
-        //        _logger.Info("OnBase Connect()");
-        //        var obj = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
-        //        application = obj.OnBaseConnect();
-        //        if (application == null)
-        //        {
-        //            _logger.Warn("Greška kod uspostavljanja konekcije sa OnBase");
-        //            throw new ArgumentException("Greška kod uspostavljanja konekcije sa OnBase. Kontaktirajte OnBase administratora.");
-        //        }
-        //        //.
-
-        //        // Logijemo od momenta uspostavljanja konekcije
-        //        dateTimeStart = DateTime.Now;
-        //        _logger.Info("DocumentImport start " + dateTimeStart);
-
-        //        // Validacija Tipa dokumenta
-        //        DocumentType documentType =
-        //            application.Core.DocumentTypes.Find(documentImport.DocumentTypeName) ?? throw new Exception(string.Format("Tip dokumenta '{0}' nije pronađen ili nisu podešena prava pristupa servisnom nalogu.", documentImport.DocumentTypeName));
-        //        FileType fileType =
-        //            application.Core.FileTypes.Find(documentImport.DefaultFileTypeName) ?? throw new Exception(string.Format("Tip datoteke '{0}' nije pronađen ili nisu podešena prava pristupa servisnom nalogu.", documentImport.DefaultFileTypeName));
-        //        //.
-
-
-        //        // Dobijamo lokacuju za privremeni upload iz konfiguracije
-        //        var uploadedFolder = System.Configuration.ConfigurationManager.AppSettings["UploadFolder"];
-
-        //        if (string.IsNullOrWhiteSpace(uploadedFolder))
-        //        {
-        //            throw new InvalidOperationException(
-        //                "Nije podešena lokacija za privremeni upload.");
-        //        }
-
-        //        var fullFilePaths = new List<string>();
-
-        //        foreach (var uploadedFileName in documentImport.FileName)
-        //        {
-        //            var fileName = Path.GetFileName(uploadedFileName);
-        //            if (string.IsNullOrWhiteSpace(fileName))
-        //            {
-        //                throw new ArgumentException("Naziv prenete datoteke nije ispravan.");
-        //            }
-        //            var fullPath = Path.Combine(uploadedFolder, fileName);
-        //            if (!System.IO.File.Exists(fullPath))
-        //            {
-        //                throw new FileNotFoundException(
-        //                    $"Preneta datoteka '{fileName}' nije pronađena.");
-        //            }
-        //            fullFilePaths.Add(fullPath);
-        //        }
-
-        //        documentImport.FileName = fullFilePaths;
-        //        //.
-
-        //        // Svojstva dokumenta
-        //        StoreNewDocumentProperties storeDocumentProperties =
-        //            application.Core.Storage.CreateStoreNewDocumentProperties(documentType, fileType);
-
-        //        storeDocumentProperties.TextEncoding = Encoding.Unicode;
-        //        storeDocumentProperties.DocumentDate = documentImport.DocumentDate;
-        //        storeDocumentProperties.Comment = documentImport.Comment;
-        //        //storeDocumentProperties.Options = StoreDocumentOptions.SkipWorkflow;
-        //        //.
-
-        //        // Pridružujemo datasource kolekciji ključnih reči ali odimo računa da ne dupliramo DataSource koji ide fiksno ne kao kolekcija ključna reči
-        //        documentImport.Keywords.Add(new Keyword { KeywordName = "DataSource", KeywordValue = documentImport.DataSource });
-
-        //        // Upisujemo ključne reči 
-        //        foreach (var keyword in documentImport.Keywords)
-        //        {
-        //            if (!string.IsNullOrEmpty(keyword.KeywordName) && (keyword.KeywordName != "DataSource"))
-        //            {
-        //                // Treba nam id ključne reči i tip podatka
-        //                //var keywordTypeNameID = UnityUDF.GetKeywordTypeID(application, keyword.KeywordName);
-        //                var keywordDataType = UnityUDF.GetKeywordDataType(application, keyword.KeywordName);
-
-        //                // Konvertovati Hyland.Unity data type u C#
-        //                switch (keywordDataType)
-        //                {
-        //                    case KeywordDataType.Numeric9:
-        //                        storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToInt32(keyword.KeywordValue));
-        //                        break;
-
-        //                    case KeywordDataType.Numeric20:
-        //                        storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToInt64(keyword.KeywordValue));
-        //                        break;
-
-        //                    case KeywordDataType.AlphaNumeric:
-        //                        storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToString(keyword.KeywordValue));
-        //                        break;
-
-        //                    case KeywordDataType.Currency:
-        //                        storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToDecimal(keyword.KeywordValue));
-        //                        break;
-
-        //                    case KeywordDataType.SpecificCurrency:
-        //                        storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToDecimal(keyword.KeywordValue));
-        //                        break;
-
-        //                    case KeywordDataType.Date:
-        //                        storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToDateTime(keyword.KeywordValue));
-        //                        break;
-
-        //                    case KeywordDataType.DateTime:
-        //                        storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToDateTime(keyword.KeywordValue));
-        //                        break;
-
-        //                    case KeywordDataType.FloatingPoint:
-        //                        storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToDecimal(keyword.KeywordValue));
-        //                        break;
-
-        //                    default:
-        //                        storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToString(keyword.KeywordValue));
-        //                        break;
-        //                }
-        //                Debug.WriteLine("Kriterijum pretrage Keyword type.");
-        //            }
-        //        }
-
-        //        // Skladišti novi dokument
-        //        var newDocument = application.Core.Storage.StoreNewDocument(documentImport.FileName, storeDocumentProperties);
-        //        //.
-
-        //        // Vrati id unetog dokumenta / Return the id of the entered document
-        //        status = newDocument.ID.ToString();
-        //        message = string.Format("Dokument je uspešno sačuvan DocumentID #{0}.", status);
-
-        //        //.
-        //        if (status != string.Empty)
-        //        {
-        //            result = new Result
-        //            {
-        //                Status = status,
-        //                Message = message
-        //            };
-
-        //            responseMessage = Request.CreateResponse(HttpStatusCode.OK, result);
-        //            _logger.Info(result.Message);
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Logger
-        //        _logger.Error(string.Format("Greška kod importovanja dokumenta DocumentTypeName: {0}", documentImport?.DocumentTypeName ?? "(nije prosleđen)"));
-        //        _logger.Error(ex.Message);
-        //        _logger.Error(ex.StackTrace);
-        //        //.
-
-        //        // Formiraj response
-        //        result = new Result
-        //        {
-        //            Status = string.Empty,
-        //            Message = ex.Message
-        //        };
-        //        responseMessage = Request.CreateResponse(httpStatusCode, result);
-        //        //.
-        //    }
-        //    finally
-        //    {
-        //        var dateTimeEnd = DateTime.Now;
-        //        var diffInSeconds = (dateTimeEnd - dateTimeStart).TotalSeconds;
-        //        _logger.Info("DocumentImport finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
-        //        if (application != null)
-        //        {
-        //            _logger.Info("OnBase Disconnect()");
-        //            var obj = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
-        //            obj.OnBaseDisconnect(application);
-        //        }
-        //    }
-        //    return responseMessage;
-        //}
-
-        #region DocumentImport
-
         /// <summary>
         /// Preuzimanje datoteke i unos u OnBase
         /// </summary>
@@ -376,6 +158,7 @@ namespace AlgotechUnityREST_generali.Controllers
         /// <returns></returns>
         [Authorize]
         [HttpPost, ActionName("DocumentImport")]
+        [Route("api/DocumentsUniversal/DocumentImport")]
         public HttpResponseMessage DocumentImport([FromBody] DocumentsImport documentImport)
         {
             HttpResponseMessage responseMessage;
@@ -659,7 +442,6 @@ namespace AlgotechUnityREST_generali.Controllers
             return responseMessage;
         }
 
-        #endregion
         #endregion
 
         #region DocumentList
@@ -1003,5 +785,183 @@ namespace AlgotechUnityREST_generali.Controllers
             return response;
         }
         #endregion
+
+        /// <summary>
+        /// DocumentImportWithUpload
+        /// </summary>
+        /// <returns></returns>
+        [Authorize]
+        [HttpPost, ActionName("DocumentImportWithUpload")]
+        [Route("api/DocumentsUniversal/DocumentImportWithUpload")]
+        public HttpResponseMessage DocumentImportWithUpload()
+        {
+            try
+            {
+                var httpRequest = HttpContext.Current.Request;
+
+                if (httpRequest.Files.Count == 0)
+                {
+                    return Request.CreateResponse(
+                        HttpStatusCode.BadRequest,
+                        new Result
+                        {
+                            Status = string.Empty,
+                            Message = "Nije poslata nijedna datoteka."
+                        });
+                }
+
+                // Klijent šalje JSON kao tekstualno multipart polje "DocumentImport".
+                var json = httpRequest.Form["DocumentImport"];
+
+                if (string.IsNullOrWhiteSpace(json))
+                {
+                    return Request.CreateResponse(
+                        HttpStatusCode.BadRequest,
+                        new Result
+                        {
+                            Status = string.Empty,
+                            Message = "Nisu poslati podaci za import."
+                        });
+                }
+
+                var documentImport =
+                    Newtonsoft.Json.JsonConvert.DeserializeObject<DocumentsImport>(json);
+
+                if (documentImport == null)
+                {
+                    return Request.CreateResponse(
+                        HttpStatusCode.BadRequest,
+                        new Result
+                        {
+                            Status = string.Empty,
+                            Message = "Podaci za import nisu ispravni."
+                        });
+                }
+
+                // Upload se izvršava prvo. Vraćaju se samo jedinstveni nazivi fajlova,
+                // bez fizičkih putanja servera.
+                documentImport.FileName = SaveUploadedFiles(httpRequest.Files);
+
+                // Poziva istu import logiku koju koristi i postojeći JSON endpoint.
+                return ImportDocumentCore(documentImport);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error("Greška u orkestraciji uploada i importa.");
+                _logger.Error(ex.Message);
+                _logger.Error(ex.StackTrace);
+
+                return Request.CreateResponse(
+                    HttpStatusCode.InternalServerError,
+                    new Result
+                    {
+                        Status = string.Empty,
+                        Message = ex.Message
+                    });
+            }
+        }
+
+        private List<string> SaveUploadedFiles(HttpFileCollection files)
+        {
+            var uploadedFolder =
+                System.Configuration.ConfigurationManager.AppSettings["UploadFolder"];
+
+            if (string.IsNullOrWhiteSpace(uploadedFolder))
+            {
+                throw new InvalidOperationException(
+                    "Nije podešena lokacija za privremeni upload.");
+            }
+
+            Directory.CreateDirectory(uploadedFolder);
+
+            var uploadedFileNames = new List<string>();
+
+            foreach (string key in files)
+            {
+                var postedFile = files[key];
+
+                if (postedFile == null || string.IsNullOrWhiteSpace(postedFile.FileName))
+                {
+                    throw new ArgumentException("Naziv poslate datoteke nije ispravan.");
+                }
+
+                var originalFileName = Path.GetFileName(postedFile.FileName);
+                var extension = Path.GetExtension(originalFileName);
+
+                var uniqueFileName =
+                    $"{Path.GetFileNameWithoutExtension(originalFileName)}_" +
+                    $"{Guid.NewGuid():N}{extension}";
+
+                var filePath = Path.Combine(uploadedFolder, uniqueFileName);
+
+                postedFile.SaveAs(filePath);
+                uploadedFileNames.Add(uniqueFileName);
+            }
+
+            return uploadedFileNames;
+        }
+
+        private HttpResponseMessage ImportDocumentCore(
+            DocumentsImport documentImport)
+        {
+            try
+            {
+                var uploadFolder =
+                    System.Configuration.ConfigurationManager.AppSettings["UploadFolder"];
+
+                if (string.IsNullOrWhiteSpace(uploadFolder))
+                {
+                    return Request.CreateResponse(
+                        HttpStatusCode.InternalServerError,
+                        "Nije podešena lokacija za privremeni upload.");
+                }
+
+                Directory.CreateDirectory(uploadFolder);
+
+                var httpRequest = HttpContext.Current.Request;
+
+                if (httpRequest.Files.Count == 0)
+                {
+                    return Request.CreateResponse(
+                        HttpStatusCode.BadRequest,
+                        "Nema datoteka za prenos.");
+                }
+
+                var uploadedFiles = new List<UploadedFileInfo>();
+
+                foreach (string file in httpRequest.Files)
+                {
+                    var postedFile = httpRequest.Files[file];
+
+                    var originalFileName = Path.GetFileName(postedFile.FileName);
+                    var extension = Path.GetExtension(originalFileName);
+                    var storedFileName = $"{Guid.NewGuid():N}{extension}";
+                    var filePath = Path.Combine(uploadFolder, storedFileName);
+
+                    postedFile.SaveAs(filePath);
+
+                    uploadedFiles.Add(new UploadedFileInfo
+                    {
+                        OriginalFileName = originalFileName,
+                        StoredFileName = storedFileName
+                    });
+                }
+
+                return Request.CreateResponse(
+                    HttpStatusCode.Created,
+                    new
+                    {
+                        Message = "Datoteke su uspešno prenete na server.",
+                        Files = uploadedFiles
+                    });
+            }
+            catch (Exception ex)
+            {
+                return Request.CreateResponse(
+                    HttpStatusCode.InternalServerError,
+                    ex.Message);
+            }
+        }
+
     }
 }
