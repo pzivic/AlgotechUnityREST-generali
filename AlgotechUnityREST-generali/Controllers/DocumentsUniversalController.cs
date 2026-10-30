@@ -10,25 +10,22 @@
 // zajedno sa kolekcijom ključnih reči kao ulaznim parametrima, omogućavajući fleksibilan i prilagodljiv import u sistem.
 //
 // Istorija izmena:
+// 30.10.2023 - Predrag Živić - Putaju uzima iz web config fajla za DocumentImport, upload pravi guid fajla da ne bi došlo do sudara imena fajla, dodata metoda DocumentList za listanje dokumenata po parametrima
 // ============================================================================
 
-using System;
-using System.Web.Http;
-using System.Text;
-
-using Hyland.Unity;
-
-
-using System.Net.Http;
-using System.Net;
-
+using Algotech.UTL.AlgotechUnityUDF;
 using AlgotechUnityREST_generali.Models;
-
-using System.ComponentModel.DataAnnotations;
+using Hyland.Unity;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.Globalization;
-using Algotech.UTL.AlgotechUnityUDF;
+using System.IO;
+using System.Net;
+using System.Net.Http;
+using System.Text;
+using System.Web.Http;
 
 namespace AlgotechUnityREST_generali.Controllers
 {
@@ -152,6 +149,226 @@ namespace AlgotechUnityREST_generali.Controllers
         #endregion
 
         #region DocumentImport
+        ///// <summary>
+        ///// Preuzimanje datoteke i unos u OnBase
+        ///// </summary>
+        ///// <param name="documentImport">Objekat Documents</param>
+        ///// <returns></returns>
+        //[Authorize]
+        //[HttpPost, ActionName("DocumentImport")]
+        //public HttpResponseMessage DocumentImport([FromBody] DocumentsImport documentImport)
+        //{
+        //    HttpResponseMessage responseMessage;
+        //    Application application = null;
+
+        //    var dateTimeStart = DateTime.Now;
+
+        //    var httpStatusCode = HttpStatusCode.BadRequest;
+        //    var result = new Result();
+        //    responseMessage = Request.CreateResponse(httpStatusCode, result);
+
+        //    try
+        //    {
+        //        _logger.Info("Metoda:: DocumentImport Univerzalni");
+
+        //        var status = string.Empty;
+        //        var message = string.Empty;
+
+        //        // Provera da li su vrednosti prosleđene
+        //        if (documentImport == null) { throw new ArgumentException("Niste definisali Dokument!"); }
+        //        //if (!documentImport.DocumentDate.HasValue) { throw new ArgumentException("Niste definisali datum dokumenta!");               }
+
+        //        if (string.IsNullOrEmpty(documentImport.DocumentTypeName)) { throw new ArgumentException("Niste definisali OnBase tip dokumenta!"); }
+        //        if (string.IsNullOrEmpty(documentImport.DefaultFileTypeName)) { throw new ArgumentException("Niste definisali tip datoteke!"); }
+        //        if (string.IsNullOrEmpty(documentImport.DataSource)) { throw new ArgumentException("Niste definisali izvor podatka!"); }
+
+        //        //if (documentImport.FileName == null) { throw new ArgumentException("Niste definisali datoteku!"); }
+        //        if (documentImport.FileName == null || documentImport.FileName.Count == 0) { throw new ArgumentException("Niste definisali datoteku."); }
+        //        if (documentImport.Keywords == null) { throw new ArgumentException("Niste definisali ključne reči!"); }
+        //        //.
+
+        //        // Ključne reči definicija
+        //        Console.WriteLine($"Received document: {documentImport.DocumentTypeName}");
+        //        foreach (var keyword in documentImport.Keywords)
+        //        {
+        //            Debug.WriteLine($"KeywordName: {keyword.KeywordName} Value: {keyword.KeywordValue} DataType: {keyword.KeywordDataType}");
+        //            _logger.Info($"KeywordName: {keyword.KeywordName} Value: {keyword.KeywordValue} DataType: {keyword.KeywordDataType}");
+        //        }
+        //        //.
+
+        //        // Konekcija na OnBase
+        //        _logger.Info("OnBase Connect()");
+        //        var obj = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
+        //        application = obj.OnBaseConnect();
+        //        if (application == null)
+        //        {
+        //            _logger.Warn("Greška kod uspostavljanja konekcije sa OnBase");
+        //            throw new ArgumentException("Greška kod uspostavljanja konekcije sa OnBase. Kontaktirajte OnBase administratora.");
+        //        }
+        //        //.
+
+        //        // Logijemo od momenta uspostavljanja konekcije
+        //        dateTimeStart = DateTime.Now;
+        //        _logger.Info("DocumentImport start " + dateTimeStart);
+
+        //        // Validacija Tipa dokumenta
+        //        DocumentType documentType =
+        //            application.Core.DocumentTypes.Find(documentImport.DocumentTypeName) ?? throw new Exception(string.Format("Tip dokumenta '{0}' nije pronađen ili nisu podešena prava pristupa servisnom nalogu.", documentImport.DocumentTypeName));
+        //        FileType fileType =
+        //            application.Core.FileTypes.Find(documentImport.DefaultFileTypeName) ?? throw new Exception(string.Format("Tip datoteke '{0}' nije pronađen ili nisu podešena prava pristupa servisnom nalogu.", documentImport.DefaultFileTypeName));
+        //        //.
+
+
+        //        // Dobijamo lokacuju za privremeni upload iz konfiguracije
+        //        var uploadedFolder = System.Configuration.ConfigurationManager.AppSettings["UploadFolder"];
+
+        //        if (string.IsNullOrWhiteSpace(uploadedFolder))
+        //        {
+        //            throw new InvalidOperationException(
+        //                "Nije podešena lokacija za privremeni upload.");
+        //        }
+
+        //        var fullFilePaths = new List<string>();
+
+        //        foreach (var uploadedFileName in documentImport.FileName)
+        //        {
+        //            var fileName = Path.GetFileName(uploadedFileName);
+        //            if (string.IsNullOrWhiteSpace(fileName))
+        //            {
+        //                throw new ArgumentException("Naziv prenete datoteke nije ispravan.");
+        //            }
+        //            var fullPath = Path.Combine(uploadedFolder, fileName);
+        //            if (!System.IO.File.Exists(fullPath))
+        //            {
+        //                throw new FileNotFoundException(
+        //                    $"Preneta datoteka '{fileName}' nije pronađena.");
+        //            }
+        //            fullFilePaths.Add(fullPath);
+        //        }
+
+        //        documentImport.FileName = fullFilePaths;
+        //        //.
+
+        //        // Svojstva dokumenta
+        //        StoreNewDocumentProperties storeDocumentProperties =
+        //            application.Core.Storage.CreateStoreNewDocumentProperties(documentType, fileType);
+
+        //        storeDocumentProperties.TextEncoding = Encoding.Unicode;
+        //        storeDocumentProperties.DocumentDate = documentImport.DocumentDate;
+        //        storeDocumentProperties.Comment = documentImport.Comment;
+        //        //storeDocumentProperties.Options = StoreDocumentOptions.SkipWorkflow;
+        //        //.
+
+        //        // Pridružujemo datasource kolekciji ključnih reči ali odimo računa da ne dupliramo DataSource koji ide fiksno ne kao kolekcija ključna reči
+        //        documentImport.Keywords.Add(new Keyword { KeywordName = "DataSource", KeywordValue = documentImport.DataSource });
+
+        //        // Upisujemo ključne reči 
+        //        foreach (var keyword in documentImport.Keywords)
+        //        {
+        //            if (!string.IsNullOrEmpty(keyword.KeywordName) && (keyword.KeywordName != "DataSource"))
+        //            {
+        //                // Treba nam id ključne reči i tip podatka
+        //                //var keywordTypeNameID = UnityUDF.GetKeywordTypeID(application, keyword.KeywordName);
+        //                var keywordDataType = UnityUDF.GetKeywordDataType(application, keyword.KeywordName);
+
+        //                // Konvertovati Hyland.Unity data type u C#
+        //                switch (keywordDataType)
+        //                {
+        //                    case KeywordDataType.Numeric9:
+        //                        storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToInt32(keyword.KeywordValue));
+        //                        break;
+
+        //                    case KeywordDataType.Numeric20:
+        //                        storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToInt64(keyword.KeywordValue));
+        //                        break;
+
+        //                    case KeywordDataType.AlphaNumeric:
+        //                        storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToString(keyword.KeywordValue));
+        //                        break;
+
+        //                    case KeywordDataType.Currency:
+        //                        storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToDecimal(keyword.KeywordValue));
+        //                        break;
+
+        //                    case KeywordDataType.SpecificCurrency:
+        //                        storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToDecimal(keyword.KeywordValue));
+        //                        break;
+
+        //                    case KeywordDataType.Date:
+        //                        storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToDateTime(keyword.KeywordValue));
+        //                        break;
+
+        //                    case KeywordDataType.DateTime:
+        //                        storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToDateTime(keyword.KeywordValue));
+        //                        break;
+
+        //                    case KeywordDataType.FloatingPoint:
+        //                        storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToDecimal(keyword.KeywordValue));
+        //                        break;
+
+        //                    default:
+        //                        storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToString(keyword.KeywordValue));
+        //                        break;
+        //                }
+        //                Debug.WriteLine("Kriterijum pretrage Keyword type.");
+        //            }
+        //        }
+
+        //        // Skladišti novi dokument
+        //        var newDocument = application.Core.Storage.StoreNewDocument(documentImport.FileName, storeDocumentProperties);
+        //        //.
+
+        //        // Vrati id unetog dokumenta / Return the id of the entered document
+        //        status = newDocument.ID.ToString();
+        //        message = string.Format("Dokument je uspešno sačuvan DocumentID #{0}.", status);
+
+        //        //.
+        //        if (status != string.Empty)
+        //        {
+        //            result = new Result
+        //            {
+        //                Status = status,
+        //                Message = message
+        //            };
+
+        //            responseMessage = Request.CreateResponse(HttpStatusCode.OK, result);
+        //            _logger.Info(result.Message);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        // Logger
+        //        _logger.Error(string.Format("Greška kod importovanja dokumenta DocumentTypeName: {0}", documentImport?.DocumentTypeName ?? "(nije prosleđen)"));
+        //        _logger.Error(ex.Message);
+        //        _logger.Error(ex.StackTrace);
+        //        //.
+
+        //        // Formiraj response
+        //        result = new Result
+        //        {
+        //            Status = string.Empty,
+        //            Message = ex.Message
+        //        };
+        //        responseMessage = Request.CreateResponse(httpStatusCode, result);
+        //        //.
+        //    }
+        //    finally
+        //    {
+        //        var dateTimeEnd = DateTime.Now;
+        //        var diffInSeconds = (dateTimeEnd - dateTimeStart).TotalSeconds;
+        //        _logger.Info("DocumentImport finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
+        //        if (application != null)
+        //        {
+        //            _logger.Info("OnBase Disconnect()");
+        //            var obj = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
+        //            obj.OnBaseDisconnect(application);
+        //        }
+        //    }
+        //    return responseMessage;
+        //}
+
+        #region DocumentImport
+
         /// <summary>
         /// Preuzimanje datoteke i unos u OnBase
         /// </summary>
@@ -162,181 +379,287 @@ namespace AlgotechUnityREST_generali.Controllers
         public HttpResponseMessage DocumentImport([FromBody] DocumentsImport documentImport)
         {
             HttpResponseMessage responseMessage;
+
             Application application = null;
 
             var dateTimeStart = DateTime.Now;
-
             var httpStatusCode = HttpStatusCode.BadRequest;
             var result = new Result();
+
             responseMessage = Request.CreateResponse(httpStatusCode, result);
 
             try
             {
                 _logger.Info("Metoda:: DocumentImport Univerzalni");
 
-                var status = string.Empty;
-                var message = string.Empty;
+                if (documentImport == null)
+                {
+                    throw new ArgumentException("Niste definisali dokument!");
+                }
 
-                // Provera da li su vrednosti prosleđene
-                if (documentImport == null) { throw new ArgumentException("Niste definisali Dokument!"); }
-                //if (!documentImport.DocumentDate.HasValue) { throw new ArgumentException("Niste definisali datum dokumenta!");               }
+                if (string.IsNullOrEmpty(documentImport.DocumentTypeName))
+                {
+                    throw new ArgumentException("Niste definisali OnBase tip dokumenta!");
+                }
 
-                if (string.IsNullOrEmpty(documentImport.DocumentTypeName)) { throw new ArgumentException("Niste definisali OnBase tip dokumenta!"); }
-                if (string.IsNullOrEmpty(documentImport.DefaultFileTypeName)) { throw new ArgumentException("Niste definisali tip datoteke!"); }
-                if (string.IsNullOrEmpty(documentImport.DataSource)) { throw new ArgumentException("Niste definisali izvor podatka!"); }
+                if (string.IsNullOrEmpty(documentImport.DefaultFileTypeName))
+                {
+                    throw new ArgumentException("Niste definisali tip datoteke!");
+                }
 
-                if (documentImport.FileName == null) { throw new ArgumentException("Niste definisali datoteku!"); }
-                if (documentImport.Keywords == null) { throw new ArgumentException("Niste definisali ključne reči!"); }
-                //.
+                if (string.IsNullOrEmpty(documentImport.DataSource))
+                {
+                    throw new ArgumentException("Niste definisali izvor podatka!");
+                }
 
-                // Ključne reči definicija
+                if (documentImport.FileName == null || documentImport.FileName.Count == 0)
+                {
+                    throw new ArgumentException("Niste definisali datoteku.");
+                }
+
+                if (documentImport.Keywords == null)
+                {
+                    throw new ArgumentException("Niste definisali ključne reči!");
+                }
+
+                // Formiranje pune putanje za privremeno prenete datoteke
+                var uploadedFolder =
+                    System.Configuration.ConfigurationManager.AppSettings["UploadFolder"];
+
+                if (string.IsNullOrWhiteSpace(uploadedFolder))
+                {
+                    httpStatusCode = HttpStatusCode.InternalServerError;
+
+                    throw new InvalidOperationException(
+                        "Nije podešena lokacija za privremeni upload.");
+                }
+
+                var fullFilePaths = new List<string>();
+
+                foreach (var uploadedFileName in documentImport.FileName)
+                {
+                    var fileName = Path.GetFileName(uploadedFileName);
+
+                    if (string.IsNullOrWhiteSpace(fileName))
+                    {
+                        throw new ArgumentException(
+                            "Naziv prenete datoteke nije ispravan.");
+                    }
+
+                    var fullPath = Path.Combine(uploadedFolder, fileName);
+
+                    if (!System.IO.File.Exists(fullPath))
+                    {
+                        throw new FileNotFoundException(
+                            $"Preneta datoteka '{fileName}' nije pronađena.");
+                    }
+
+                    fullFilePaths.Add(fullPath);
+                }
+
+                documentImport.FileName = fullFilePaths;
+
+                // Beleženje prosleđenih ključnih reči
                 Console.WriteLine($"Received document: {documentImport.DocumentTypeName}");
+
                 foreach (var keyword in documentImport.Keywords)
                 {
-                    Debug.WriteLine($"KeywordName: {keyword.KeywordName} Value: {keyword.KeywordValue} DataType: {keyword.KeywordDataType}");
-                    _logger.Info($"KeywordName: {keyword.KeywordName} Value: {keyword.KeywordValue} DataType: {keyword.KeywordDataType}");
-                }
-                //.
+                    if (keyword == null)
+                    {
+                        continue;
+                    }
 
-                // Konekcija ona OnBase
+                    Debug.WriteLine(
+                        $"KeywordName: {keyword.KeywordName} " +
+                        $"Value: {keyword.KeywordValue} " +
+                        $"DataType: {keyword.KeywordDataType}");
+
+                    _logger.Info(
+                        $"KeywordName: {keyword.KeywordName} " +
+                        $"Value: {keyword.KeywordValue} " +
+                        $"DataType: {keyword.KeywordDataType}");
+                }
+
+                // Konekcija na OnBase
                 _logger.Info("OnBase Connect()");
-                var obj = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
-                application = obj.OnBaseConnect();
+
+                var connection = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
+                application = connection.OnBaseConnect();
+
                 if (application == null)
                 {
                     _logger.Warn("Greška kod uspostavljanja konekcije sa OnBase");
-                    throw new ArgumentException("Greška kod uspostavljanja konekcije sa OnBase. Kontaktirajte OnBase administratora.");
-                }
-                //.
 
-                // Logijemo od momenta uspostavljanja konekcije
+                    throw new ArgumentException(
+                        "Greška kod uspostavljanja konekcije sa OnBase. " +
+                        "Kontaktirajte OnBase administratora.");
+                }
+
                 dateTimeStart = DateTime.Now;
                 _logger.Info("DocumentImport start " + dateTimeStart);
 
-                // Validacija Tipa dokumenta
+                // Validacija tipa dokumenta i tipa datoteke
                 DocumentType documentType =
-                    application.Core.DocumentTypes.Find(documentImport.DocumentTypeName) ?? throw new Exception(string.Format("Tip dokumenta '{0}' nije pronađen ili nisu podešena prava pristupa servisnom nalogu.", documentImport.DocumentTypeName));
+                    application.Core.DocumentTypes.Find(documentImport.DocumentTypeName)
+                    ?? throw new Exception(
+                        string.Format(
+                            "Tip dokumenta '{0}' nije pronađen ili nisu podešena prava pristupa servisnom nalogu.",
+                            documentImport.DocumentTypeName));
+
                 FileType fileType =
-                    application.Core.FileTypes.Find(documentImport.DefaultFileTypeName) ?? throw new Exception(string.Format("Tip datoteke '{0}' nije pronađen ili nisu podešena prava pristupa servisnom nalogu.", documentImport.DefaultFileTypeName));
-                //.
+                    application.Core.FileTypes.Find(documentImport.DefaultFileTypeName)
+                    ?? throw new Exception(
+                        string.Format(
+                            "Tip datoteke '{0}' nije pronađen ili nisu podešena prava pristupa servisnom nalogu.",
+                            documentImport.DefaultFileTypeName));
 
                 // Svojstva dokumenta
                 StoreNewDocumentProperties storeDocumentProperties =
-                    application.Core.Storage.CreateStoreNewDocumentProperties(documentType, fileType);
+                    application.Core.Storage.CreateStoreNewDocumentProperties(
+                        documentType,
+                        fileType);
 
                 storeDocumentProperties.TextEncoding = Encoding.Unicode;
                 storeDocumentProperties.DocumentDate = documentImport.DocumentDate;
                 storeDocumentProperties.Comment = documentImport.Comment;
-                //storeDocumentProperties.Options = StoreDocumentOptions.SkipWorkflow;
-                //.
 
-                // Pridružujemo datasource kolekciji ključnih reči ali odimo računa da ne dupliramo DataSource koji ide fiksno ne kao kolekcija ključna reči
-                documentImport.Keywords.Add(new Keyword { KeywordName = "DataSource", KeywordValue = documentImport.DataSource });
-
-                // Upisujemo ključne reči 
+                // Upis ostalih ključnih reči.
+                // DataSource se obrađuje posebno, da bi se uvek upisala vrednost
+                // iz polja documentImport.DataSource i da ne bi bilo duplikata.
                 foreach (var keyword in documentImport.Keywords)
                 {
-                    if (!string.IsNullOrEmpty(keyword.KeywordName) && (keyword.KeywordName != "DataSouce"))
+                    if (keyword == null ||
+                        string.IsNullOrWhiteSpace(keyword.KeywordName) ||
+                        string.Equals(
+                            keyword.KeywordName,
+                            "DataSource",
+                            StringComparison.OrdinalIgnoreCase))
                     {
-                        // Treba nam id ključne reči i tip podatka
-                        //var keywordTypeNameID = UnityUDF.GetKeywordTypeID(application, keyword.KeywordName);
-                        var keywordDataType = UnityUDF.GetKeywordDataType(application, keyword.KeywordName);
+                        continue;
+                    }
 
-                        // Konvertovati Hyland.Unity data type u C#
-                        switch (keywordDataType)
-                        {
-                            case KeywordDataType.Numeric9:
-                                storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToInt32(keyword.KeywordValue));
-                                break;
+                    var keywordDataType =
+                        UnityUDF.GetKeywordDataType(
+                            application,
+                            keyword.KeywordName);
 
-                            case KeywordDataType.Numeric20:
-                                storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToInt64(keyword.KeywordValue));
-                                break;
+                    switch (keywordDataType)
+                    {
+                        case KeywordDataType.Numeric9:
+                            storeDocumentProperties.AddKeyword(
+                                keyword.KeywordName,
+                                Convert.ToInt32(keyword.KeywordValue));
+                            break;
 
-                            case KeywordDataType.AlphaNumeric:
-                                storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToString(keyword.KeywordValue));
-                                break;
+                        case KeywordDataType.Numeric20:
+                            storeDocumentProperties.AddKeyword(
+                                keyword.KeywordName,
+                                Convert.ToInt64(keyword.KeywordValue));
+                            break;
 
-                            case KeywordDataType.Currency:
-                                storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToDecimal(keyword.KeywordValue));
-                                break;
+                        case KeywordDataType.AlphaNumeric:
+                            storeDocumentProperties.AddKeyword(
+                                keyword.KeywordName,
+                                Convert.ToString(keyword.KeywordValue));
+                            break;
 
-                            case KeywordDataType.SpecificCurrency:
-                                storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToDecimal(keyword.KeywordValue));
-                                break;
+                        case KeywordDataType.Currency:
+                        case KeywordDataType.SpecificCurrency:
+                        case KeywordDataType.FloatingPoint:
+                            storeDocumentProperties.AddKeyword(
+                                keyword.KeywordName,
+                                Convert.ToDecimal(keyword.KeywordValue));
+                            break;
 
-                            case KeywordDataType.Date:
-                                storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToDateTime(keyword.KeywordValue));
-                                break;
+                        case KeywordDataType.Date:
+                        case KeywordDataType.DateTime:
+                            storeDocumentProperties.AddKeyword(
+                                keyword.KeywordName,
+                                Convert.ToDateTime(keyword.KeywordValue));
+                            break;
 
-                            case KeywordDataType.DateTime:
-                                storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToDateTime(keyword.KeywordValue));
-                                break;
-
-                            case KeywordDataType.FloatingPoint:
-                                storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToDecimal(keyword.KeywordValue));
-                                break;
-
-                            default:
-                                storeDocumentProperties.AddKeyword(keyword.KeywordName, Convert.ToString(keyword.KeywordValue));
-                                break;
-                        }
-                        Debug.WriteLine("Kriterijum pretrage Keyword type.");
+                        default:
+                            storeDocumentProperties.AddKeyword(
+                                keyword.KeywordName,
+                                Convert.ToString(keyword.KeywordValue));
+                            break;
                     }
                 }
 
-                // Skladišti novi dokument
-                var newDocument = application.Core.Storage.StoreNewDocument(documentImport.FileName, storeDocumentProperties);
-                //.
+                // Dodavanje DataSource tačno jednom, iz posebnog polja zahteva
+                storeDocumentProperties.AddKeyword(
+                    "DataSource",
+                    documentImport.DataSource);
 
-                // Vrati id unetog dokumenta / Return the id of the entered document
-                status = newDocument.ID.ToString();
-                message = string.Format("Dokument je uspešno sačuvan DocumentID #{0}.", status);
+                // Skladištenje novog dokumenta
+                var newDocument = application.Core.Storage.StoreNewDocument(
+                    documentImport.FileName,
+                    storeDocumentProperties);
 
-                //.
-                if (status != string.Empty)
+                var status = newDocument.ID.ToString();
+                var message =
+                    string.Format(
+                        "Dokument je uspešno sačuvan DocumentID #{0}.",
+                        status);
+
+                result = new Result
                 {
-                    result = new Result
-                    {
-                        Status = status,
-                        Message = message
-                    };
+                    Status = status,
+                    Message = message
+                };
 
-                    responseMessage = Request.CreateResponse(HttpStatusCode.OK, result);
-                    _logger.Info(result.Message);
-                }
+                responseMessage = Request.CreateResponse(
+                    HttpStatusCode.OK,
+                    result);
+
+                _logger.Info(result.Message);
             }
             catch (Exception ex)
             {
-                // Logger
-                _logger.Error(string.Format("Greška kod importovanja dokumenta DocumentTypeName: {0}", documentImport.DocumentTypeName));
+                _logger.Error(
+                    string.Format(
+                        "Greška kod importovanja dokumenta DocumentTypeName: {0}",
+                        documentImport?.DocumentTypeName ?? "(nije prosleđen)"));
+
                 _logger.Error(ex.Message);
                 _logger.Error(ex.StackTrace);
-                //.
 
-                // Formiraj response
                 result = new Result
                 {
                     Status = string.Empty,
                     Message = ex.Message
                 };
-                responseMessage = Request.CreateResponse(httpStatusCode, result);
-                //.
+
+                responseMessage = Request.CreateResponse(
+                    httpStatusCode,
+                    result);
             }
             finally
             {
                 var dateTimeEnd = DateTime.Now;
                 var diffInSeconds = (dateTimeEnd - dateTimeStart).TotalSeconds;
-                _logger.Info("DocumentImport finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
+
+                _logger.Info(
+                    "DocumentImport finally " +
+                    dateTimeEnd +
+                    " sec " +
+                    diffInSeconds);
+
                 if (application != null)
                 {
                     _logger.Info("OnBase Disconnect()");
-                    var obj = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
-                    obj.OnBaseDisconnect(application);
+
+                    var connection =
+                        new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
+
+                    connection.OnBaseDisconnect(application);
                 }
             }
+
             return responseMessage;
         }
+
+        #endregion
         #endregion
 
         #region DocumentList

@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-
+using System.IO;
 using System.Net;
 using System.Net.Http;
 
@@ -59,45 +59,7 @@ namespace AlgotechUnityREST_generali.Controllers
         /// </summary>
         /// <returns></returns>
         /// <exception cref="HttpResponseException"></exception>
-        [HttpPost]
-        public HttpResponseMessage PostFormData()
-        {
-            HttpResponseMessage result;
-
-            try
-            {
-                var uploadFolder = System.Configuration.ConfigurationManager.AppSettings["UploadFolder"];
-                string filePath;
-
-                var httpRequest = HttpContext.Current.Request;
-                if (httpRequest.Files.Count > 0)
-                {
-                    var docfiles = new List<string>();
-                    foreach (string file in httpRequest.Files)
-                    {
-                        var postedFile = httpRequest.Files[file];
-                        filePath = uploadFolder + @"\" + postedFile.FileName;
-
-                        postedFile.SaveAs(filePath);
-                        docfiles.Add(filePath);
-                    }
-                    result = Request.CreateResponse(HttpStatusCode.Created, "Datoteke su uspešno prenete na server.");
-                }
-                else
-                {
-                    result = Request.CreateResponse(HttpStatusCode.BadRequest);
-                }
-            }
-            catch (Exception ex)
-            {
-                result = Request.CreateResponse(HttpStatusCode.BadRequest, ex.Message);
-            }
-
-            return result;
-        }
-
-
-        // kod sa gui nazivom fajla
+        //[HttpPost]
         //public HttpResponseMessage PostFormData()
         //{
         //    HttpResponseMessage result;
@@ -105,10 +67,7 @@ namespace AlgotechUnityREST_generali.Controllers
         //    try
         //    {
         //        var uploadFolder = System.Configuration.ConfigurationManager.AppSettings["UploadFolder"];
-        //        if (!Directory.Exists(uploadFolder))
-        //        {
-        //            Directory.CreateDirectory(uploadFolder);
-        //        }
+        //        string filePath;
 
         //        var httpRequest = HttpContext.Current.Request;
         //        if (httpRequest.Files.Count > 0)
@@ -117,8 +76,7 @@ namespace AlgotechUnityREST_generali.Controllers
         //            foreach (string file in httpRequest.Files)
         //            {
         //                var postedFile = httpRequest.Files[file];
-        //                string uniqueFileName = $"{Path.GetFileNameWithoutExtension(postedFile.FileName)}_{Guid.NewGuid()}{Path.GetExtension(postedFile.FileName)}";
-        //                string filePath = Path.Combine(uploadFolder, uniqueFileName);
+        //                filePath = uploadFolder + @"\" + postedFile.FileName;
 
         //                postedFile.SaveAs(filePath);
         //                docfiles.Add(filePath);
@@ -127,16 +85,85 @@ namespace AlgotechUnityREST_generali.Controllers
         //        }
         //        else
         //        {
-        //            result = Request.CreateResponse(HttpStatusCode.BadRequest, "Nema datoteka za prijenos.");
+        //            result = Request.CreateResponse(HttpStatusCode.BadRequest);
         //        }
         //    }
         //    catch (Exception ex)
         //    {
-        //        result = Request.CreateResponse(HttpStatusCode.InternalServerError, ex.Message);
+        //        result = Request.CreateResponse(HttpStatusCode.BadRequest, ex.Message);
         //    }
 
         //    return result;
         //}
+
+
+        [HttpPost]
+        public HttpResponseMessage PostFormData()
+        {
+            try
+            {
+                var uploadFolder =
+                    System.Configuration.ConfigurationManager.AppSettings["UploadFolder"];
+
+                if (string.IsNullOrWhiteSpace(uploadFolder))
+                {
+                    return Request.CreateResponse(
+                        HttpStatusCode.InternalServerError,
+                        "Nije podešena lokacija za privremeni upload.");
+                }
+
+                Directory.CreateDirectory(uploadFolder);
+
+                var httpRequest = HttpContext.Current.Request;
+
+                if (httpRequest.Files.Count == 0)
+                {
+                    return Request.CreateResponse(
+                        HttpStatusCode.BadRequest,
+                        "Nema datoteka za prenos.");
+                }
+
+                var uploadedFiles = new List<UploadedFileInfo>();
+
+                foreach (string file in httpRequest.Files)
+                {
+                    var postedFile = httpRequest.Files[file];
+
+                    var originalFileName = Path.GetFileName(postedFile.FileName);
+                    var extension = Path.GetExtension(originalFileName);
+                    var storedFileName = $"{Guid.NewGuid():N}{extension}";
+                    var filePath = Path.Combine(uploadFolder, storedFileName);
+
+                    postedFile.SaveAs(filePath);
+
+                    uploadedFiles.Add(new UploadedFileInfo
+                    {
+                        OriginalFileName = originalFileName,
+                        StoredFileName = storedFileName
+                    });
+                }
+
+                return Request.CreateResponse(
+                    HttpStatusCode.Created,
+                    new
+                    {
+                        Message = "Datoteke su uspešno prenete na server.",
+                        Files = uploadedFiles
+                    });
+            }
+            catch (Exception ex)
+            {
+                return Request.CreateResponse(
+                    HttpStatusCode.InternalServerError,
+                    ex.Message);
+            }
+        }
+
+        public class UploadedFileInfo
+        {
+            public string OriginalFileName { get; set; }
+            public string StoredFileName { get; set; }
+        }
         #endregion
     }
 }

@@ -36,7 +36,7 @@ Servis koristi REST arhitekturu i JSON format za razmenu podataka, sa podrškom 
                         .TermsOfService("https://www.algotech.rs/uslovi-koriscenja")
                         .Contact(cc => cc
                             .Name("Algotech d.o.o.")
-                            .Email("OnBaseSupport-owner@algotech.rs")
+                            .Email("onbase_api@algotech.rs")
                             .Url("https://www.algotech.rs"))
                         .License(lc => lc
                             .Name("Proprietary - Internal Use Only")
