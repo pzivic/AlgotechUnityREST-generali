@@ -5,7 +5,7 @@
 // Naziv:           Univerzalni data import i univerzalno listanje dokumenata
 //
 // Opis:
-// Univerzaalna metoda REST servisa za uvoz dokumenata koja koristi generičke meta podatke.
+// Univerzalna metoda REST servisa za uvoz dokumenata koja koristi generičke meta podatke.
 // Metoda treba da prihvati fajl dokumenta iz opsega podržanih OnBase tipova (PDF, Image File...)
 // zajedno sa kolekcijom ključnih reči kao ulaznim parametrima, omogućavajući fleksibilan i prilagodljiv import u sistem.
 //
@@ -172,7 +172,7 @@ namespace AlgotechUnityREST_generali.Controllers
 
         #region DocumentImport
         /// <summary>
-        /// DocumentImportWithUpload
+        /// Preuzimanje datoteke i unos u OnBase
         /// </summary>
         /// <returns></returns>
         [Authorize]

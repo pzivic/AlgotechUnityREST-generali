@@ -1,272 +1,277 @@
-﻿using System;
+﻿// ============================================================================
+// Autor:           Predrag Živić
+// Datum kreiranja: 01.03.2025
+// Naziv:           Rad sa klučnim rečima dokumenata u OnBase sistemu putem REST servisa
+//
+// Opis:
+//
+// Istorija izmena:
+// 
+// ============================================================================
+
+using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 
 using Hyland.Unity;
-using Newtonsoft.Json;
-
 using AlgotechUnityREST_generali.Models;
 
 namespace AlgotechUnityREST_generali.Controllers
 {
     /// <summary>
-    /// Ključne reči.
+    /// Operacije nad ključnim rečima dokumenata.
     /// </summary>
     [Authorize]
     public class DocumentsKeywordsController : ApiController
     {
-
-        #region Variable  
-        // Logger
         private static readonly log4net.ILog _logger = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
+        // Serijalizuje brisanja u okviru ovog procesa.
         private static readonly object _documentLock = new object();
-        HttpResponseMessage response;
-        #endregion
-
-        #region DocumentResult
-        /// <summary>
-        /// Privatna klasa za listanje dokumenata
-        /// </summary>
-        [JsonObject(Title = "DocumentResult")]
-        private class DocumentsList
-        {
-            //[JsonProperty(PropertyName = "id")]
-            public string DocumentID { get; set; }
-            //[JsonProperty(PropertyName = "name")]
-            public string Name { get; set; }
-            //[JsonProperty(PropertyName = "created-on")]
-            public DateTime DocumentDate { get; set; }
-            public DateTime DateStored { get; set; }
-            //[JsonProperty(PropertyName = "path")]
-            public string DocumentUrl { get; internal set; }
-            //[JsonProperty(PropertyName = "media-type")]
-            public string DefaultFileTypeName { get; set; }
-
-            //public string AccountNum { get; set; }
-
-            public string GroupType { get; set; }
-            public string GroupID { get; set; }
-            public string GroupBarcode { get; set; }
-            public string DocID { get; set; }
-            public string DocBarcode { get; set; }
-
-            public string ClientID { get; set; }
-            public string ClientName { get; set; }
-
-            public string DataSource { get; set; }
-            public DateTime DocRegDate { get; set; }
-            public string DocStatus { get; set; }
-
-        }
-        #endregion
 
         #region DocumentKeywords
         /// <summary>
-        /// Vraća ključne reči određenog dokumenta
+        /// Vraća ključne reči dokumenta.
         /// </summary>
-        /// <param name="documentID"></param>
-        /// <returns></returns>
+        /// <param name="documentID">Identifikator dokumenta.</param>
+        /// <returns>JSON objekat čija su svojstva nazivi tipova ključnih reči.</returns>
         [HttpGet, ActionName("DocumentKeywords")]
         public HttpResponseMessage DocumentKeywords(long documentID)
         {
+            if (documentID <= 0)
+            {
+                return CreateErrorResponse(
+                    HttpStatusCode.BadRequest,
+                    "DocumentID mora biti veći od nule.");
+            }
+
             Application application = null;
-            Result objResult;
-            string result;
 
             try
             {
-                // Konektuj OnBase
-                _logger.Info("OnBase Connect()");
-                var obj = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
-                application = obj.OnBaseConnect();
+                _logger.Info("Povezivanje sa OnBase.");
+                var connection = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
+                application = connection.OnBaseConnect();
+
                 if (application == null)
                 {
-                    _logger.Warn("Greška kod uspostavljanja konekcije sa OnBase");
-                    throw new ArgumentException("Greška kod uspostavljanja konekcije sa OnBase. Kontaktirajte OnBase administratora.");
+                    _logger.Warn("OnBase konekcija nije uspostavljena.");
+                    return CreateErrorResponse(
+                        HttpStatusCode.ServiceUnavailable,
+                        "OnBase servis trenutno nije dostupan.");
                 }
-                //.
 
-                _logger.Info("Pokušaj preuzimanja svojstava dokumenta...");
+                _logger.InfoFormat(
+                    "Preuzimanje ključnih reči dokumenta DocumentID={0}.",
+                    documentID);
+
                 Document document = application.Core.GetDocumentByID(documentID);
                 if (document == null)
                 {
-                    _logger.Error(string.Format("Dokument za DocumentID={0} nije pronađen!", documentID));
-                    throw new Exception("Dokument nije pronađen!");
+                    _logger.WarnFormat(
+                        "Dokument DocumentID={0} nije pronađen.",
+                        documentID);
+
+                    return CreateErrorResponse(
+                        HttpStatusCode.NotFound,
+                        "Dokument nije pronađen.");
                 }
 
-                using (DocumentLock documentLock = document.LockDocument())
+                var keywordList = new Dictionary<string, string>();
+
+                foreach (KeywordRecord keywordRecord in document.KeywordRecords)
                 {
-                    var forceLockDocument = System.Configuration.ConfigurationManager.AppSettings["ForceLockDocument"] == "True";
-                    if (forceLockDocument == true)
+                    foreach (Keyword keyword in keywordRecord.Keywords)
                     {
-                        _logger.Error(string.Format("Pokušaj da zaključaš dokument DocumentID={0}", documentID));
-                        if (documentLock.Status != DocumentLockStatus.LockObtained)
+                        string keywordName = keyword.KeywordType.Name;
+                        string keywordValue = Convert.ToString(
+                            keyword.Value,
+                            CultureInfo.InvariantCulture);
+
+                        // Postojeći API model podržava samo jednu vrednost po nazivu.
+                        // Vrati jasnu grešku umesto da prepiše ili izgubi duplu vrednost.
+                        if (keywordList.ContainsKey(keywordName))
                         {
-                            _logger.Error("Zaključavanje dokumenta nije uspelo, molimo pokušajte kasnije.");
-                            throw new Exception("Zaključavanje dokumenta nije uspelo, molimo pokušajte kasnije.");
+                            _logger.WarnFormat(
+                                "Dokument DocumentID={0} sadrži više vrednosti za keyword type '{1}'.",
+                                documentID,
+                                keywordName);
+
+                            return CreateErrorResponse(
+                                HttpStatusCode.Conflict,
+                                "Dokument sadrži više vrednosti za istu ključnu reč, a ovaj API podržava jednu vrednost po nazivu.");
                         }
+
+                        keywordList.Add(keywordName, keywordValue);
                     }
-
-                    // Ključne reči izabranog dokumenta
-                    Dictionary<string, string> keywordList = new Dictionary<string, string>();
-                    // 
-                    _logger.Info("Daj nam keyword izabranog dokumenta");
-                    foreach (KeywordRecord keywordRecords in document.KeywordRecords)
-                    {
-                        foreach (Keyword keyword in keywordRecords.Keywords)
-                        {
-                            //objKeyword.KeywordTypeName = keyword.KeywordType.Name;
-                            //objKeyword.KeywordValue = keyword.Value.ToString();
-
-                            keywordList.Add(keyword.KeywordType.Name, keyword.Value.ToString());
-                        }
-                    }
-                    //var objKeyword = new Keywords()
-                    //{
-                    //    KeywordList = keywordList
-                    //};
-                    //.
-
-                    result = Newtonsoft.Json.JsonConvert.SerializeObject(keywordList);
                 }
 
-                if (result != string.Empty)
-                {
-                    objResult = new Result
-                    {
-                        Status = result,
-                        Message = "Podacu su uspešno preuzeti."
-                    };
-
-                    response = Request.CreateResponse(HttpStatusCode.OK, objResult);
-                    response.Content = new StringContent(result, System.Text.Encoding.UTF8, "application/json");
-                }
-
+                // Zadržava postojeći uspešni ugovor: JSON objekat sa nazivima i
+                // vrednostima ključnih reči, bez Result omotača.
+                return Request.CreateResponse(
+                    HttpStatusCode.OK,
+                    keywordList,
+                    Configuration.Formatters.JsonFormatter);
             }
             catch (Exception ex)
             {
-                // Logger
                 _logger.Error(
-                    string.Format("Greška kod preuzimanja podataka documentID: {0}", documentID));
-                _logger.Error(ex.Message);
-                _logger.Error(ex.StackTrace);
-                //.
+                    string.Format(
+                        "Greška pri preuzimanju ključnih reči za DocumentID={0}.",
+                        documentID),
+                    ex);
 
-                objResult = new Result
-                {
-                    Status = string.Empty,
-                    Message = ex.Message
-                };
-                response = Request.CreateResponse(HttpStatusCode.BadRequest, objResult);
+                return CreateErrorResponse(
+                    HttpStatusCode.InternalServerError,
+                    "Došlo je do greške pri preuzimanju ključnih reči dokumenta.");
             }
             finally
             {
-                if (application != null)
-                {
-                    _logger.Info("OnBase Disconnect()");
-                    var obj = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
-                    obj.OnBaseDisconnect(application);
-                }
+                DisconnectFromOnBase(application);
             }
-
-            return response;
         }
         #endregion
 
         #region DocumentKeywordsRemove
         /// <summary>
-        /// Vraća ključne reči određenog dokumenta
+        /// Briše keyword record iz dokumenta prema nazivu tipa ključne reči.
         /// </summary>
-        /// <param name="documentID">Identifikator dokumenta</param>
-        /// <param name="keywordTypeName">Naziv ključne reči koju uklanjamo</param>
-        /// <returns></returns>
+        /// <param name="documentID">Identifikator dokumenta.</param>
+        /// <param name="keywordTypeName">Naziv tipa ključne reči koji se briše.</param>
+        /// <returns>Rezultat brisanja.</returns>
         [HttpDelete, ActionName("DocumentKeywordsRemove")]
-        public HttpResponseMessage DocumentKeywordsRemove(long documentID, string keywordTypeName)
+        public HttpResponseMessage DocumentKeywordsRemove(
+            long documentID,
+            string keywordTypeName)
         {
+            if (documentID <= 0)
+            {
+                return CreateErrorResponse(
+                    HttpStatusCode.BadRequest,
+                    "DocumentID mora biti veći od nule.");
+            }
+
+            if (string.IsNullOrWhiteSpace(keywordTypeName))
+            {
+                return CreateErrorResponse(
+                    HttpStatusCode.BadRequest,
+                    "KeywordTypeName je obavezan.");
+            }
+
             Application application = null;
-            Result objResult;
 
             try
             {
-                //_logger.Info("Ide zaključavaje");
                 lock (_documentLock)
                 {
+                    _logger.Info("Povezivanje sa OnBase radi brisanja ključne reči.");
+                    var connection = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
+                    application = connection.OnBaseConnect();
+
+                    if (application == null)
                     {
-                        // Konektuj OnBase
-                        _logger.Info("OnBase Connect()");
-                        var obj = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
-                        application = obj.OnBaseConnect();
-                        if (application == null)
-                        {
-                            _logger.Warn("Greška kod uspostavljanja konekcije sa OnBase");
-                            throw new ArgumentException("Greška kod uspostavljanja konekcije sa OnBase. Kontaktirajte OnBase administratora.");
-                        }
-                        //.
+                        _logger.Warn("OnBase konekcija nije uspostavljena.");
+                        return CreateErrorResponse(
+                            HttpStatusCode.ServiceUnavailable,
+                            "OnBase servis trenutno nije dostupan.");
+                    }
 
-                        _logger.Info("Pokušaj preuzimanja svojstava dokumenta...");
-                        Document document = application.Core.GetDocumentByID(documentID);
-                        if (document == null)
-                        {
-                            _logger.Error(string.Format("Dokument za DocumentID={0} nije pronađen!", documentID));
-                            throw new Exception("Dokument nije pronađen!");
-                        }
+                    Document document = application.Core.GetDocumentByID(documentID);
+                    if (document == null)
+                    {
+                        _logger.WarnFormat(
+                            "Dokument DocumentID={0} nije pronađen.",
+                            documentID);
 
-                        var objUDF = new Algotech.UTL.AlgotechUnityUDF.UnityUDF();
-                        if (objUDF.RemoveKeywordRecord(application, document, keywordTypeName) == true)
-                        {
-                            objResult = new Result
+                        return CreateErrorResponse(
+                            HttpStatusCode.NotFound,
+                            "Dokument nije pronađen.");
+                    }
+
+                    var unityUdf = new Algotech.UTL.AlgotechUnityUDF.UnityUDF();
+                    bool removed = unityUdf.RemoveKeywordRecord(
+                        application,
+                        document,
+                        keywordTypeName);
+
+                    if (removed)
+                    {
+                        return Request.CreateResponse(
+                            HttpStatusCode.OK,
+                            new Result
                             {
                                 Status = "True",
-                                Message = "Ključna reč je uspešno obrisana."
-                            };
-                            response = Request.CreateResponse(HttpStatusCode.OK, objResult);
-                        }
-                        else
-                        {
-                            objResult = new Result
-                            {
-                                Status = "False",
-                                Message = "Ključna reč nije uspešno obrisana. Vrednost ključne reči nije postojala."
-                            };
-                            // Ako pokuša da obriše vrednost ključne reči koje nema nema ni greške
-                            // response = Request.CreateResponse(HttpStatusCode.BadRequest, objResult);
-                            // Equivalent to HTTP status 100.
-                            // Continue indicates that the client can continue with its request.Equivalent to HTTP status 201.
-                            // Created indicates that the request resulted in a new resource created before the response was sent.
-                            response = Request.CreateResponse(HttpStatusCode.Continue, objResult);
-                        }
+                                Message = "Keyword record je uspešno obrisan."
+                            });
                     }
-                    _logger.Info("Završeno zaključavaje");
+
+                    // Continue (100) nije odgovarajući status za rezultat DELETE zahteva.
+                    return Request.CreateResponse(
+                        HttpStatusCode.NotFound,
+                        new Result
+                        {
+                            Status = "False",
+                            Message = "Keyword record nije pronađen ili nije obrisan."
+                        });
                 }
             }
             catch (Exception ex)
             {
-                // Logger
-                _logger.Error(string.Format("Greška kod brisanja podataka o ključnoj reči za documentID: {0}", documentID));
-                _logger.Error(ex.Message);
-                _logger.Error(ex.StackTrace);
-                //.
+                _logger.Error(
+                    string.Format(
+                        "Greška pri brisanju keyword record-a '{0}' za DocumentID={1}.",
+                        keywordTypeName,
+                        documentID),
+                    ex);
 
-                objResult = new Result
-                {
-                    Status = string.Empty,
-                    Message = ex.Message
-                };
-                response = Request.CreateResponse(HttpStatusCode.BadRequest, objResult);
+                return CreateErrorResponse(
+                    HttpStatusCode.InternalServerError,
+                    "Došlo je do greške pri brisanju ključne reči dokumenta.");
             }
             finally
             {
-                if (application != null)
+                DisconnectFromOnBase(application);
+            }
+        }
+        #endregion
+
+        #region CreateErrorResponse
+        private HttpResponseMessage CreateErrorResponse(
+            HttpStatusCode statusCode,
+            string message)
+        {
+            return Request.CreateResponse(
+                statusCode,
+                new Result
                 {
-                    _logger.Info("OnBase Disconnect()");
-                    var obj = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
-                    obj.OnBaseDisconnect(application);
-                }
+                    Status = string.Empty,
+                    Message = message
+                });
+        }
+        #endregion
+
+        #region DisconnectFromOnBase
+        private static void DisconnectFromOnBase(Application application)
+        {
+            if (application == null)
+            {
+                return;
             }
 
-            return response;
+            try
+            {
+                _logger.Info("Prekidanje OnBase konekcije.");
+                var connection = new Algotech.UTL.AlgotechUnityUDF.OnBaseConnection();
+                connection.OnBaseDisconnect(application);
+            }
+            catch (Exception ex)
+            {
+                // Greška pri disconnect-u ne treba da zameni već pripremljen HTTP odgovor.
+                _logger.Error("Greška pri prekidanju OnBase konekcije.", ex);
+            }
         }
         #endregion
     }
