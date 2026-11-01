@@ -50,7 +50,7 @@ namespace AlgotechUnityREST_generali.Controllers
 
         #region Klasa
         /// <summary>
-        /// Dokument
+        /// Dokument 
         /// </summary>
         public class DocumentsImport
         {
@@ -172,9 +172,43 @@ namespace AlgotechUnityREST_generali.Controllers
 
         #region DocumentImport
         /// <summary>
-        /// Preuzimanje datoteke i unos u OnBase
+        /// Prima datoteke i metapodatke dokumenta i uvozi ih u OnBase.
         /// </summary>
-        /// <returns></returns>
+        /// <remarks>
+        /// Zahtev mora biti poslat kao <c>multipart/form-data</c> i da sadrži:
+        /// <list type="bullet">
+        /// <item>
+        /// <description>
+        /// Tekstualno polje <c>DocumentImport</c> sa JSON metapodacima dokumenta.
+        /// </description>
+        /// </item>
+        /// <item>
+        /// <description>
+        /// Jednu ili više datoteka, na primer u poljima <c>File1</c> i <c>File2</c>.
+        /// Operacija zahteva autorizaciju.
+        /// Kada servis bude uveden u klijentovo okruženje, poziv će koristiti Bearer token dobijen uz Client ID i Client Secret.
+        /// </description>
+        /// </item>
+        /// </list>
+        ///
+        /// Primer vrednosti polja <c>DocumentImport</c>:
+        /// <code>
+        /// {
+        ///   "DocumentTypeName": "Invoice",
+        ///   "DocumentDate": "2026-11-01T00:00:00",
+        ///   "DefaultFileTypeName": "PDF",
+        ///   "Comment": "Test import",
+        ///   "DataSource": "WIS",
+        ///   "Keywords": [
+        ///     {
+        ///       "KeywordName": "PolicyNumber",
+        ///       "KeywordValue": "INS-123456/2026"
+        ///     }
+        ///   ]
+        /// }
+        /// </code>
+        /// </remarks>
+        /// <returns>Rezultat uvoza dokumenta.</returns>
         [Authorize]
         [HttpPost, ActionName("DocumentImport")]
         [Route("api/DocumentsUniversal/DocumentImport")]

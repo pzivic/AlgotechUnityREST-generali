@@ -40,7 +40,7 @@ namespace AlgotechUnityREST_generali.Controllers
         /// <param name="documentID">Identifikator dokumenta.</param>
         /// <returns>JSON objekat čija su svojstva nazivi tipova ključnih reči.</returns>
         [HttpGet, ActionName("DocumentKeywords")]
-        [Route("api/DocumentsKeywords/DocumentKeywords")]
+        [Route("api/DocumentsKeywords")]
         public HttpResponseMessage DocumentKeywords(long documentID)
         {
             if (documentID <= 0)
@@ -145,7 +145,7 @@ namespace AlgotechUnityREST_generali.Controllers
         /// <param name="keywordTypeName">Naziv tipa ključne reči koji se briše.</param>
         /// <returns>Rezultat brisanja.</returns>
         [HttpDelete, ActionName("DocumentKeywordsRemove")]
-        [Route("api/DocumentsKeywords/DocumentKeywordsRemove")]
+        [Route("api/DocumentsKeywords")]
         public HttpResponseMessage DocumentKeywordsRemove(
             long documentID,
             string keywordTypeName)
