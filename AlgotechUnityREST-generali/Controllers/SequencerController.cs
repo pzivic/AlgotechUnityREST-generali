@@ -1,6 +1,13 @@
-﻿// Predrag Živić
-// 20.02.2024
-// Generator sekvenci
+﻿// ============================================================================
+// Autor:           Predrag Živić
+// Datum kreiranja: 20.02.2024
+// Naziv:           Generator sekvenci, kreiranje alternativnih klučeva po sekvencama.
+//
+// Opis: Rad sa ključnim rečima dokumenata u OnBase sistemu putem REST servisa            
+//
+// Istorija izmena: 
+// 01.11.2026 Revizija koda sa kolegom radi poboljšanja performansi. 
+// ============================================================================
 
 using System;
 using System.Net;
@@ -30,7 +37,7 @@ namespace AlgotechUnityREST_generali.Controllers
     /// <summary>
     /// Generator sekvenci
     /// </summary>
-    //[Authorize]
+    [Authorize]
     [ApiExplorerSettings(IgnoreApi=false)]
     public class SequencerController : ApiController
     {
@@ -53,6 +60,7 @@ namespace AlgotechUnityREST_generali.Controllers
         /// <param name="prefix">Prefix</param>
         /// <returns></returns>
         [HttpGet, ActionName("GetValue")]
+        [Route("api/Sequencer/GetValue")]
         public HttpResponseMessage GetValue(string prefix)
         {
             Result result;

@@ -1,20 +1,21 @@
 ﻿// ============================================================================
 // Autor:           Predrag Živić
 // Datum kreiranja: 01.03.2025
-// Naziv:           Rad sa klučnim rečima dokumenata u OnBase sistemu putem REST servisa
+// Naziv:           Rad sa ključnim rečima dokumenata u OnBase sistemu putem REST servisa
 //
-// Opis:
+// Opis: Rad sa ključnim rečima dokumenata u OnBase sistemu putem REST servisa            
 //
-// Istorija izmena:
-// 
+// Istorija izmena: 
+// 01.11.2026 Revizija koda sa kolegom radi poboljšanja performansi i dodavanja logovanja. 
 // ============================================================================
 
 using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+
+using System.Collections.Generic;
+using System.Globalization;
 
 using Hyland.Unity;
 using AlgotechUnityREST_generali.Models;
@@ -39,6 +40,7 @@ namespace AlgotechUnityREST_generali.Controllers
         /// <param name="documentID">Identifikator dokumenta.</param>
         /// <returns>JSON objekat čija su svojstva nazivi tipova ključnih reči.</returns>
         [HttpGet, ActionName("DocumentKeywords")]
+        [Route("api/DocumentsKeywords/DocumentKeywords")]
         public HttpResponseMessage DocumentKeywords(long documentID)
         {
             if (documentID <= 0)
@@ -143,6 +145,7 @@ namespace AlgotechUnityREST_generali.Controllers
         /// <param name="keywordTypeName">Naziv tipa ključne reči koji se briše.</param>
         /// <returns>Rezultat brisanja.</returns>
         [HttpDelete, ActionName("DocumentKeywordsRemove")]
+        [Route("api/DocumentsKeywords/DocumentKeywordsRemove")]
         public HttpResponseMessage DocumentKeywordsRemove(
             long documentID,
             string keywordTypeName)
