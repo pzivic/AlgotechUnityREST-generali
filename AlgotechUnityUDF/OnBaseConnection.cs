@@ -48,13 +48,16 @@ namespace Algotech.UTL.AlgotechUnityUDF
             {
                 var userName = System.Configuration.ConfigurationManager.AppSettings["UserName"];
                 var userPassword = System.Configuration.ConfigurationManager.AppSettings["UserPassword"];
-                OnBaseAuthenticationProperties authProps = Application.CreateOnBaseAuthenticationProperties(_appServerURL, userName, userPassword, _dataSource);
+                var licenseType = System.Configuration.ConfigurationManager.AppSettings["LicenceType"];
 
-                authProps.IdentitySettings = authProps.CreateIdentitySettings("AlgotechUnityREST");
-                authProps.LicenseType = LicenseType.Default;
-                //authProps.LicenseType = LicenseType.QueryMetering;
-                //authProps.LicenseType = LicenseType.EnterpriseCoreAPI;
+                OnBaseAuthenticationProperties authProps = 
+                    Application.CreateOnBaseAuthenticationProperties(_appServerURL, userName, userPassword, _dataSource);
 
+                authProps.IdentitySettings = 
+                    authProps.CreateIdentitySettings("AlgotechUnityREST");
+                authProps.LicenseType = 
+                    authProps.LicenseType = (LicenseType)Enum.Parse(typeof(LicenseType), _licenceType); ;
+                    
                 _logger.Debug(string.Format("Pokušaj uspostavljanja veze na klasičan (nativ) način sa identitetom: {0} i licencom: {1}.", userName, authProps.LicenseType));
 
                 try

@@ -460,54 +460,6 @@ namespace Algotech.UTL.AlgotechUnityUDF
         }
         #endregion
 
-        //#region GetDiskGroupID
-        ///// <summary>
-        ///// Vraća GetDiskGroupID
-        ///// </summary>
-        ///// <returns></returns>
-        ///// <exception cref="Exception"></exception>
-        //public long GetDiskGroupID(string diskGroupName)
-        //{
-        //    var dateTimeStart = DateTime.Now;
-        //    long ret = 0;
-        //    try
-        //    {
-        //        _logger.Debug("Metoda GetDiskGroupID");
-
-        //        var sqlHelper = new SqlHelper("connection_string_onbase");
-        //        var sqlString = string.Empty;
-
-        //        // hsi.diskgroup.diskgroupname, hsi.physicalplatter.lastuseddrive 
-        //        sqlString = string.Format("SELECT hsi.diskgroup.diskgroupnum " +
-        //            "FROM hsi.diskgroup " +
-        //            "INNER JOIN hsi.physicalplatter ON hsi.diskgroup.diskgroupnum = hsi.physicalplatter.diskgroupnum " +
-        //            "WHERE hsi.physicalplatter.physicalplatternum = 1 AND hsi.diskgroup.diskgroupname='{0}'", diskGroupName);
-
-        //        _logger.Debug(string.Format("SQL string: {0}", sqlString));
-
-        //        ret = Convert.ToInt64(sqlHelper.ExecuteScalar(sqlString));
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        // Logger
-        //        _logger.Error(string.Format("Greška kod preuzimaja podataka o disk grupi {0}.", diskGroupName));
-        //        _logger.Error(ex.Message);
-        //        _logger.Error(ex.StackTrace);
-        //        //.
-
-        //        throw new Exception(ex.Message);
-        //    }
-        //    finally
-        //    {
-        //        // Metrika end
-        //        var dateTimeEnd = DateTime.Now;
-        //        var diffInSeconds = (dateTimeEnd - dateTimeStart).TotalSeconds;
-        //        _logger.Debug("Funkcija:: GetDiskGroupID finally " + dateTimeEnd + " sec " + diffInSeconds.ToString());
-        //    }
-        //    return ret;
-        //}
-        //#endregion
-
         #region IsValidGroupType
         /// <summary>
         /// Vraća putanju datoteke
